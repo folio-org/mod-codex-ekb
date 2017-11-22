@@ -9,6 +9,3 @@ _How does this change fulfill the purpose?_
 
 ## Learning
 _Describe the research stage. Add links to blog posts, patterns, libraries or addons used to solve this problem._
-
-## Screenshots
-_Let's see those sweet visuals!_
