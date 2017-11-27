@@ -1,4 +1,4 @@
-# mod-kb-ebsco-codex 
+# mod-codex-ekb 
 
 Copyright (C) 2017 The Open Library Foundation
 
