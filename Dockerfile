@@ -1,6 +1,6 @@
 FROM openjdk:8-jre
 
-ENV VERTICLE_FILE mod-kb-ebsco-codex-fat.jar
+ENV VERTICLE_FILE mod-codex-ekb-fat.jar
 
 # Set the location of the verticles
 ENV VERTICLE_HOME /usr/verticles

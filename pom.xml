@@ -2,11 +2,11 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
-  <artifactId>mod-kb-ebsco-codex</artifactId>
+  <artifactId>mod-codex-ekb</artifactId>
   <version>0.0.1-SNAPSHOT</version>
 
   <name>EBSCO Knowledge Base Codex Module</name>
-  <url>https://github.com/folio-org/mod-kb-ebsco-codex</url>
+  <url>https://github.com/folio-org/mod-codex-ekb</url>
   <description>This module bridges the FOLIO codex and the EBSCO knowledge base.</description>
   <inceptionYear>2017</inceptionYear>
 
@@ -21,9 +21,9 @@
   </issueManagement>
 
   <scm>
-    <connection>scm:git:git://github.com/folio-org/mod-kb-ebsco-codex.git</connection>
-    <developerConnection>scm:git:git@github.com:folio-org/mod-kb-ebsco-codex.git</developerConnection>
-    <url>https://github.com/folio-org/mod-kb-ebsco-codex.git</url>
+    <connection>scm:git:git://github.com/folio-org/mod-codex-ekb.git</connection>
+    <developerConnection>scm:git:git@github.com:folio-org/mod-codex-ekb.git</developerConnection>
+    <url>https://github.com/folio-org/mod-codex-ekb.git</url>
   </scm>
 
   <licenses>
