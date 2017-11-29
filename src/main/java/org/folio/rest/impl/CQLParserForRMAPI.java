@@ -57,5 +57,6 @@ public class CQLParserForRMAPI {
 		   //System.out.println("valid enum type" +node.getIndex()); // gives title
 		   //System.out.println("value" +node.getTerm()); //gives value
 		   //System.out.println("operation" +node.getRelation()); //gives operator
+
 		}
 }
