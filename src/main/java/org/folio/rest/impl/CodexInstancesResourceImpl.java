@@ -4,11 +4,13 @@ import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.folio.config.RMAPIConfiguration;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.resource.CodexInstancesResource;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
@@ -37,6 +39,18 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext)
       throws Exception {
     log.info("method call: getInstances");
+
+    Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+
+    config.setHandler(result -> {
+      if (result.failed()) {
+        log.error("Config call failed!", result.cause());
+      } else {
+        RMAPIConfiguration rmAPIConfig = result.result();
+        log.info("RM API Config: " + rmAPIConfig);
+      }
+    });
+
     throw new UnsupportedOperationException("Operation not supported.");
   }
 
@@ -50,6 +64,18 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext)
       throws Exception {
     log.info("method call: getInstancesById");
+
+    Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+
+    config.setHandler(result -> {
+      if (result.failed()) {
+        log.error("Config call failed!", result.cause());
+      } else {
+        RMAPIConfiguration rmAPIConfig = result.result();
+        log.info("RM API Config: " + rmAPIConfig);
+      }
+    });
+
     throw new UnsupportedOperationException("Operation not supported.");
   }
 }
