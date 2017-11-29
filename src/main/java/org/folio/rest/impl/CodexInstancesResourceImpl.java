@@ -16,7 +16,7 @@ import io.vertx.core.logging.LoggerFactory;
 
 /**
  * Instance related codex APIs.
- * 
+ *
  * @author mreno
  *
  */
@@ -33,14 +33,16 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
   @Override
   @Validate
   public void getCodexInstances(String query, int offset, int limit, String lang,
-      Map<String, String> okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext)
-      throws Exception {
-    log.info("method call: getInstances");
-    throw new UnsupportedOperationException("Operation not supported.");
-  }
+	      Map<String, String> okapiHeaders,
+	      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext)
+	      throws Exception {
+	    log.info("method call: getInstances");
+	    log.info("Calling CQL Parser");
+	    final CQLParserForRMAPI parserForRMAPI = new CQLParserForRMAPI(query);
+	    throw new UnsupportedOperationException("Work in progress");
+	  }
 
-  /* (non-Javadoc)
+/* (non-Javadoc)
    * @see org.folio.rest.jaxrs.resource.InstancesResource#getCodexInstancesById(java.lang.String, java.lang.String, java.util.Map, io.vertx.core.Handler, io.vertx.core.Context)
    */
   @Override
