@@ -18,7 +18,7 @@ import io.vertx.core.logging.LoggerFactory;
 
 /**
  * Instance related codex APIs.
- * 
+ *
  * @author mreno
  *
  */
@@ -40,23 +40,22 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
       throws Exception {
     log.info("method call: getInstances");
 
-    Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+    final Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
 
     config.setHandler(result -> {
       if (result.failed()) {
         log.error("Config call failed!", result.cause());
       } else {
-        RMAPIConfiguration rmAPIConfig = result.result();
+        final RMAPIConfiguration rmAPIConfig = result.result();
         log.info("RM API Config: " + rmAPIConfig);
       }
     });
 
-    throw new UnsupportedOperationException("Operation not supported.");
+    log.info("Calling CQL Parser");
+    final CQLParserForRMAPI parserForRMAPI = new CQLParserForRMAPI(query);
+    throw new UnsupportedOperationException("Work in progress");
   }
 
-  /* (non-Javadoc)
-   * @see org.folio.rest.jaxrs.resource.InstancesResource#getCodexInstancesById(java.lang.String, java.lang.String, java.util.Map, io.vertx.core.Handler, io.vertx.core.Context)
-   */
   @Override
   @Validate
   public void getCodexInstancesById(String id, String lang,
@@ -65,13 +64,13 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
       throws Exception {
     log.info("method call: getInstancesById");
 
-    Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+    final Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
 
     config.setHandler(result -> {
       if (result.failed()) {
         log.error("Config call failed!", result.cause());
       } else {
-        RMAPIConfiguration rmAPIConfig = result.result();
+        final RMAPIConfiguration rmAPIConfig = result.result();
         log.info("RM API Config: " + rmAPIConfig);
       }
     });
