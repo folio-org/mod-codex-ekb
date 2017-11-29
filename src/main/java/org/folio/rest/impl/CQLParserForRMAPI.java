@@ -27,10 +27,8 @@ public class CQLParserForRMAPI {
 
 	private void initCQLParser(String query) throws QueryValidationException {
 		  final CQLParser parser = new CQLParser();
-		  System.out.println(query);
 			try {
 				final CQLNode node = parser.parse(query);
-				System.out.println(node.toXCQL());
 				checkNodeInstance(node);
 			} catch (CQLParseException | IOException e) {
 				throw new QueryValidationException(e);
@@ -56,8 +54,8 @@ public class CQLParserForRMAPI {
 			   throw new UnsupportedOperationException("Search operation on this field is not supported at this time.");
 		   }
 
-		   System.out.println("valid enum type" +node.getIndex()); // gives title
-		   System.out.println("value" +node.getTerm()); //gives value
-		   System.out.println("operation" +node.getRelation()); //gives operator
+		   //System.out.println("valid enum type" +node.getIndex()); // gives title
+		   //System.out.println("value" +node.getTerm()); //gives value
+		   //System.out.println("operation" +node.getRelation()); //gives operator
 		}
 }
