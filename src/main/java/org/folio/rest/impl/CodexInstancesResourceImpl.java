@@ -63,7 +63,6 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
     throw new UnsupportedOperationException("Work in progress");
   }
 
-
   @Override
   @Validate
   public void getCodexInstancesById(String id, String lang,
