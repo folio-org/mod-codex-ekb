@@ -1,6 +1,7 @@
 package org.folio.cql2rmapi;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.z3950.zing.cql.CQLBooleanNode;
@@ -9,16 +10,14 @@ import org.z3950.zing.cql.CQLParseException;
 import org.z3950.zing.cql.CQLParser;
 import org.z3950.zing.cql.CQLSortNode;
 import org.z3950.zing.cql.CQLTermNode;
-
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import org.z3950.zing.cql.ModifierSet;
 
 public class CQLParserForRMAPI {
 
-	private final Logger log = LoggerFactory.getLogger(CQLParserForRMAPI.class);
+	private String error = "Unsupported Query Format : ";
 
 	private enum RMAPISupportedSearchFields {
-		TITLE, PUBLISHER
+		TITLE, PUBLISHER, ISSN, ISBN, ISXN
 	}
 
 	public CQLParserForRMAPI(String query) throws QueryValidationException {
@@ -29,9 +28,11 @@ public class CQLParserForRMAPI {
 		  final CQLParser parser = new CQLParser();
 			try {
 				final CQLNode node = parser.parse(query);
+				System.out.println(node.toXCQL());
 				checkNodeInstance(node);
 			} catch (CQLParseException | IOException e) {
-				throw new QueryValidationException(e);
+				error += "Search query is in an unsupported format.";
+				throw new QueryValidationException(error);
 			}
 	  }
 
@@ -41,22 +42,54 @@ public class CQLParserForRMAPI {
 			  parseCQLTermNode((CQLTermNode) node);
 		  }
 		  if(node instanceof CQLBooleanNode) {
-			  throw new UnsupportedOperationException("Boolean operations in searches are not supported at this time.");
+			  error += "Multiple search tags are not supported.";
+			  throw new QueryValidationException(error);
 		  }
 		  if(node instanceof CQLSortNode) {
-			  throw new UnsupportedOperationException("Sort operations are not supported at this time.");
+			  parseCQLSortNode((CQLSortNode) node);
 		  }
-
 	  }
 
-	  private void parseCQLTermNode(CQLTermNode node) {
-		   if(!EnumUtils.isValidEnum(RMAPISupportedSearchFields.class, node.getIndex().toUpperCase())) {
-			   throw new UnsupportedOperationException("Search operation on this field is not supported at this time.");
-		   }
+	private void parseCQLTermNode(CQLTermNode node) throws QueryValidationException {
+		  String searchField = null;
+		  String searchValue = null;
+		  String comparator = null;
 
-		   //System.out.println("valid enum type" +node.getIndex()); // gives title
-		   //System.out.println("value" +node.getTerm()); //gives value
-		   //System.out.println("operation" +node.getRelation()); //gives operator
+		  searchField = node.getIndex(); //gives the search field
 
+		  //If no search field is passed, default it to title search. This is the default search supported by RMAPI
+		  if ("cql.serverChoice".equalsIgnoreCase(searchField)) {
+			  searchField = "title";
+			  System.out.println(searchField);
+		  } else if(!EnumUtils.isValidEnum(RMAPISupportedSearchFields.class, searchField.toUpperCase())) {
+			  //If search field is not supported, log and return an error response
+			  error += "Search field " + searchField + " is not supported.";
+			  System.out.println(error);
+			  throw new QueryValidationException(error);
+		  }
+
+		  comparator = node.getRelation().getBase(); //gives operator
+
+		  //If comparison operators are not supported, log and return an error response
+		  if(!comparator.equals("=")) {
+			  error += "Search with " + comparator + " operator is not supported.";
+			  throw new QueryValidationException(error);
+		  }
+
+		  searchValue = node.getTerm(); //gives the search value
 		}
+
+	  private void parseCQLSortNode(CQLSortNode node) throws QueryValidationException {
+		  final List<ModifierSet> sortIndexes = node.getSortIndexes();
+		  if(sortIndexes.size() > 1) {
+			  error += "Sorting on multiple keys is unsupported.";
+			  throw new QueryValidationException(error);
+		  }
+		  //At this point RM API supports only sort by title
+		  for(final ModifierSet ms : sortIndexes) {
+			 if(ms.getBase().equalsIgnoreCase("title")) {
+				 final String sortOrder = "title";
+			 }
+		  }
+	}
 }
