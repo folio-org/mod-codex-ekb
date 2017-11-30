@@ -28,7 +28,6 @@ public class CQLParserForRMAPI {
 		  final CQLParser parser = new CQLParser();
 			try {
 				final CQLNode node = parser.parse(query);
-				System.out.println(node.toXCQL());
 				checkNodeInstance(node);
 			} catch (CQLParseException | IOException e) {
 				error += "Search query is in an unsupported format.";
@@ -60,11 +59,9 @@ public class CQLParserForRMAPI {
 		  //If no search field is passed, default it to title search. This is the default search supported by RMAPI
 		  if ("cql.serverChoice".equalsIgnoreCase(searchField)) {
 			  searchField = "title";
-			  System.out.println(searchField);
 		  } else if(!EnumUtils.isValidEnum(RMAPISupportedSearchFields.class, searchField.toUpperCase())) {
 			  //If search field is not supported, log and return an error response
 			  error += "Search field " + searchField + " is not supported.";
-			  System.out.println(error);
 			  throw new QueryValidationException(error);
 		  }
 
@@ -85,10 +82,16 @@ public class CQLParserForRMAPI {
 			  error += "Sorting on multiple keys is unsupported.";
 			  throw new QueryValidationException(error);
 		  }
-		  //At this point RM API supports only sort by title
+		  //At this point RM API supports only sort by title and relevance
+		  //front end does not support relevance, so we ignore everything but title
+		  String sortOrder = null;
 		  for(final ModifierSet ms : sortIndexes) {
-			 if(ms.getBase().equalsIgnoreCase("title")) {
-				 final String sortOrder = "title";
+			  sortOrder = ms.getBase();
+			 if(sortOrder.equalsIgnoreCase("title")) {
+				 sortOrder = "title";
+			 }else {
+				 error += "Sorting on " + sortOrder + " key is unsupported.";
+				 throw new QueryValidationException(error);
 			 }
 		  }
 	}
