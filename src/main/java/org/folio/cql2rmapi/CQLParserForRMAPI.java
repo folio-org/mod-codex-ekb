@@ -1,4 +1,4 @@
-package org.folio.rest.impl;
+package org.folio.cql2rmapi;
 
 import java.io.IOException;
 
