@@ -85,6 +85,16 @@
       <artifactId>domain-models-runtime</artifactId>
       <version>15.0.2</version>
     </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.vertx</groupId>
+      <artifactId>vertx-unit</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>

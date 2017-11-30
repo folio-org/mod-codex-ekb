@@ -97,7 +97,7 @@ public final class RMAPIConfiguration {
 
             mapResults(configs, future);
           } else {
-            LOG.error("Cannot get configuration data: " + response.getError().toString(), response.getError());
+            LOG.error("Cannot get configuration data: " + response.getError().toString(), response.getException());
             future.fail(response.getException());
           }
         });
@@ -137,7 +137,13 @@ public final class RMAPIConfiguration {
               },
               JsonObject::mergeIn,
               result -> result.mapTo(RMAPIConfiguration.class)));
-      future.complete(mappedValue);
+
+      if (mappedValue.getCustomerId() == null ||
+          mappedValue.getAPIKey() == null) {
+        future.fail("Configuration data is invalid");
+      } else {
+        future.complete(mappedValue);
+      }
     } catch (Exception ex) {
       future.fail(ex);
     }
