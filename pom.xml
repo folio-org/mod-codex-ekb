@@ -16,7 +16,7 @@
   </organization>
 
   <issueManagement>
-    <url>https://issues.folio.org/projects/MODCOD</url>
+    <url>https://issues.folio.org/projects/MODCXEKB</url>
     <system>JIRA</system>
   </issueManagement>
 
@@ -25,6 +25,11 @@
     <developerConnection>scm:git:git@github.com:folio-org/mod-codex-ekb.git</developerConnection>
     <url>https://github.com/folio-org/mod-codex-ekb.git</url>
   </scm>
+
+  <ciManagement>
+    <system>Jenkins</system>
+    <url>https://jenkins-aws.indexdata.com/job/folio-org/job/mod-codex-ekb</url>
+  </ciManagement>
 
   <licenses>
     <license>
@@ -51,6 +56,23 @@
       <url>https://repository.folio.org/repository/maven-folio</url>
     </repository>
   </repositories>
+
+  <distributionManagement>
+    <repository>
+      <id>folio-nexus</id>
+      <name>FOLIO Release Repository</name>
+      <url>https://repository.folio.org/repository/maven-releases/</url>
+      <uniqueVersion>false</uniqueVersion>
+      <layout>default</layout>
+    </repository>
+    <snapshotRepository>
+      <id>folio-nexus</id>
+      <name>FOLIO Snapshot Repository</name>
+      <uniqueVersion>true</uniqueVersion>
+      <url>https://repository.folio.org/repository/maven-snapshots/</url>
+      <layout>default</layout>
+    </snapshotRepository>
+  </distributionManagement>
 
   <pluginRepositories>
     <pluginRepository>
@@ -292,6 +314,18 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <version>2.5.3</version>
+        <configuration>
+          <preparationGoals>clean verify</preparationGoals>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+          <pushChanges>false</pushChanges>
+          <localCheckout>true</localCheckout>
+        </configuration>
+      </plugin>      
     </plugins>
   </build>
 </project>
