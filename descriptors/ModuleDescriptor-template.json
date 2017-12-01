@@ -3,8 +3,9 @@
   "name" : "EBSCO Knowledge Base Codex",
   "provides" : [
     {
-      "id" : "codex-ekb",
+      "id" : "codex",
       "version" : "1.0",
+      "interfaceType": "multiple",
       "handlers" : [
         {
           "methods" : [ "GET" ],
