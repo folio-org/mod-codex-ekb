@@ -82,22 +82,22 @@ public final class RMAPIConfiguration {
    * @return The RMI API configuration for the tenant.
    */
   public static Future<RMAPIConfiguration> getConfiguration(final Map<String, String> okapiHeaders) {
-    final Map<String, String> _okapiHeaders = new HashMap<>(okapiHeaders);
-    final String tenantId = TenantTool.calculateTenantId(_okapiHeaders.get(RestVerticle.OKAPI_HEADER_TENANT));
-    final String okapiURL = _okapiHeaders.get("x-okapi-url");
+    final Map<String, String> okapiHeadersLocal = new HashMap<>(okapiHeaders);
+    final String tenantId = TenantTool.calculateTenantId(okapiHeadersLocal.get(RestVerticle.OKAPI_HEADER_TENANT));
+    final String okapiURL = okapiHeadersLocal.get("x-okapi-url");
 
     // We need to remove this header before calling another module or okapi
     // will not be able to find the route. Since we don't own the headers map,
     // we need to make a defensive copy so changes to the map are isolated to
     // this class.
-    _okapiHeaders.remove("x-okapi-module-id");
+    okapiHeadersLocal.remove("x-okapi-module-id");
 
     Future<RMAPIConfiguration> future = Future.future();
 
     try {
       final HttpClientInterface httpClient = HttpClientFactory.getHttpClient(okapiURL, tenantId);
 
-      httpClient.request(CONFIGURATIONS_ENTRIES_ENDPOINT_PATH, _okapiHeaders)
+      httpClient.request(CONFIGURATIONS_ENTRIES_ENDPOINT_PATH, okapiHeadersLocal)
         .whenComplete((response, throwable) -> {
           if (Response.isSuccess(response.getCode())) {
             final JsonObject responseBody = response.getBody();
