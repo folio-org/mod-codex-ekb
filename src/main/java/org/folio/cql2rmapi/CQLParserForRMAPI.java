@@ -17,7 +17,7 @@ import org.z3950.zing.cql.ModifierSet;
 public class CQLParserForRMAPI {
 
 	private String error = "Unsupported Query Format : ";
-	private static final String RMAPITITLE = "titlename";
+	private static final String RM_API_TITLE = "titlename";
 	private static final String TITLE = "title";
 	private String searchField = null;
 	private String searchValue = null;
@@ -66,7 +66,7 @@ public class CQLParserForRMAPI {
 
 		  //If no search field is passed, default it to title search. This is the default search supported by RMAPI
 		  if ("cql.serverChoice".equalsIgnoreCase(searchField)) {
-			  searchField = RMAPITITLE;
+			  searchField = RM_API_TITLE;
 		  } else if(!EnumUtils.isValidEnum(RMAPISupportedSearchFields.class, searchField.toUpperCase())) {
 			  //If search field is not supported, log and return an error response
 			  error += "Search field " + searchField + " is not supported.";
@@ -95,7 +95,7 @@ public class CQLParserForRMAPI {
 		  for(final ModifierSet ms : sortIndexes) {
 			  sortOrder = ms.getBase();
 			 if(sortOrder.equalsIgnoreCase(TITLE)) {
-				 sortOrder = RMAPITITLE;
+				 sortOrder = RM_API_TITLE;
 			 }else {
 				 final StringBuilder builder = new StringBuilder();
 				 builder.append(error);
@@ -114,13 +114,13 @@ public class CQLParserForRMAPI {
 			// Map fields to RM API
 
 			if (searchField.equalsIgnoreCase(TITLE)) {
-				searchField = RMAPITITLE;
+				searchField = RM_API_TITLE;
 			}
 			if (searchField.equals("isbn") || searchField.equals("issn")) {
 				searchField = "isxn";
 			}
 			if(sortOrder == null) {
-				sortOrder = RMAPITITLE; //orderby is a mandatory field, otherwise RMAPI throws error
+				sortOrder = RM_API_TITLE; //orderby is a mandatory field, otherwise RMAPI throws error
 			}
 			if(offset == 0) {
 				offset = 1; //minimum offset should be 1, otherwise RMAPI throws an error
