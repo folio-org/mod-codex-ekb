@@ -6,6 +6,7 @@ import javax.ws.rs.core.Response;
 
 import org.folio.config.RMAPIConfiguration;
 import org.folio.cql2rmapi.CQLParserForRMAPI;
+import org.folio.cql2rmapi.QueryValidationException;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.resource.CodexInstancesResource;
 
@@ -53,7 +54,14 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
     });
 
     log.info("Calling CQL Parser");
-    final CQLParserForRMAPI parserForRMAPI = new CQLParserForRMAPI(query);
+    try {
+    	final CQLParserForRMAPI parserForRMAPI = new CQLParserForRMAPI(query, offset, limit);
+    	final String queryForRMAPI = parserForRMAPI.getRMAPIQuery();
+    	log.info("Query to be passed to RM API is " + queryForRMAPI);
+    } catch (final QueryValidationException e) {
+    	log.error("CQL Query Validation failed!", e);
+    }
+
     throw new UnsupportedOperationException("Work in progress");
   }
 
