@@ -17,8 +17,8 @@ import org.z3950.zing.cql.ModifierSet;
 public class CQLParserForRMAPI {
 
 	private String error = "Unsupported Query Format : ";
-	private final String RMAPITITLE = "titlename";
-	private final String TITLE = "title";
+	private static final String titleRMAPI = "titlename";
+	private static final String titleInputSearch = "title";
 	private String searchField = null;
 	private String searchValue = null;
 	private String sortOrder = null;
@@ -66,7 +66,7 @@ public class CQLParserForRMAPI {
 
 		  //If no search field is passed, default it to title search. This is the default search supported by RMAPI
 		  if ("cql.serverChoice".equalsIgnoreCase(searchField)) {
-			  searchField = RMAPITITLE;
+			  searchField = titleRMAPI;
 		  } else if(!EnumUtils.isValidEnum(RMAPISupportedSearchFields.class, searchField.toUpperCase())) {
 			  //If search field is not supported, log and return an error response
 			  error += "Search field " + searchField + " is not supported.";
@@ -94,8 +94,8 @@ public class CQLParserForRMAPI {
 		  //front end does not support relevance, so we ignore everything but title
 		  for(final ModifierSet ms : sortIndexes) {
 			  sortOrder = ms.getBase();
-			 if(sortOrder.equalsIgnoreCase(TITLE)) {
-				 sortOrder = RMAPITITLE;
+			 if(sortOrder.equalsIgnoreCase(titleInputSearch)) {
+				 sortOrder = titleRMAPI;
 			 }else {
 				 final StringBuilder builder = new StringBuilder();
 				 builder.append(error);
@@ -113,14 +113,14 @@ public class CQLParserForRMAPI {
 		if((searchValue != null) && (searchField != null)) {
 			// Map fields to RM API
 
-			if (searchField.equalsIgnoreCase(TITLE)) {
-				searchField = RMAPITITLE;
+			if (searchField.equalsIgnoreCase(titleInputSearch)) {
+				searchField = titleRMAPI;
 			}
 			if (searchField.equals("isbn") || searchField.equals("issn")) {
 				searchField = "isxn";
 			}
 			if(sortOrder == null) {
-				sortOrder = RMAPITITLE; //orderby is a mandatory field, otherwise RMAPI throws error
+				sortOrder = titleRMAPI; //orderby is a mandatory field, otherwise RMAPI throws error
 			}
 			if(offset == 0) {
 				offset = 1; //minimum offset should be 1, otherwise RMAPI throws an error
