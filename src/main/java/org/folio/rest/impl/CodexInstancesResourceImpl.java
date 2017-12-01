@@ -55,7 +55,9 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
 
     log.info("Calling CQL Parser");
     try {
-    	final CQLParserForRMAPI parserForRMAPI = new CQLParserForRMAPI(query);
+    	final CQLParserForRMAPI parserForRMAPI = new CQLParserForRMAPI(query, offset, limit);
+    	final String queryForRMAPI = parserForRMAPI.getRMAPIQuery();
+    	log.info("Query to be passed to RM API is " + queryForRMAPI);
     } catch (final QueryValidationException e) {
     	log.error("CQL Query Validation failed!", e);
     }

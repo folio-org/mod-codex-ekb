@@ -1,6 +1,8 @@
 package org.folio.cql2rmapi;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 
 import org.apache.commons.lang3.EnumUtils;
@@ -15,12 +17,21 @@ import org.z3950.zing.cql.ModifierSet;
 public class CQLParserForRMAPI {
 
 	private String error = "Unsupported Query Format : ";
+	private final String RMAPITITLE = "titlename";
+	private final String TITLE = "title";
+	private String searchField = null;
+	private String searchValue = null;
+	private String sortOrder = null;
+	private int offset;
+	private final int limit;
 
 	private enum RMAPISupportedSearchFields {
 		TITLE, PUBLISHER, ISSN, ISBN, ISXN
 	}
 
-	public CQLParserForRMAPI(String query) throws QueryValidationException {
+	public CQLParserForRMAPI(String query, int offset, int limit) throws QueryValidationException {
+		this.offset = offset;
+		this.limit = limit;
 	    initCQLParser(query);
 	}
 
@@ -50,15 +61,12 @@ public class CQLParserForRMAPI {
 	  }
 
 	private void parseCQLTermNode(CQLTermNode node) throws QueryValidationException {
-		  String searchField = null;
-		  String searchValue = null;
 		  String comparator = null;
-
 		  searchField = node.getIndex(); //gives the search field
 
 		  //If no search field is passed, default it to title search. This is the default search supported by RMAPI
 		  if ("cql.serverChoice".equalsIgnoreCase(searchField)) {
-			  searchField = "title";
+			  searchField = RMAPITITLE;
 		  } else if(!EnumUtils.isValidEnum(RMAPISupportedSearchFields.class, searchField.toUpperCase())) {
 			  //If search field is not supported, log and return an error response
 			  error += "Search field " + searchField + " is not supported.";
@@ -84,15 +92,48 @@ public class CQLParserForRMAPI {
 		  }
 		  //At this point RM API supports only sort by title and relevance
 		  //front end does not support relevance, so we ignore everything but title
-		  String sortOrder = null;
 		  for(final ModifierSet ms : sortIndexes) {
 			  sortOrder = ms.getBase();
-			 if(sortOrder.equalsIgnoreCase("title")) {
-				 sortOrder = "title";
+			 if(sortOrder.equalsIgnoreCase(TITLE)) {
+				 sortOrder = RMAPITITLE;
 			 }else {
-				 error += "Sorting on " + sortOrder + " key is unsupported.";
-				 throw new QueryValidationException(error);
+				 final StringBuilder builder = new StringBuilder();
+				 builder.append(error);
+				 builder.append("Sorting on ");
+				 builder.append(sortOrder);
+				 builder.append(" key is unsupported.");
+				 throw new QueryValidationException(builder.toString());
 			 }
 		  }
+	}
+
+	public String getRMAPIQuery() throws UnsupportedEncodingException {
+		final StringBuilder builder = new StringBuilder();
+
+		if((searchValue != null) && (searchField != null)) {
+			// Map fields to RM API
+
+			if (searchField.equalsIgnoreCase(TITLE)) {
+				searchField = RMAPITITLE;
+			}
+			if (searchField.equals("isbn") || searchField.equals("issn")) {
+				searchField = "isxn";
+			}
+			if(sortOrder == null) {
+				sortOrder = RMAPITITLE; //orderby is a mandatory field, otherwise RMAPI throws error
+			}
+			if(offset == 0) {
+				offset = 1; //minimum offset should be 1, otherwise RMAPI throws an error
+			}
+			builder.append("search=");
+			builder.append(URLEncoder.encode(searchValue, "UTF-8"));
+			builder.append("&searchfield=" + searchField);
+		}
+			builder.append("&orderby=" + sortOrder);
+
+		builder.append("&count=" + limit);
+		builder.append("&offset=" + offset);
+
+		return builder.toString();
 	}
 }
