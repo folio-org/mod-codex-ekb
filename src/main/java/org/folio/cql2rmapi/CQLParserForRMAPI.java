@@ -154,23 +154,21 @@ public class CQLParserForRMAPI {
 				sortOrder = RM_API_TITLE; //orderby is a mandatory field, otherwise RMAPI throws error
 			}
 			if(offset == 0) {
-				offset = 1; //TODO: calculate offsets correctly
+				offset = 1; //calculate offsets correctly
 			}
 			builder.append("search=");
 			builder.append(URLEncoder.encode(searchValue, "UTF-8"));
 			builder.append("&searchfield=" + searchField);
 		}
 
-		if((filterType != null) && (filterValue != null)) {
+		if(((filterType != null) && filterType.equalsIgnoreCase("type")) && ((filterValue != null) && EnumUtils.isValidEnum(RMAPISupportedFilterValues.class, filterValue.toUpperCase()))) {
 			//Map fields to RM API
-			if(filterType.equalsIgnoreCase("type") && EnumUtils.isValidEnum(RMAPISupportedFilterValues.class, filterValue.toUpperCase())) {
-				builder.append("&resourcetype=" + filterValue);
-			}
+			builder.append("&resourcetype=" + filterValue);
 		}
 		builder.append("&orderby=" + sortOrder);
 
-		builder.append("&count=" + limit); //TODO : Verify limit
-		builder.append("&offset=" + offset); //TODO: Compute offsets correctly
+		builder.append("&count=" + limit);
+		builder.append("&offset=" + offset);
 
 		return builder.toString();
 	}
