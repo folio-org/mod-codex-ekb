@@ -6,6 +6,7 @@ import java.net.URLEncoder;
 import java.util.List;
 
 import org.apache.commons.lang3.EnumUtils;
+import org.z3950.zing.cql.CQLAndNode;
 import org.z3950.zing.cql.CQLBooleanNode;
 import org.z3950.zing.cql.CQLNode;
 import org.z3950.zing.cql.CQLParseException;
@@ -21,12 +22,19 @@ public class CQLParserForRMAPI {
 	private static final String TITLE = "title";
 	private String searchField = null;
 	private String searchValue = null;
+	private String filterType = null;
+	private String filterValue = null;
 	private String sortOrder = null;
 	private int offset;
 	private final int limit;
 
 	private enum RMAPISupportedSearchFields {
-		TITLE, PUBLISHER, ISSN, ISBN, ISXN
+		TITLE, PUBLISHER, ISSN, ISBN, ISXN, TYPE
+	}
+
+	private enum RMAPISupportedFilterValues {
+		ALL, JOURNAL, NEWSLETTER, REPORT, PROCEEDINGS, WEBSITE, NEWSPAPER, UNSPECIFIED, BOOK, BOOKSERIES,
+		DATABASE, THESISDISSERTATION, STREAMINGAUDIO, STREAMINGVIDEO, AUDIOBOOK
 	}
 
 	public CQLParserForRMAPI(String query, int offset, int limit) throws QueryValidationException {
@@ -52,8 +60,7 @@ public class CQLParserForRMAPI {
 			  parseCQLTermNode((CQLTermNode) node);
 		  }
 		  if(node instanceof CQLBooleanNode) {
-			  error += "Multiple search tags are not supported.";
-			  throw new QueryValidationException(error);
+			  parseCQLBooleanNode((CQLBooleanNode) node);
 		  }
 		  if(node instanceof CQLSortNode) {
 			  parseCQLSortNode((CQLSortNode) node);
@@ -61,19 +68,7 @@ public class CQLParserForRMAPI {
 	  }
 
 	private void parseCQLTermNode(CQLTermNode node) throws QueryValidationException {
-		  String comparator = null;
-		  searchField = node.getIndex(); //gives the search field
-
-		  //If no search field is passed, default it to title search. This is the default search supported by RMAPI
-		  if ("cql.serverChoice".equalsIgnoreCase(searchField)) {
-			  searchField = RM_API_TITLE;
-		  } else if(!EnumUtils.isValidEnum(RMAPISupportedSearchFields.class, searchField.toUpperCase())) {
-			  //If search field is not supported, log and return an error response
-			  error += "Search field " + searchField + " is not supported.";
-			  throw new QueryValidationException(error);
-		  }
-
-		  comparator = node.getRelation().getBase(); //gives operator
+		  final String comparator = node.getRelation().getBase(); //gives operator
 
 		  //If comparison operators are not supported, log and return an error response
 		  if(!comparator.equals("=")) {
@@ -81,7 +76,28 @@ public class CQLParserForRMAPI {
 			  throw new QueryValidationException(error);
 		  }
 
-		  searchValue = node.getTerm(); //gives the search value
+		  final String indexNode = node.getIndex(); //gives the search field
+		  final String termNode = node.getTerm(); //gives the search value
+
+		  //If no search field is passed, default it to title search. This is the default search supported by RMAPI
+		  if ("cql.serverChoice".equalsIgnoreCase(indexNode)) {
+			  searchField = RM_API_TITLE;
+			  searchValue = termNode;
+		  } else if ("identifier.type".equalsIgnoreCase(indexNode) && EnumUtils.isValidEnum(RMAPISupportedSearchFields.class, termNode.toUpperCase())) {
+			  searchField = termNode;
+		  } else if ("identifier.value".equalsIgnoreCase(indexNode)) {
+			  searchValue = termNode;
+		  } else if ("type".equalsIgnoreCase(indexNode)) {
+			  filterType = indexNode;
+			  filterValue = termNode;
+		  } else if(!EnumUtils.isValidEnum(RMAPISupportedSearchFields.class, indexNode.toUpperCase())) {
+			  //If search field is not supported, log and return an error response
+			  error += "Search field " + indexNode + " is not supported.";
+			  throw new QueryValidationException(error);
+		  } else {
+			  searchField = indexNode;
+			  searchValue = termNode;
+		  }
 		}
 
 	  private void parseCQLSortNode(CQLSortNode node) throws QueryValidationException {
@@ -105,6 +121,21 @@ public class CQLParserForRMAPI {
 				 throw new QueryValidationException(builder.toString());
 			 }
 		  }
+
+		  //Get the search field and search value
+		  final CQLNode subTree = node.getSubtree();
+		  checkNodeInstance(subTree);
+	}
+
+	private void parseCQLBooleanNode(CQLBooleanNode node) throws QueryValidationException {
+		if(node instanceof CQLAndNode) {
+			final CQLNode leftNode = node.getLeftOperand();
+			checkNodeInstance(leftNode);
+			final CQLNode rightNode = node.getRightOperand();
+			checkNodeInstance(rightNode);
+		} else {
+			throw new QueryUnsupportedFeatureException("Boolean operators OR and NOT are unsupported.");
+		}
 	}
 
 	public String getRMAPIQuery() throws UnsupportedEncodingException {
@@ -123,16 +154,23 @@ public class CQLParserForRMAPI {
 				sortOrder = RM_API_TITLE; //orderby is a mandatory field, otherwise RMAPI throws error
 			}
 			if(offset == 0) {
-				offset = 1; //minimum offset should be 1, otherwise RMAPI throws an error
+				offset = 1; //TODO: calculate offsets correctly
 			}
 			builder.append("search=");
 			builder.append(URLEncoder.encode(searchValue, "UTF-8"));
 			builder.append("&searchfield=" + searchField);
 		}
-			builder.append("&orderby=" + sortOrder);
 
-		builder.append("&count=" + limit);
-		builder.append("&offset=" + offset);
+		if((filterType != null) && (filterValue != null)) {
+			//Map fields to RM API
+			if(filterType.equalsIgnoreCase("type") && EnumUtils.isValidEnum(RMAPISupportedFilterValues.class, filterValue.toUpperCase())) {
+				builder.append("&resourcetype=" + filterValue);
+			}
+		}
+		builder.append("&orderby=" + sortOrder);
+
+		builder.append("&count=" + limit); //TODO : Verify limit
+		builder.append("&offset=" + offset); //TODO: Compute offsets correctly
 
 		return builder.toString();
 	}
