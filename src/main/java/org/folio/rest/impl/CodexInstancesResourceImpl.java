@@ -8,7 +8,9 @@ import org.folio.config.RMAPIConfiguration;
 import org.folio.cql2rmapi.CQLParserForRMAPI;
 import org.folio.cql2rmapi.QueryValidationException;
 import org.folio.rest.annotations.Validate;
+import org.folio.rest.jaxrs.model.Instance;
 import org.folio.rest.jaxrs.resource.CodexInstancesResource;
+import org.folio.rmapi.RMAPIService;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -81,9 +83,23 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
       } else {
         final RMAPIConfiguration rmAPIConfig = result.result();
         log.info("RM API Config: " + rmAPIConfig);
+        
+        RMAPIService svc = new RMAPIService(rmAPIConfig.getCustomerId(),rmAPIConfig.getAPIKey(), RMAPIService.getBaseURI(), vertxContext.owner());
+        
+        final Future<Instance> codexInstanceFuture = svc.GetTitleById(id);
+        
+        codexInstanceFuture.setHandler(rmapiResult -> {
+          if (rmapiResult.failed()) {
+            log.error("RMAPI call failed!", rmapiResult.cause());
+          } else {
+            final Instance codexInstance = rmapiResult.result();
+            // Need to wrapper response
+            log.info("Request Title Name: " + codexInstance.getTitle());
+          }
+        });
       }
     });
 
-    throw new UnsupportedOperationException("Operation not supported.");
+    throw new UnsupportedOperationException("Work in progress.");
   }
 }
