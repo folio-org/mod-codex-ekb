@@ -25,7 +25,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 
 /**
  * Tests the RMAPIConfiguration class.
- * 
+ *
  * Note: RMAPIConfiguration uses the same URL path when called, so to use the
  * mock content we need to supply different mock files. However, the
  * HttpClientInterface is local to the RMAPIConfiguration class and setting the
@@ -37,9 +37,9 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
  * HttpClientInterface (which will be a HttpClientMock2 instance) and the tests
  * function. *phew*! There is likely a better way to do this or at least there
  * should be.
- * 
+ *
  * TODO: figure out a better way to set the mock files.
- * 
+ *
  * @author mreno
  *
  */
@@ -50,6 +50,9 @@ public class RMAPIConfigurationTest {
   private static final String MOCK_CONTENT_FAIL_MISSING_CUSTOMER_ID_FILE = "RMAPIConfiguration/mock_content_fail_missing_customer_id.json";
   private static final String MOCK_CONTENT_FAIL_MISSING_API_KEY_FILE = "RMAPIConfiguration/mock_content_fail_missing_api_key.json";
   private static final String MOCK_CONTENT_SUCCESS_MULTIPLE_FILE = "RMAPIConfiguration/mock_content_success_multiple.json";
+  private static final String MOCK_CONTENT_SUCCESS_TO_STRING_FILE = "RMAPIConfiguration/mock_content_success_to_string.json";
+  private static final String MOCK_CONTENT_FAIL_404_FILE = "RMAPIConfiguration/mock_content_fail_404.json";
+  private static final String MOCK_CONTENT_FAIL_INTERNAL_ERROR_FILE = "RMAPIConfiguration/mock_content_fail_internal_error.json";
 
   private final Logger logger = LoggerFactory.getLogger("okapi");
   // Use a random ephemeral port if not defined via a system property
@@ -208,4 +211,70 @@ public class RMAPIConfigurationTest {
       async.complete();
     });
   }
+
+  @Test
+  public void toStringTest(TestContext context) {
+    Async async = context.async();
+
+    try {
+      // HACK ALERT! See above for the reason this is here.
+      httpClientMock.setMockJsonContent(MOCK_CONTENT_SUCCESS_TO_STRING_FILE);
+    } catch (IOException e) {
+      context.fail("Cannot read mock file: " +
+          MOCK_CONTENT_SUCCESS_TO_STRING_FILE + " - reason: " + e.getMessage());
+    }
+
+    Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+    config.setHandler(result -> {
+      context.assertTrue(result.succeeded());
+
+      RMAPIConfiguration rmAPIConfig = result.result();
+
+      context.assertEquals("RMAPIConfiguration [customerId=myid, apiKey=mykey]", rmAPIConfig.toString());
+
+      async.complete();
+    });
+  }
+
+  @Test
+  public void return404Test(TestContext context) {
+    Async async = context.async();
+
+    try {
+      // HACK ALERT! See above for the reason this is here.
+      httpClientMock.setMockJsonContent(MOCK_CONTENT_FAIL_404_FILE);
+    } catch (IOException e) {
+      context.fail("Cannot read mock file: " +
+          MOCK_CONTENT_FAIL_404_FILE + " - reason: " + e.getMessage());
+    }
+
+    Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+    config.setHandler(result -> {
+      context.assertTrue(result.failed());
+
+      async.complete();
+    });
+  }
+
+  @Test
+  public void cannotGetConfigDataTest(TestContext context) {
+    Async async = context.async();
+
+    try {
+      // HACK ALERT! See above for the reason this is here.
+      httpClientMock.setMockJsonContent(MOCK_CONTENT_FAIL_INTERNAL_ERROR_FILE);
+    } catch (IOException e) {
+      context.fail("Cannot read mock file: " +
+          MOCK_CONTENT_FAIL_INTERNAL_ERROR_FILE + " - reason: " + e.getMessage());
+    }
+
+    Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+    config.setHandler(result -> {
+      context.assertTrue(result.failed());
+      context.assertTrue(result.cause() instanceof NullPointerException);
+
+      async.complete();
+    });
+  }
+
 }
