@@ -57,7 +57,7 @@ public class RMAPIService {
     public Future<Instance> getTileById(String titleId) {  
       
       Future<Instance> future = Future.future();
-      final HttpClientRequest request = httpClient.getAbs(ConstructURL(String.format("titles/%s", titleId)));
+      final HttpClientRequest request = httpClient.getAbs(constructURL(String.format("titles/%s", titleId)));
  
       request.headers().add("Accept","application/json");
       request.headers().add("Content-Type", "application/json");
@@ -65,7 +65,7 @@ public class RMAPIService {
       
       LOG.info("absolute URL is" + request.absoluteURI());
  
-      request.handler(response -> {
+      request.handler(response -> 
       
         response.bodyHandler(body -> {
           
@@ -94,8 +94,8 @@ public class RMAPIService {
             httpClient.close();
             future.fail("Invalid status code from RMAPI" + response.statusCode());
           }
-        });
-      });     
+        })
+      );     
       request.end();
       
       return future;
@@ -161,7 +161,7 @@ public class RMAPIService {
      * @param path
      * @return
      */
-    private String ConstructURL(String path){
+    private String constructURL(String path){
        String fullPath = String.format("%s/rm/rmaccounts/%s/%s", baseURI, customerId, path);
      
        LOG.info("constructurl - path=" + fullPath);
