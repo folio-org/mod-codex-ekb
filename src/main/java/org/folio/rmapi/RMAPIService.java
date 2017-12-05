@@ -1,5 +1,6 @@
 package org.folio.rmapi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.folio.rest.jaxrs.model.Instance;
@@ -19,23 +20,21 @@ import io.vertx.core.logging.LoggerFactory;
 public class RMAPIService {
   
     private static final Logger LOG = LoggerFactory.getLogger(RMAPIService.class);
-    private static final String RMAPI_PRODUCTION_BASEURI = "https://api.ebsco.io";
-    private static final String RMAPI_SANDBOX_BASEURI = "https://sandbox.ebsco.io";
-    private static final String ERESOURCE_FORMAT = "Electronic Resource";
+    private static final String RMAPI_SANDBOX_BASE_URI = "https://sandbox.ebsco.io";
+    private static final String E_RESOURCE_FORMAT = "Electronic Resource";
     
     private String customerId;
     private String apiKey;
     private String baseURI;
     
     private HttpClient httpClient;
-    private Vertx vertx;
     
     /**
-     * TODO: selection of rmapi base uri needs to be more dynamic
+     * Returns base url of rmapi service. Setting will vary depending upon environment (sandbox or production)
      * @return base RMAPI URI 
      */
     public static String getBaseURI() {
-      return RMAPI_SANDBOX_BASEURI;
+      return RMAPI_SANDBOX_BASE_URI;
     }
     
     /**
@@ -48,7 +47,6 @@ public class RMAPIService {
       this.customerId = customerId;
       this.apiKey = apiKey;
       this.baseURI = baseURI;
-      this.vertx = vertx;
       httpClient = vertx.createHttpClient();
      }
     
@@ -56,7 +54,7 @@ public class RMAPIService {
      * @param titleId
      * @return
      */
-    public Future<Instance> GetTitleById(String titleId) {  
+    public Future<Instance> getTileById(String titleId) {  
       
       Future<Instance> future = Future.future();
       final HttpClientRequest request = httpClient.getAbs(ConstructURL(String.format("titles/%s", titleId)));
@@ -65,7 +63,7 @@ public class RMAPIService {
       request.headers().add("Content-Type", "application/json");
       request.headers().add("X-Api-Key", apiKey);
       
-      LOG.info("absolute URL is" + request.absoluteURI().toString());
+      LOG.info("absolute URL is" + request.absoluteURI());
  
       request.handler(response -> {
       
@@ -74,14 +72,13 @@ public class RMAPIService {
           LOG.info("rmapi request status code =" + response.statusCode());
           
           // need to only handle status code = 200
-          // to do constants needed for codes
           // other status codes should return and throw an error
           if (response.statusCode() == 200)
           {
             try {
               LOG.info(body.toString());
-              final JsonObject InstanceJson = new JsonObject(body.toString()); 
-              mapResultsFromClass(InstanceJson, future);
+              final JsonObject instanceJSON = new JsonObject(body.toString()); 
+              mapResultsFromClass(instanceJSON, future);
             }
             catch (Exception e) {
               LOG.info("failure  " + e.getMessage());
@@ -98,7 +95,7 @@ public class RMAPIService {
             future.fail("Invalid status code from RMAPI" + response.statusCode());
           }
         });
-       });     
+      });     
       request.end();
       
       return future;
@@ -107,24 +104,24 @@ public class RMAPIService {
      * @param rmapiQuery
      * @return
      */
-    public Future<List<Instance>> GetTitleList(String rmapiQuery) {
+    public Future<List<Instance>> getTitleList(String rmapiQuery) {
       
       Future<List<Instance>> future = Future.future();
       
-      
+      future.complete(new ArrayList<Instance>());
       return future;
     }
   
   
     /**
-     * @param InstanceJson
+     * @param instanceJSON
      * @param future
      */
-    private static void mapResultsFromClass(JsonObject InstanceJson, Future<Instance> future ) {
+    private static void mapResultsFromClass(JsonObject instanceJSON, Future<Instance> future ) {
      
       Instance codexInstance = new Instance();
       
-      RMAPITitle svcTitle = InstanceJson.mapTo(RMAPITitle.class);
+      RMAPITitle svcTitle = instanceJSON.mapTo(RMAPITitle.class);
          
       LOG.info("title name " + svcTitle.titleName);
       LOG.info("Edition " + svcTitle.edition);
@@ -150,7 +147,7 @@ public class RMAPIService {
       codexInstance.setTitle(svcTitle.titleName);
       codexInstance.setPublisher(svcTitle.publisherName);
       codexInstance.setType(svcTitle.pubType);
-      codexInstance.setFormat(ERESOURCE_FORMAT);
+      codexInstance.setFormat(E_RESOURCE_FORMAT);
       // storing source as kbid
       codexInstance.setSource(Integer.toString(svcTitle.titleId));
       codexInstance.setVersion(svcTitle.edition);
@@ -159,26 +156,6 @@ public class RMAPIService {
    
       future.complete(codexInstance);
     } 
-    /*
-    private static void mapResultsFromJson(JsonObject InstanceJson, Future<Instance> future ) {
-      
-      Instance codexInstance = new Instance();
-          
-      LOG.info("field names" + InstanceJson.fieldNames());
-      
-      LOG.info("title name" + InstanceJson.getString("titleName"));
-      LOG.info("title id" + InstanceJson.getInteger("titleId"));
-      LOG.info("publisher name" + InstanceJson.getString("publisherName"));
-      LOG.info("contributors" + InstanceJson.getJsonArray("contributorsList"));
-      LOG.info("identifiers" + InstanceJson.getJsonArray("identifiersList"));
-      LOG.info("pubtype" + InstanceJson.getString("pubType"));
-      LOG.info("format Electronic Resource");
-      LOG.info("source" + InstanceJson.getInteger("titleId"));
-      LOG.info("edition" + InstanceJson.getInteger("edition"));
-
-      future.complete(codexInstance);
-    } 
-    */
     
     /**
      * @param path

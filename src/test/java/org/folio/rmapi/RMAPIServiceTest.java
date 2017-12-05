@@ -18,7 +18,7 @@ public class RMAPIServiceTest {
     
     RMAPIService svc = new RMAPIService(custId,apiKey,RMAPIService.getBaseURI(), VertxUtils.getVertxFromContextOrNew());
     
-    final Future<Instance> codexInstanceFuture = svc.GetTitleById("161509");
+    final Future<Instance> codexInstanceFuture = svc.getTileById("161509");
     
     codexInstanceFuture.setHandler(result -> {
       if (result.failed()) {

@@ -86,7 +86,7 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
         
         RMAPIService svc = new RMAPIService(rmAPIConfig.getCustomerId(),rmAPIConfig.getAPIKey(), RMAPIService.getBaseURI(), vertxContext.owner());
         
-        final Future<Instance> codexInstanceFuture = svc.GetTitleById(id);
+        final Future<Instance> codexInstanceFuture = svc.getTileById(id);
         
         codexInstanceFuture.setHandler(rmapiResult -> {
           if (rmapiResult.failed()) {
