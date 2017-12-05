@@ -87,9 +87,14 @@ public class RMAPIService {
               LOG.info("failure  " + e.getMessage());
               future.fail("Error parsing return json object" + e.getMessage()); 
             }
+            finally
+            {
+              httpClient.close();
+            }
           }
           else 
           {
+            httpClient.close();
             future.fail("Invalid status code from RMAPI" + response.statusCode());
           }
         });
