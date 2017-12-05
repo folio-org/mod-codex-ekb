@@ -1,17 +1,27 @@
 package org.folio.rmapi;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.io.IOException;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.codehaus.jackson.JsonParseException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.folio.rest.jaxrs.model.Instance;
+
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import jersey.repackaged.com.google.common.collect.Lists;
 
 /**
  * @author cgodfrey
@@ -104,14 +114,55 @@ public class RMAPIService {
      * @param rmapiQuery
      * @return
      */
+
     public Future<List<Instance>> getTitleList(String rmapiQuery) {
-      
+            
       Future<List<Instance>> future = Future.future();
+      final HttpClientRequest request = httpClient.getAbs(constructURL(String.format("titles?%s", rmapiQuery)));
+ 
+      request.headers().add("Accept","application/json");
+      request.headers().add("Content-Type", "application/json");
+      request.headers().add("X-Api-Key", apiKey);
       
-      future.complete(new ArrayList<Instance>());
+      LOG.info("absolute URL is" + request.absoluteURI());
+ 
+      request.handler(response -> 
+      
+        response.bodyHandler(body -> {
+          
+          LOG.info("rmapi request status code =" + response.statusCode());
+          
+          // need to only handle status code = 200
+          // other status codes should return and throw an error
+          if (response.statusCode() == 200)
+          {
+            try {
+              LOG.info(body.toString());
+              final JsonObject instanceJSON = new JsonObject(body.toString()); 
+              mapResultListFromClass(instanceJSON, future);
+            }
+            catch (Exception e) {
+              LOG.info("failure  " + e.getMessage());
+              future.fail("Error parsing return json object" + e.getMessage()); 
+            }
+            finally
+            {
+              httpClient.close();
+            }
+          }
+          else 
+          {
+            httpClient.close();
+            future.fail("Invalid status code from RMAPI" + response.statusCode());
+          }
+        })
+      );     
+      request.end();
+      
       return future;
+
     }
-  
+
   
     /**
      * @param instanceJSON
@@ -122,14 +173,9 @@ public class RMAPIService {
       Instance codexInstance = new Instance();
       
       RMAPITitle svcTitle = instanceJSON.mapTo(RMAPITitle.class);
-         
-      LOG.info("title name " + svcTitle.titleName);
-      LOG.info("Edition " + svcTitle.edition);
-      LOG.info("Publisher Name " + svcTitle.publisherName);
-      LOG.info("PubType " + svcTitle.pubType);
-      LOG.info("titleid " + svcTitle.titleId);
-      LOG.info("identifiers count " + svcTitle.identifiers.size());
-   
+        
+      codexInstance = ConvertRMAPIToCodex(svcTitle);
+    
       svcTitle.identifiers.forEach(i -> {
         LOG.info("identifier id" + i.id);
         LOG.info("identifier source" + i.source);
@@ -143,6 +189,18 @@ public class RMAPIService {
         LOG.info("contributor" + c.contributor);
        });
       
+    
+      future.complete(codexInstance);
+    } 
+    
+    /**
+     * @param instanceJSON
+     * @param future
+     */
+    private static Instance ConvertRMAPIToCodex(RMAPITitle svcTitle ) {
+     
+      Instance codexInstance = new Instance();
+           
       codexInstance.setId(Integer.toString(svcTitle.titleId));
       codexInstance.setTitle(svcTitle.titleName);
       codexInstance.setPublisher(svcTitle.publisherName);
@@ -154,7 +212,24 @@ public class RMAPIService {
 
       // TO DO: need to include identifier and contributor collections
    
-      future.complete(codexInstance);
+      return codexInstance;
+    } 
+    
+    /**
+     * @param instanceJSON
+     * @param future
+     */
+    private static void mapResultListFromClass(JsonObject instanceJSON, Future<List<Instance>> future ) {
+      
+      RMAPITitleList rmapiTitles = instanceJSON.mapTo(RMAPITitleList.class);
+ 
+      LOG.info("title count " + rmapiTitles.titles.size());
+  
+      List<Instance> codexInstances = rmapiTitles.titles.stream()
+          .map(rmTitle -> ConvertRMAPIToCodex(rmTitle))
+          .collect(Collectors.toList());
+         
+      future.complete(codexInstances);
     } 
     
     /**
