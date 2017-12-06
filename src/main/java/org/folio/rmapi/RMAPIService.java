@@ -10,7 +10,7 @@ import org.codehaus.jackson.JsonParseException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.folio.rest.jaxrs.model.Instance;
-
+import org.folio.rest.jaxrs.model.InstanceCollection;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -115,9 +115,9 @@ public class RMAPIService {
      * @return
      */
 
-    public Future<List<Instance>> getTitleList(String rmapiQuery) {
+    public Future<InstanceCollection> getTitleList(String rmapiQuery) {
             
-      Future<List<Instance>> future = Future.future();
+      Future<InstanceCollection> future = Future.future();
       final HttpClientRequest request = httpClient.getAbs(constructURL(String.format("titles?%s", rmapiQuery)));
  
       request.headers().add("Accept","application/json");
@@ -219,17 +219,21 @@ public class RMAPIService {
      * @param instanceJSON
      * @param future
      */
-    private static void mapResultListFromClass(JsonObject instanceJSON, Future<List<Instance>> future ) {
+    private static void mapResultListFromClass(JsonObject instanceJSON, Future<InstanceCollection> future ) {
       
       RMAPITitleList rmapiTitles = instanceJSON.mapTo(RMAPITitleList.class);
  
       LOG.info("title count " + rmapiTitles.titles.size());
   
-      List<Instance> codexInstances = rmapiTitles.titles.stream()
+      InstanceCollection coll = new InstanceCollection();
+      
+      List<Instance>codexInstances = rmapiTitles.titles.stream()
           .map(rmTitle -> ConvertRMAPIToCodex(rmTitle))
           .collect(Collectors.toList());
          
-      future.complete(codexInstances);
+      coll.setInstances(codexInstances);
+      coll.setTotalRecords(rmapiTitles.totalResults);
+      future.complete(coll);
     } 
     
     /**
