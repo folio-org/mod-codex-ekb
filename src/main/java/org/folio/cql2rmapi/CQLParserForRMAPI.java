@@ -26,28 +26,30 @@ public class CQLParserForRMAPI {
 	private String error = "Unsupported Query Format : ";
 	private static final String RM_API_TITLE = "titlename";
 	private static final String TITLE = "title";
-	String searchField = null;
-	String searchValue = null;
-	String filterType = null;
-	String filterValue = null;
-	String sortOrder = null;
+	String searchField;
+	String searchValue;
+	String filterType;
+	String filterValue;
+	String sortType;
 	private int offset;
 	private final int limit;
+	String queryForRMAPI;
 
 	private enum RMAPISupportedSearchFields {
 		TITLE, PUBLISHER, ISSN, ISBN, ISXN, TYPE
 	}
 
 	private enum RMAPISupportedFilterValues {
-		ALL, JOURNAL, NEWSLETTER, REPORT, PROCEEDINGS, WEBSITE, NEWSPAPER, UNSPECIFIED, BOOK, BOOKSERIES, 
+		ALL, JOURNAL, NEWSLETTER, REPORT, PROCEEDINGS, WEBSITE, NEWSPAPER, UNSPECIFIED, BOOK, BOOKSERIES,
 		DATABASE, THESISDISSERTATION, STREAMINGAUDIO, STREAMINGVIDEO, AUDIOBOOK
 	}
 
-	public CQLParserForRMAPI(String query, int offset, int limit) throws QueryValidationException {
+	public CQLParserForRMAPI(String query, int offset, int limit) throws QueryValidationException, UnsupportedEncodingException {
 		this.offset = offset;
 		this.limit = limit;
 		final CQLNode node = initCQLParser(query);
 		checkNodeInstance(node);
+		queryForRMAPI = buildRMAPIQuery();
 	}
 
 	CQLNode initCQLParser(String query) throws QueryValidationException {
@@ -56,7 +58,7 @@ public class CQLParserForRMAPI {
 			return parser.parse(query);
 		} catch (CQLParseException | IOException e) {
 			error += "Search query is in an unsupported format.";
-			throw new QueryValidationException(error);
+			throw new QueryValidationException(error, e);
 		}
 	}
 
@@ -121,20 +123,20 @@ public class CQLParserForRMAPI {
 		// At this point RM API supports only sort by title and relevance
 		// front end does not support relevance, so we ignore everything but title
 		for (final ModifierSet ms : sortIndexes) {
-			sortOrder = ms.getBase();
-			if (sortOrder.equalsIgnoreCase(TITLE)) {
-				sortOrder = RM_API_TITLE;
+			sortType = ms.getBase();
+			if (sortType.equalsIgnoreCase(TITLE)) {
+				sortType = RM_API_TITLE;
 			} else {
 				final StringBuilder builder = new StringBuilder();
 				builder.append(error);
 				builder.append("Sorting on ");
-				builder.append(sortOrder);
-				builder.append(" key is unsupported.");
+				builder.append(sortType);
+				builder.append(" is unsupported.");
 				throw new QueryValidationException(builder.toString());
 			}
 		}
 
-		// Get the search field and search value
+		// Get the search field and search value from sort node
 		final CQLNode subTree = node.getSubtree();
 		checkNodeInstance(subTree);
 	}
@@ -146,11 +148,11 @@ public class CQLParserForRMAPI {
 			final CQLNode rightNode = node.getRightOperand();
 			checkNodeInstance(rightNode);
 		} else {
-			throw new QueryUnsupportedFeatureException("Boolean operators OR and NOT are unsupported.");
+			throw new QueryUnsupportedFeatureException("Boolean operators OR, NOT and PROX are unsupported.");
 		}
 	}
 
-	public String getRMAPIQuery() throws QueryValidationException {
+	String buildRMAPIQuery() throws QueryValidationException, UnsupportedEncodingException  {
 		final StringBuilder builder = new StringBuilder();
 
 		if ((searchValue != null) && (searchField != null)) {
@@ -162,31 +164,31 @@ public class CQLParserForRMAPI {
 			if (searchField.equals("isbn") || searchField.equals("issn")) {
 				searchField = "isxn";
 			}
-			if (sortOrder == null) {
-				sortOrder = RM_API_TITLE; // orderby is a mandatory field, otherwise RMAPI throws error
+			if (sortType == null) {
+				sortType = RM_API_TITLE; // orderby is a mandatory field, otherwise RMAPI throws error
 			}
 			if (offset == 0) {
 				offset = 1; // calculate offsets correctly
 			}
 			builder.append("search=");
-			try {
-				builder.append(URLEncoder.encode(searchValue, "UTF-8"));
-			} catch (final UnsupportedEncodingException e) {
-				throw new QueryValidationException(e);
-			}
+			builder.append(URLEncoder.encode(searchValue, "UTF-8"));
 			builder.append("&searchfield=" + searchField);
 
 			if ((filterType != null) && (filterValue != null)) {
 				// Map fields to RM API
 				builder.append("&resourcetype=" + filterValue);
 			}
-			builder.append("&orderby=" + sortOrder);
+			builder.append("&orderby=" + sortType);
 
 			builder.append("&count=" + limit);
 			builder.append("&offset=" + offset);
 		}else {
-			throw new QueryValidationException("Invalid query format, issue with search parameters");
+			throw new QueryValidationException("Invalid query format, unsupported search parameters");
 		}
 		return builder.toString();
+	}
+
+	public String getRMAPIQuery() {
+	  return queryForRMAPI;
 	}
 }
