@@ -24,13 +24,13 @@ import org.z3950.zing.cql.CQLNode;
 @PrepareForTest(CQLParserForRMAPI.class)
 public class CQLParserForRMAPITest {
 
-	private static final String VALID_QUERY = "title=bridget";
-	private static final String VALID_ISBN_QUERY = "identifier.type = isbn and identifier.value = 12345 sortby title";
-	private static final String VALID_ISSN_QUERY = "identifier.type = issn and identifier.value = 12345 sortby title";
-	private static final String VALID_FILTER_QUERY = "title = bridget and type = journal sortby title";
+  private static final String VALID_QUERY = "title=bridget";
+  private static final String VALID_ISBN_QUERY = "identifier.type = isbn and identifier.value = 12345 sortby title";
+  private static final String VALID_ISSN_QUERY = "identifier.type = issn and identifier.value = 12345 sortby title";
+  private static final String VALID_FILTER_QUERY = "title = bridget and type = journal sortby title";
 
-	@Test(expected = QueryValidationException.class)
-	public void initCQLParserThrowsExceptionIfQueryInvalidTest() throws QueryValidationException {
+  @Test(expected = QueryValidationException.class)
+  public void initCQLParserThrowsExceptionIfQueryInvalidTest() throws QueryValidationException {
 		final String invalidQuery = "";
 		new CQLParserForRMAPI(invalidQuery, 1, 10);
 	}
