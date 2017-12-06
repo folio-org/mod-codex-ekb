@@ -161,12 +161,10 @@ public class RMAPIService {
      * @param future
      */
     private static void mapResultsFromClass(JsonObject instanceJSON, Future<Instance> future ) {
-     
-      Instance codexInstance = new Instance();
-      
+          
       RMAPITitle svcTitle = instanceJSON.mapTo(RMAPITitle.class);
         
-      codexInstance = ConvertRMAPIToCodex(svcTitle);
+      Instance codexInstance = ConvertRMAPIToCodex(svcTitle);
     
       svcTitle.identifiers.forEach(i -> {
         LOG.info("identifier id" + i.id);
@@ -219,7 +217,7 @@ public class RMAPIService {
       InstanceCollection coll = new InstanceCollection();
       
       List<Instance>codexInstances = rmapiTitles.titles.stream()
-          .map(rmTitle -> ConvertRMAPIToCodex(rmTitle))
+          .map(RMAPIService::ConvertRMAPIToCodex)
           .collect(Collectors.toList());
          
       coll.setInstances(codexInstances);
