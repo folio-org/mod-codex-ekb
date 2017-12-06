@@ -23,7 +23,12 @@ public class RMAPIService {
     private static final Logger LOG = LoggerFactory.getLogger(RMAPIService.class);
     private static final String RMAPI_SANDBOX_BASE_URI = "https://sandbox.ebsco.io";
     private static final String E_RESOURCE_FORMAT = "Electronic Resource";
-    
+    private static final String HTTP_HEADER_CONTENT_TYPE = "Content-type";
+    private static final String APPLICATION_JSON = "application/json";
+    private static final String HTTP_HEADER_ACCEPT = "Accept";
+    private static final String RMAPI_API_KEY = "X-Api-Key";
+ 
+
     private String customerId;
     private String apiKey;
     private String baseURI;
@@ -60,9 +65,9 @@ public class RMAPIService {
       Future<Instance> future = Future.future();
       final HttpClientRequest request = httpClient.getAbs(constructURL(String.format("titles/%s", titleId)));
  
-      request.headers().add("Accept","application/json");
-      request.headers().add("Content-Type", "application/json");
-      request.headers().add("X-Api-Key", apiKey);
+      request.headers().add(HTTP_HEADER_ACCEPT,APPLICATION_JSON);
+      request.headers().add(HTTP_HEADER_CONTENT_TYPE, APPLICATION_JSON);
+      request.headers().add(RMAPI_API_KEY, apiKey);
       
       LOG.info("absolute URL is" + request.absoluteURI());
  
@@ -114,10 +119,10 @@ public class RMAPIService {
       Future<InstanceCollection> future = Future.future();
       final HttpClientRequest request = httpClient.getAbs(constructURL(String.format("titles?%s", rmapiQuery)));
  
-      request.headers().add("Accept","application/json");
-      request.headers().add("Content-Type", "application/json");
-      request.headers().add("X-Api-Key", apiKey);
-      
+      request.headers().add(HTTP_HEADER_ACCEPT,APPLICATION_JSON);
+      request.headers().add(HTTP_HEADER_CONTENT_TYPE, APPLICATION_JSON);
+      request.headers().add(RMAPI_API_KEY, apiKey);
+    
       LOG.info("absolute URL is" + request.absoluteURI());
  
       request.handler(response -> 
@@ -154,8 +159,7 @@ public class RMAPIService {
       return future;
 
     }
-
-  
+   
     /**
      * @param instanceJSON
      * @param future
@@ -164,7 +168,7 @@ public class RMAPIService {
           
       RMAPITitle svcTitle = instanceJSON.mapTo(RMAPITitle.class);
         
-      Instance codexInstance = ConvertRMAPIToCodex(svcTitle);
+      Instance codexInstance = convertRMAPIToCodex(svcTitle);
     
       svcTitle.identifiers.forEach(i -> {
         LOG.info("identifier id" + i.id);
@@ -186,7 +190,7 @@ public class RMAPIService {
      * @param instanceJSON
      * @param future
      */
-    private static Instance ConvertRMAPIToCodex(RMAPITitle svcTitle ) {
+    private static Instance convertRMAPIToCodex(RMAPITitle svcTitle ) {
      
       Instance codexInstance = new Instance();
            
@@ -217,7 +221,7 @@ public class RMAPIService {
       InstanceCollection coll = new InstanceCollection();
       
       List<Instance>codexInstances = rmapiTitles.titles.stream()
-          .map(RMAPIService::ConvertRMAPIToCodex)
+          .map(RMAPIService::convertRMAPIToCodex)
           .collect(Collectors.toList());
          
       coll.setInstances(codexInstances);
