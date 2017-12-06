@@ -1,5 +1,6 @@
 package org.folio.rest.impl;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
@@ -9,6 +10,7 @@ import org.folio.cql2rmapi.CQLParserForRMAPI;
 import org.folio.cql2rmapi.QueryValidationException;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.Instance;
+import org.folio.rest.jaxrs.model.InstanceCollection;
 import org.folio.rest.jaxrs.resource.CodexInstancesResource;
 import org.folio.rmapi.RMAPIService;
 
@@ -52,18 +54,38 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
       } else {
         final RMAPIConfiguration rmAPIConfig = result.result();
         log.info("RM API Config: " + rmAPIConfig);
+        log.info("Calling CQL Parser");
+        try {
+            final CQLParserForRMAPI parserForRMAPI = new CQLParserForRMAPI(query, offset, limit);
+            final String queryForRMAPI = parserForRMAPI.getRMAPIQuery();
+            log.info("Query to be passed to RM API is " + queryForRMAPI);
+            RMAPIService svc = new RMAPIService(rmAPIConfig.getCustomerId(),rmAPIConfig.getAPIKey(), RMAPIService.getBaseURI(), vertxContext.owner());
+            
+            final Future<InstanceCollection> codexInstanceFuture = svc.getTitleList(queryForRMAPI);
+           
+           codexInstanceFuture.setHandler(rmapiResult -> {
+             if (rmapiResult.failed()) {
+               log.error("RMAPI call failed!", rmapiResult.cause());
+                asyncResultHandler.handle(Future.succeededFuture(GetCodexInstancesResponse
+                   .withPlainInternalServerError( rmapiResult.cause().getMessage())));
+               return;
+
+             } else {
+               InstanceCollection coll = rmapiResult.result();
+               log.info("Titles Returned: " + coll.getTotalRecords());
+               asyncResultHandler.handle(Future.succeededFuture(
+                   GetCodexInstancesResponse.withJsonOK(coll)));
+               return;
+             }
+           });
+        } catch (final QueryValidationException | UnsupportedEncodingException e) {
+            log.error("CQL Query Validation failed!", e);
+        }
+ 
       }
     });
 
-    log.info("Calling CQL Parser");
-    try {
-    	final CQLParserForRMAPI parserForRMAPI = new CQLParserForRMAPI(query, offset, limit);
-    	final String queryForRMAPI = parserForRMAPI.getRMAPIQuery();
-    	log.info("Query to be passed to RM API is " + queryForRMAPI);
-    } catch (final QueryValidationException e) {
-    	log.error("CQL Query Validation failed!", e);
-    }
-
+   
     throw new UnsupportedOperationException("Work in progress");
   }
 
@@ -91,13 +113,21 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
         codexInstanceFuture.setHandler(rmapiResult -> {
           if (rmapiResult.failed()) {
             log.error("RMAPI call failed!", rmapiResult.cause());
+            // need to handle variations of this (not authorized vs bad request)
+            asyncResultHandler.handle(Future.succeededFuture(GetCodexInstancesByIdResponse
+                .withPlainInternalServerError( rmapiResult.cause().getMessage())));
+            return;
+
           } else {
             final Instance codexInstance = rmapiResult.result();
-            // Need to wrapper response
             log.info("Request Title Name: " + codexInstance.getTitle());
+            asyncResultHandler.handle(Future.succeededFuture(
+                GetCodexInstancesByIdResponse.withJsonOK(codexInstance)));
+            return;
           }
         });
       }
+       
     });
 
     throw new UnsupportedOperationException("Work in progress.");

@@ -1,9 +1,10 @@
 package org.folio.rmapi;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.folio.rest.jaxrs.model.Instance;
+import org.folio.rest.jaxrs.model.InstanceCollection;
 
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
@@ -22,7 +23,12 @@ public class RMAPIService {
     private static final Logger LOG = LoggerFactory.getLogger(RMAPIService.class);
     private static final String RMAPI_SANDBOX_BASE_URI = "https://sandbox.ebsco.io";
     private static final String E_RESOURCE_FORMAT = "Electronic Resource";
-    
+    private static final String HTTP_HEADER_CONTENT_TYPE = "Content-type";
+    private static final String APPLICATION_JSON = "application/json";
+    private static final String HTTP_HEADER_ACCEPT = "Accept";
+    private static final String RMAPI_API_KEY = "X-Api-Key";
+ 
+
     private String customerId;
     private String apiKey;
     private String baseURI;
@@ -59,9 +65,9 @@ public class RMAPIService {
       Future<Instance> future = Future.future();
       final HttpClientRequest request = httpClient.getAbs(constructURL(String.format("titles/%s", titleId)));
  
-      request.headers().add("Accept","application/json");
-      request.headers().add("Content-Type", "application/json");
-      request.headers().add("X-Api-Key", apiKey);
+      request.headers().add(HTTP_HEADER_ACCEPT,APPLICATION_JSON);
+      request.headers().add(HTTP_HEADER_CONTENT_TYPE, APPLICATION_JSON);
+      request.headers().add(RMAPI_API_KEY, apiKey);
       
       LOG.info("absolute URL is" + request.absoluteURI());
  
@@ -101,35 +107,69 @@ public class RMAPIService {
       return future;
     }
     /**
+     * 
+     * Returns a InstanceCollection - list of Codex Instance Titles and total records
+     * 
      * @param rmapiQuery
      * @return
      */
-    public Future<List<Instance>> getTitleList(String rmapiQuery) {
+
+    public Future<InstanceCollection> getTitleList(String rmapiQuery) {
+            
+      Future<InstanceCollection> future = Future.future();
+      final HttpClientRequest request = httpClient.getAbs(constructURL(String.format("titles?%s", rmapiQuery)));
+ 
+      request.headers().add(HTTP_HEADER_ACCEPT,APPLICATION_JSON);
+      request.headers().add(HTTP_HEADER_CONTENT_TYPE, APPLICATION_JSON);
+      request.headers().add(RMAPI_API_KEY, apiKey);
+    
+      LOG.info("absolute URL is" + request.absoluteURI());
+ 
+      request.handler(response -> 
       
-      Future<List<Instance>> future = Future.future();
+        response.bodyHandler(body -> {
+          
+          LOG.info("rmapi request status code =" + response.statusCode());
+          
+          if (response.statusCode() == 200)
+          {
+            try {
+              LOG.info(body.toString());
+              final JsonObject instanceJSON = new JsonObject(body.toString()); 
+              mapResultListFromClass(instanceJSON, future);
+            }
+            catch (Exception e) {
+              LOG.info("failure  " + e.getMessage());
+              future.fail("Error parsing return json object" + e.getMessage()); 
+            }
+            finally
+            {
+              httpClient.close();
+            }
+          }
+          else 
+          {
+            httpClient.close();
+            future.fail("Invalid status code from RMAPI" + response.statusCode());
+          }
+        })
+      );     
+      request.end();
       
-      future.complete(new ArrayList<Instance>());
       return future;
+
     }
-  
-  
+   
     /**
      * @param instanceJSON
      * @param future
      */
     private static void mapResultsFromClass(JsonObject instanceJSON, Future<Instance> future ) {
-     
-      Instance codexInstance = new Instance();
-      
+          
       RMAPITitle svcTitle = instanceJSON.mapTo(RMAPITitle.class);
-         
-      LOG.info("title name " + svcTitle.titleName);
-      LOG.info("Edition " + svcTitle.edition);
-      LOG.info("Publisher Name " + svcTitle.publisherName);
-      LOG.info("PubType " + svcTitle.pubType);
-      LOG.info("titleid " + svcTitle.titleId);
-      LOG.info("identifiers count " + svcTitle.identifiers.size());
-   
+        
+      Instance codexInstance = convertRMAPIToCodex(svcTitle);
+    
       svcTitle.identifiers.forEach(i -> {
         LOG.info("identifier id" + i.id);
         LOG.info("identifier source" + i.source);
@@ -142,7 +182,18 @@ public class RMAPIService {
         LOG.info("contributor type" + c.type);
         LOG.info("contributor" + c.contributor);
        });
-      
+          
+      future.complete(codexInstance);
+    } 
+    
+    /**
+     * @param instanceJSON
+     * @param future
+     */
+    private static Instance convertRMAPIToCodex(RMAPITitle svcTitle ) {
+     
+      Instance codexInstance = new Instance();
+           
       codexInstance.setId(Integer.toString(svcTitle.titleId));
       codexInstance.setTitle(svcTitle.titleName);
       codexInstance.setPublisher(svcTitle.publisherName);
@@ -154,7 +205,28 @@ public class RMAPIService {
 
       // TO DO: need to include identifier and contributor collections
    
-      future.complete(codexInstance);
+      return codexInstance;
+    } 
+    
+    /**
+     * @param instanceJSON
+     * @param future
+     */
+    private static void mapResultListFromClass(JsonObject instanceJSON, Future<InstanceCollection> future ) {
+      
+      RMAPITitleList rmapiTitles = instanceJSON.mapTo(RMAPITitleList.class);
+ 
+      LOG.info("title count " + rmapiTitles.titles.size());
+  
+      InstanceCollection coll = new InstanceCollection();
+      
+      List<Instance>codexInstances = rmapiTitles.titles.stream()
+          .map(RMAPIService::convertRMAPIToCodex)
+          .collect(Collectors.toList());
+         
+      coll.setInstances(codexInstances);
+      coll.setTotalRecords(rmapiTitles.totalResults);
+      future.complete(coll);
     } 
     
     /**
