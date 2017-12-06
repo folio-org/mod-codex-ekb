@@ -1,6 +1,5 @@
 package org.folio.rest.impl;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
@@ -78,7 +77,7 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
                return;
              }
            });
-        } catch (final QueryValidationException | UnsupportedEncodingException e) {
+        } catch (final QueryValidationException e) {
             log.error("CQL Query Validation failed!", e);
         }
  
