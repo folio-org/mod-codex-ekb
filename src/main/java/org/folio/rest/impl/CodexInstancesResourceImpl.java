@@ -1,5 +1,6 @@
 package org.folio.rest.impl;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
@@ -58,10 +59,10 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
             final CQLParserForRMAPI parserForRMAPI = new CQLParserForRMAPI(query, offset, limit);
             final String queryForRMAPI = parserForRMAPI.getRMAPIQuery();
             log.info("Query to be passed to RM API is " + queryForRMAPI);
-            RMAPIService svc = new RMAPIService(rmAPIConfig.getCustomerId(),rmAPIConfig.getAPIKey(), RMAPIService.getBaseURI(), vertxContext.owner());
-            
+            final RMAPIService svc = new RMAPIService(rmAPIConfig.getCustomerId(),rmAPIConfig.getAPIKey(), RMAPIService.getBaseURI(), vertxContext.owner());
+
             final Future<InstanceCollection> codexInstanceFuture = svc.getTitleList(queryForRMAPI);
-           
+
            codexInstanceFuture.setHandler(rmapiResult -> {
              if (rmapiResult.failed()) {
                log.error("RMAPI call failed!", rmapiResult.cause());
@@ -70,22 +71,18 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
                return;
 
              } else {
-               InstanceCollection coll = rmapiResult.result();
+               final InstanceCollection coll = rmapiResult.result();
                log.info("Titles Returned: " + coll.getTotalRecords());
                asyncResultHandler.handle(Future.succeededFuture(
                    GetCodexInstancesResponse.withJsonOK(coll)));
                return;
              }
            });
-        } catch (final QueryValidationException e) {
-            log.error("CQL Query Validation failed!", e);
+        } catch (final QueryValidationException | UnsupportedEncodingException e) {
+            log.error("CQL Query Parsing failed!", e);
         }
- 
       }
     });
-
-   
-    throw new UnsupportedOperationException("Work in progress");
   }
 
   @Override
@@ -104,11 +101,11 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
       } else {
         final RMAPIConfiguration rmAPIConfig = result.result();
         log.info("RM API Config: " + rmAPIConfig);
-        
-        RMAPIService svc = new RMAPIService(rmAPIConfig.getCustomerId(),rmAPIConfig.getAPIKey(), RMAPIService.getBaseURI(), vertxContext.owner());
-        
+
+        final RMAPIService svc = new RMAPIService(rmAPIConfig.getCustomerId(),rmAPIConfig.getAPIKey(), RMAPIService.getBaseURI(), vertxContext.owner());
+
         final Future<Instance> codexInstanceFuture = svc.getTileById(id);
-        
+
         codexInstanceFuture.setHandler(rmapiResult -> {
           if (rmapiResult.failed()) {
             log.error("RMAPI call failed!", rmapiResult.cause());
@@ -126,9 +123,6 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
           }
         });
       }
-       
     });
-
-    throw new UnsupportedOperationException("Work in progress.");
   }
 }
