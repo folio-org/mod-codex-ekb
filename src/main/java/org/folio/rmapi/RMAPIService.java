@@ -1,14 +1,8 @@
 package org.folio.rmapi;
 
-import java.io.IOException;
-
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.codehaus.jackson.JsonParseException;
-import org.codehaus.jackson.map.JsonMappingException;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.folio.rest.jaxrs.model.Instance;
 import org.folio.rest.jaxrs.model.InstanceCollection;
 
@@ -16,12 +10,9 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
-import io.vertx.core.json.Json;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import jersey.repackaged.com.google.common.collect.Lists;
 
 /**
  * @author cgodfrey
@@ -111,6 +102,9 @@ public class RMAPIService {
       return future;
     }
     /**
+     * 
+     * Returns a InstanceCollection - list of Codex Instance Titles and total records
+     * 
      * @param rmapiQuery
      * @return
      */
@@ -132,8 +126,6 @@ public class RMAPIService {
           
           LOG.info("rmapi request status code =" + response.statusCode());
           
-          // need to only handle status code = 200
-          // other status codes should return and throw an error
           if (response.statusCode() == 200)
           {
             try {
@@ -188,8 +180,7 @@ public class RMAPIService {
         LOG.info("contributor type" + c.type);
         LOG.info("contributor" + c.contributor);
        });
-      
-    
+          
       future.complete(codexInstance);
     } 
     
