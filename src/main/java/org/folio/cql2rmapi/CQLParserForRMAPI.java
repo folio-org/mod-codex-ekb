@@ -39,7 +39,8 @@ public class CQLParserForRMAPI {
 	}
 
 	private enum RMAPISupportedFilterValues {
-		ALL, JOURNAL, NEWSLETTER, REPORT, PROCEEDINGS, WEBSITE, NEWSPAPER, UNSPECIFIED, BOOK, BOOKSERIES, DATABASE, THESISDISSERTATION, STREAMINGAUDIO, STREAMINGVIDEO, AUDIOBOOK
+		ALL, JOURNAL, NEWSLETTER, REPORT, PROCEEDINGS, WEBSITE, NEWSPAPER, UNSPECIFIED, BOOK, BOOKSERIES, 
+		DATABASE, THESISDISSERTATION, STREAMINGAUDIO, STREAMINGVIDEO, AUDIOBOOK
 	}
 
 	public CQLParserForRMAPI(String query, int offset, int limit) throws QueryValidationException {
@@ -71,7 +72,7 @@ public class CQLParserForRMAPI {
 		}
 	}
 
-	private void parseCQLTermNode(CQLTermNode node) throws QueryValidationException {
+  private void parseCQLTermNode(CQLTermNode node) throws QueryValidationException {
 		final String comparator = node.getRelation().getBase(); // gives operator
 
 		// If comparison operators are not supported, log and return an error response
