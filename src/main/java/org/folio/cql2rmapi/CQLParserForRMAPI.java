@@ -26,6 +26,9 @@ public class CQLParserForRMAPI {
 	private String error = "Unsupported Query Format : ";
 	private static final String RM_API_TITLE = "titlename";
 	private static final String TITLE = "title";
+	private static final String TYPE = "type";
+	private static final String ID_TYPE = "identifier.type";
+	private static final String ID_VALUE = "identifier.value";
 	String searchField;
 	String searchValue;
 	String filterType;
@@ -91,12 +94,12 @@ public class CQLParserForRMAPI {
 		if ("cql.serverChoice".equalsIgnoreCase(indexNode)) {
 			searchField = RM_API_TITLE;
 			searchValue = termNode;
-		} else if ("identifier.type".equalsIgnoreCase(indexNode)
+		} else if (ID_TYPE.equalsIgnoreCase(indexNode)
 				&& EnumUtils.isValidEnum(RMAPISupportedSearchFields.class, termNode.toUpperCase())) {
 			searchField = termNode;
-		} else if ("identifier.value".equalsIgnoreCase(indexNode)) {
+		} else if (ID_VALUE.equalsIgnoreCase(indexNode)) {
 			searchValue = termNode;
-		} else if ("type".equalsIgnoreCase(indexNode)) {
+		} else if (TYPE.equalsIgnoreCase(indexNode)) {
 			filterType = indexNode;
 			if(filterValue == null) {
 			  filterValue = termNode;
@@ -148,10 +151,24 @@ public class CQLParserForRMAPI {
 
 	private void parseCQLBooleanNode(CQLBooleanNode node) throws QueryValidationException {
 		if (node instanceof CQLAndNode) {
+		  final String MULTIPLE_FIELDS_ERROR = "Search on multiple fields is not supported";
 			final CQLNode leftNode = node.getLeftOperand();
-			checkNodeInstance(leftNode);
 			final CQLNode rightNode = node.getRightOperand();
-			checkNodeInstance(rightNode);
+			if((leftNode != null) && (rightNode != null) && ((leftNode instanceof CQLTermNode) && (rightNode instanceof CQLTermNode))) {
+			  final CQLTermNode leftTermNode = (CQLTermNode)leftNode;
+			  final CQLTermNode rightTermNode = (CQLTermNode)rightNode;
+			  //Support AND operation only if either search param is type or if it is isxn search
+			  if ((leftTermNode.getIndex().equalsIgnoreCase(TYPE) || rightTermNode.getIndex().equalsIgnoreCase(TYPE)) ||
+			    (leftTermNode.getIndex().equalsIgnoreCase(ID_TYPE) && rightTermNode.getIndex().equalsIgnoreCase(ID_VALUE)) ||
+			    (leftTermNode.getIndex().equalsIgnoreCase(ID_VALUE) && (rightTermNode.getIndex().equalsIgnoreCase(ID_TYPE)))) {
+			      parseCQLTermNode(leftTermNode);
+			      parseCQLTermNode(rightTermNode);
+			  } else {
+			    throw new QueryValidationException(MULTIPLE_FIELDS_ERROR);
+			  }
+			} else {
+			  throw new QueryValidationException(MULTIPLE_FIELDS_ERROR);
+			}
 		} else {
 			throw new QueryUnsupportedFeatureException("Boolean operators OR, NOT and PROX are unsupported.");
 		}
