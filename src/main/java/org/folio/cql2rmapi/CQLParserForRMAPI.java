@@ -26,6 +26,7 @@ public class CQLParserForRMAPI {
 	private String error = "Unsupported Query Format : ";
 	private static final String RM_API_TITLE = "titlename";
 	private static final String TITLE = "title";
+	private static final String TYPE = "type";
 	String searchField;
 	String searchValue;
 	String filterType;
@@ -96,7 +97,7 @@ public class CQLParserForRMAPI {
 			searchField = termNode;
 		} else if ("identifier.value".equalsIgnoreCase(indexNode)) {
 			searchValue = termNode;
-		} else if ("type".equalsIgnoreCase(indexNode)) {
+		} else if (TYPE.equalsIgnoreCase(indexNode)) {
 			filterType = indexNode;
 			if(filterValue == null) {
 			  filterValue = termNode;
@@ -148,10 +149,24 @@ public class CQLParserForRMAPI {
 
 	private void parseCQLBooleanNode(CQLBooleanNode node) throws QueryValidationException {
 		if (node instanceof CQLAndNode) {
+		  final String MULTIPLE_FIELDS_ERROR = "Search on multiple fields is not supported";
 			final CQLNode leftNode = node.getLeftOperand();
-			checkNodeInstance(leftNode);
 			final CQLNode rightNode = node.getRightOperand();
-			checkNodeInstance(rightNode);
+			if((leftNode != null) && (rightNode != null) && ((leftNode instanceof CQLTermNode) && (rightNode instanceof CQLTermNode))) {
+			  final CQLTermNode leftTermNode = (CQLTermNode)leftNode;
+			  final CQLTermNode rightTermNode = (CQLTermNode)rightNode;
+			  //Support AND operation only if either search param is type or if it is isxn search
+			  if (((leftTermNode.getIndex().equalsIgnoreCase(TYPE)) || (rightTermNode.getIndex().equalsIgnoreCase(TYPE))) ||
+			    (leftTermNode.getIndex().equalsIgnoreCase("identifier.type") && ((rightTermNode.getIndex().equalsIgnoreCase("identifier.value")))) ||
+			    (leftTermNode.getIndex().equalsIgnoreCase("identifier.value") && ((rightTermNode.getIndex().equalsIgnoreCase("identifier.type"))))) {
+			      parseCQLTermNode(leftTermNode);
+			      parseCQLTermNode(rightTermNode);
+			  } else {
+			    throw new QueryValidationException(MULTIPLE_FIELDS_ERROR);
+			  }
+			} else {
+			  throw new QueryValidationException(MULTIPLE_FIELDS_ERROR);
+			}
 		} else {
 			throw new QueryUnsupportedFeatureException("Boolean operators OR, NOT and PROX are unsupported.");
 		}
