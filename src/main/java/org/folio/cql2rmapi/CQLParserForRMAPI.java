@@ -98,7 +98,12 @@ public class CQLParserForRMAPI {
 			searchValue = termNode;
 		} else if ("type".equalsIgnoreCase(indexNode)) {
 			filterType = indexNode;
-			filterValue = termNode;
+			if(filterValue == null) {
+			  filterValue = termNode;
+			} else {
+			  error += "Filtering on mulitple resource types is not supported.";
+			  throw new QueryValidationException(error);
+			}
 			if((filterValue != null) && !EnumUtils.isValidEnum(RMAPISupportedFilterValues.class, filterValue.toUpperCase())) {
 				// If filter value is not supported, log and return an error response
 				error += "Filter on resource type whose value is " + filterValue + " is not supported.";

@@ -100,6 +100,24 @@ public class CQLParserForRMAPITest {
   }
 
   @Test(expected = QueryValidationException.class)
+  public void CQLParserThrowsExceptionIfMultipleFiltersSeapartedByAndAreProvidedTest() throws QueryValidationException, UnsupportedEncodingException {
+    final String multipleFilterQuery = "title = bridget and type = journal and type = audiobook sortby title, publisher";
+    new CQLParserForRMAPI(multipleFilterQuery, 1, 10);
+  }
+
+  @Test(expected = QueryValidationException.class)
+  public void CQLParserThrowsExceptionIfMultipleFiltersSepartedByCommaAreProvidedTest() throws QueryValidationException, UnsupportedEncodingException {
+    final String multipleFilterQuery = "title = bridget and type = journal, audiobook sortby title, publisher";
+    new CQLParserForRMAPI(multipleFilterQuery, 1, 10);
+  }
+
+  @Test(expected = QueryValidationException.class)
+  public void CQLParserThrowsExceptionIfMultipleFiltersSeapartedBySpaceAreProvidedTest() throws QueryValidationException, UnsupportedEncodingException {
+    final String multipleFilterQuery = "title = bridget and type = journal audiobook sortby title, publisher";
+    new CQLParserForRMAPI(multipleFilterQuery, 1, 10);
+  }
+
+  @Test(expected = QueryValidationException.class)
   public void CQLParserThrowsExceptionIfMultipleSortKeysAreProvidedTest() throws QueryValidationException, UnsupportedEncodingException {
     final String multipleSortQuery = "title = bridget and type = journal sortby title, publisher";
     new CQLParserForRMAPI(multipleSortQuery, 1, 10);
