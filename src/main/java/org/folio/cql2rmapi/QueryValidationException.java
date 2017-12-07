@@ -10,10 +10,6 @@ public class QueryValidationException extends Exception {
 		super(message);
 	}
 
-	public QueryValidationException(Exception e) {
-    super(e);
-  }
-
 	public QueryValidationException(String message, Exception e) {
 		super(message, e);
 	}

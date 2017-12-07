@@ -10,9 +10,4 @@ public class QueryUnsupportedFeatureException extends QueryValidationException {
 	public QueryUnsupportedFeatureException(String message) {
 		super(message);
 	}
-
-	public QueryUnsupportedFeatureException(Exception e) {
-		super(e);
-	}
-
 }
