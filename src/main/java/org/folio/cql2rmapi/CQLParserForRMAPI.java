@@ -27,6 +27,8 @@ public class CQLParserForRMAPI {
 	private static final String RM_API_TITLE = "titlename";
 	private static final String TITLE = "title";
 	private static final String TYPE = "type";
+	private static final String ID_TYPE = "identifier.type";
+	private static final String ID_VALUE = "identifier.value";
 	String searchField;
 	String searchValue;
 	String filterType;
@@ -92,10 +94,10 @@ public class CQLParserForRMAPI {
 		if ("cql.serverChoice".equalsIgnoreCase(indexNode)) {
 			searchField = RM_API_TITLE;
 			searchValue = termNode;
-		} else if ("identifier.type".equalsIgnoreCase(indexNode)
+		} else if (ID_TYPE.equalsIgnoreCase(indexNode)
 				&& EnumUtils.isValidEnum(RMAPISupportedSearchFields.class, termNode.toUpperCase())) {
 			searchField = termNode;
-		} else if ("identifier.value".equalsIgnoreCase(indexNode)) {
+		} else if (ID_VALUE.equalsIgnoreCase(indexNode)) {
 			searchValue = termNode;
 		} else if (TYPE.equalsIgnoreCase(indexNode)) {
 			filterType = indexNode;
@@ -156,9 +158,9 @@ public class CQLParserForRMAPI {
 			  final CQLTermNode leftTermNode = (CQLTermNode)leftNode;
 			  final CQLTermNode rightTermNode = (CQLTermNode)rightNode;
 			  //Support AND operation only if either search param is type or if it is isxn search
-			  if (((leftTermNode.getIndex().equalsIgnoreCase(TYPE)) || (rightTermNode.getIndex().equalsIgnoreCase(TYPE))) ||
-			    (leftTermNode.getIndex().equalsIgnoreCase("identifier.type") && ((rightTermNode.getIndex().equalsIgnoreCase("identifier.value")))) ||
-			    (leftTermNode.getIndex().equalsIgnoreCase("identifier.value") && ((rightTermNode.getIndex().equalsIgnoreCase("identifier.type"))))) {
+			  if ((leftTermNode.getIndex().equalsIgnoreCase(TYPE) || rightTermNode.getIndex().equalsIgnoreCase(TYPE)) ||
+			    (leftTermNode.getIndex().equalsIgnoreCase(ID_TYPE) && rightTermNode.getIndex().equalsIgnoreCase(ID_VALUE)) ||
+			    (leftTermNode.getIndex().equalsIgnoreCase(ID_VALUE) && (rightTermNode.getIndex().equalsIgnoreCase(ID_TYPE)))) {
 			      parseCQLTermNode(leftTermNode);
 			      parseCQLTermNode(rightTermNode);
 			  } else {
