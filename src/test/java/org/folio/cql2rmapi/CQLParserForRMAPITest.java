@@ -3,25 +3,17 @@ package org.folio.cql2rmapi;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
-import static org.powermock.api.easymock.PowerMock.mockStatic;
-import static org.powermock.api.easymock.PowerMock.replayAll;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 
-import org.easymock.EasyMock;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.z3950.zing.cql.CQLNode;
 
 /**
  * Unit tests for CQLParserForRMAPI class.
  *
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(CQLParserForRMAPI.class)
+
 public class CQLParserForRMAPITest {
 
   private static final String VALID_QUERY = "title=bridget";
@@ -97,6 +89,24 @@ public class CQLParserForRMAPITest {
     final String invalidFilterQuery = "title = bridget and type = null sortby title";
     final CQLParserForRMAPI parser = new CQLParserForRMAPI(invalidFilterQuery, 1, 10);
     parser.filterValue = null;
+  }
+
+  @Test(expected = QueryValidationException.class)
+  public void CQLParserThrowsExceptionIfMultipleFiltersSepartedByAndAreProvidedTest() throws QueryValidationException, UnsupportedEncodingException {
+    final String multipleFilterQuery = "title = bridget and type = journal and type = audiobook sortby title, publisher";
+    new CQLParserForRMAPI(multipleFilterQuery, 1, 10);
+  }
+
+  @Test(expected = QueryValidationException.class)
+  public void CQLParserThrowsExceptionIfMultipleFiltersSepartedByCommaAreProvidedTest() throws QueryValidationException, UnsupportedEncodingException {
+    final String multipleFilterQuery = "title = bridget and type = journal, audiobook sortby title, publisher";
+    new CQLParserForRMAPI(multipleFilterQuery, 1, 10);
+  }
+
+  @Test(expected = QueryValidationException.class)
+  public void CQLParserThrowsExceptionIfMultipleFiltersSepartedBySpaceAreProvidedTest() throws QueryValidationException, UnsupportedEncodingException {
+    final String multipleFilterQuery = "title = bridget and type = journal audiobook sortby title, publisher";
+    new CQLParserForRMAPI(multipleFilterQuery, 1, 10);
   }
 
   @Test(expected = QueryValidationException.class)
@@ -189,15 +199,5 @@ public class CQLParserForRMAPITest {
     final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_FILTER_QUERY, 10, 0);
     assertEquals("search=bridget&searchfield=titlename&resourcetype=journal&orderby=titlename&count=0&offset=10",
         parser.getRMAPIQuery());
-  }
-
-  @Test(expected = UnsupportedEncodingException.class)
-  public void CQLParserThrowsExceptionWhenURLEncodingFails()
-      throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_FILTER_QUERY, 10, 0);
-    mockStatic(URLEncoder.class);
-    EasyMock.expect(URLEncoder.encode("bridget", "UTF-8")).andThrow(new UnsupportedEncodingException());
-    replayAll();
-    parser.buildRMAPIQuery();
   }
 }
