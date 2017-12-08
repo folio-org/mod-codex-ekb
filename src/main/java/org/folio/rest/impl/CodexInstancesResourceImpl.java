@@ -1,5 +1,6 @@
 package org.folio.rest.impl;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
@@ -49,6 +50,11 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
         parserForRMAPI = new CQLParserForRMAPI(query, offset, limit);
     } catch (final QueryValidationException e) {
       asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainBadRequest(e.getMessage())));
+      return;
+    } catch (final UnsupportedEncodingException e) {
+      // Since a URL encoding error is server side and not something the
+      // client can fix, we return a 500.
+      asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainInternalServerError(e.getMessage())));
       return;
     }
 
