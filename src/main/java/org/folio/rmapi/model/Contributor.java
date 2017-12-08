@@ -17,5 +17,5 @@ public class Contributor {
   public String type;
 
   @JsonProperty("contributor")
-  public String contributor;
+  public String titleContributor;
 }

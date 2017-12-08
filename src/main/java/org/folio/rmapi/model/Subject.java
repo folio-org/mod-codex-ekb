@@ -17,5 +17,5 @@ public class Subject {
   public String type;
 
   @JsonProperty("subject")
-  public String subject;
+  public String titleSubject;
 }
