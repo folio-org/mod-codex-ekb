@@ -49,6 +49,7 @@ public class RMAPIConfigurationTest {
   private static final String MOCK_CONTENT_FAIL_EMPTY_FILE = "RMAPIConfiguration/mock_content_fail_empty.json";
   private static final String MOCK_CONTENT_FAIL_MISSING_CUSTOMER_ID_FILE = "RMAPIConfiguration/mock_content_fail_missing_customer_id.json";
   private static final String MOCK_CONTENT_FAIL_MISSING_API_KEY_FILE = "RMAPIConfiguration/mock_content_fail_missing_api_key.json";
+  private static final String MOCK_CONTENT_FAIL_MISSING_URL_FILE = "RMAPIConfiguration/mock_content_fail_missing_url.json";
   private static final String MOCK_CONTENT_SUCCESS_MULTIPLE_FILE = "RMAPIConfiguration/mock_content_success_multiple.json";
   private static final String MOCK_CONTENT_SUCCESS_TO_STRING_FILE = "RMAPIConfiguration/mock_content_success_to_string.json";
   private static final String MOCK_CONTENT_FAIL_404_FILE = "RMAPIConfiguration/mock_content_fail_404.json";
@@ -120,6 +121,7 @@ public class RMAPIConfigurationTest {
 
       context.assertEquals("examplecorp", rmAPIConfig.getCustomerId());
       context.assertEquals("8675309", rmAPIConfig.getAPIKey());
+      context.assertEquals("https://rmapi.example.com", rmAPIConfig.getUrl());
 
       async.complete();
     });
@@ -188,6 +190,27 @@ public class RMAPIConfigurationTest {
   }
 
   @Test
+  public void missingUrlTest(TestContext context) {
+    Async async = context.async();
+
+    try {
+      // HACK ALERT! See above for the reason this is here.
+      httpClientMock.setMockJsonContent(MOCK_CONTENT_FAIL_MISSING_URL_FILE);
+    } catch (IOException e) {
+      context.fail("Cannot read mock file: " +
+          MOCK_CONTENT_FAIL_MISSING_URL_FILE + " - reason: " +
+          e.getMessage());
+    }
+
+    CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+
+    config.whenCompleteAsync((result, exception) -> {
+      context.assertNull(result);
+      async.complete();
+    });
+  }
+
+  @Test
   public void multipleConfigsTest(TestContext context) {
     Async async = context.async();
 
@@ -207,6 +230,7 @@ public class RMAPIConfigurationTest {
 
       context.assertEquals("examplecorp", rmAPIConfig.getCustomerId());
       context.assertEquals("8675309", rmAPIConfig.getAPIKey());
+      context.assertEquals("https://rmapi.example.com", rmAPIConfig.getUrl());
 
       async.complete();
     });
@@ -230,7 +254,7 @@ public class RMAPIConfigurationTest {
 
       RMAPIConfiguration rmAPIConfig = result;
 
-      context.assertEquals("RMAPIConfiguration [customerId=myid, apiKey=mykey]", rmAPIConfig.toString());
+      context.assertEquals("RMAPIConfiguration [customerId=myid, apiKey=mykey, url=https://rmapi.example.com]", rmAPIConfig.toString());
 
       async.complete();
     });
@@ -276,5 +300,4 @@ public class RMAPIConfigurationTest {
       async.complete();
     });
   }
-
 }
