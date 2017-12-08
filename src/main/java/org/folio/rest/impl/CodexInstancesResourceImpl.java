@@ -1,18 +1,15 @@
 package org.folio.rest.impl;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
+import org.folio.codex.RMAPIToCodex;
 import org.folio.config.RMAPIConfiguration;
 import org.folio.cql2rmapi.CQLParserForRMAPI;
 import org.folio.cql2rmapi.QueryValidationException;
 import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.model.Instance;
-import org.folio.rest.jaxrs.model.InstanceCollection;
 import org.folio.rest.jaxrs.resource.CodexInstancesResource;
-import org.folio.rmapi.RMAPIService;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -46,43 +43,27 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
       throws Exception {
     log.info("method call: getInstances");
 
-    final Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+    log.info("Calling CQL Parser");
+    final CQLParserForRMAPI parserForRMAPI;
+    try {
+        parserForRMAPI = new CQLParserForRMAPI(query, offset, limit);
+    } catch (final QueryValidationException e) {
+      asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainBadRequest(e.getMessage())));
+      return;
+    }
 
-    config.setHandler(result -> {
-      if (result.failed()) {
-        log.error("Config call failed!", result.cause());
-      } else {
-        final RMAPIConfiguration rmAPIConfig = result.result();
+    RMAPIConfiguration.getConfiguration(okapiHeaders)
+      .thenComposeAsync(rmAPIConfig -> {
         log.info("RM API Config: " + rmAPIConfig);
-        log.info("Calling CQL Parser");
-        try {
-            final CQLParserForRMAPI parserForRMAPI = new CQLParserForRMAPI(query, offset, limit);
-            final String queryForRMAPI = parserForRMAPI.getRMAPIQuery();
-            log.info("Query to be passed to RM API is " + queryForRMAPI);
-            final RMAPIService svc = new RMAPIService(rmAPIConfig.getCustomerId(),rmAPIConfig.getAPIKey(), RMAPIService.getBaseURI(), vertxContext.owner());
-
-            final Future<InstanceCollection> codexInstanceFuture = svc.getTitleList(queryForRMAPI);
-
-           codexInstanceFuture.setHandler(rmapiResult -> {
-             if (rmapiResult.failed()) {
-               log.error("RMAPI call failed!", rmapiResult.cause());
-                asyncResultHandler.handle(Future.succeededFuture(GetCodexInstancesResponse
-                   .withPlainInternalServerError( rmapiResult.cause().getMessage())));
-               return;
-
-             } else {
-               final InstanceCollection coll = rmapiResult.result();
-               log.info("Titles Returned: " + coll.getTotalRecords());
-               asyncResultHandler.handle(Future.succeededFuture(
-                   GetCodexInstancesResponse.withJsonOK(coll)));
-               return;
-             }
-           });
-        } catch (final QueryValidationException | UnsupportedEncodingException e) {
-            log.error("CQL Query Parsing failed!", e);
-        }
-      }
-    });
+        return RMAPIToCodex.getInstances(parserForRMAPI, vertxContext, rmAPIConfig);
+      }).thenApplyAsync(instances -> {
+        asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withJsonOK(instances)));
+        return instances;
+      }).exceptionally(throwable -> {
+        log.error("getCodexInstances failed!", throwable);
+        asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainInternalServerError(throwable.getCause().getMessage())));
+        return null;
+      });
   }
 
   @Override
@@ -93,36 +74,20 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
       throws Exception {
     log.info("method call: getInstancesById");
 
-    final Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
-
-    config.setHandler(result -> {
-      if (result.failed()) {
-        log.error("Config call failed!", result.cause());
-      } else {
-        final RMAPIConfiguration rmAPIConfig = result.result();
+    RMAPIConfiguration.getConfiguration(okapiHeaders)
+      .thenComposeAsync(rmAPIConfig -> {
         log.info("RM API Config: " + rmAPIConfig);
-
-        final RMAPIService svc = new RMAPIService(rmAPIConfig.getCustomerId(),rmAPIConfig.getAPIKey(), RMAPIService.getBaseURI(), vertxContext.owner());
-
-        final Future<Instance> codexInstanceFuture = svc.getTileById(id);
-
-        codexInstanceFuture.setHandler(rmapiResult -> {
-          if (rmapiResult.failed()) {
-            log.error("RMAPI call failed!", rmapiResult.cause());
-            // need to handle variations of this (not authorized vs bad request)
-            asyncResultHandler.handle(Future.succeededFuture(GetCodexInstancesByIdResponse
-                .withPlainInternalServerError( rmapiResult.cause().getMessage())));
-            return;
-
-          } else {
-            final Instance codexInstance = rmapiResult.result();
-            log.info("Request Title Name: " + codexInstance.getTitle());
-            asyncResultHandler.handle(Future.succeededFuture(
-                GetCodexInstancesByIdResponse.withJsonOK(codexInstance)));
-            return;
-          }
-        });
-      }
-    });
+        return RMAPIToCodex.getInstance(id, vertxContext, rmAPIConfig);
+      }).thenApplyAsync(instance -> {
+        asyncResultHandler.handle(Future.succeededFuture(
+            instance == null ?
+                CodexInstancesResource.GetCodexInstancesByIdResponse.withPlainNotFound(id) :
+                  CodexInstancesResource.GetCodexInstancesByIdResponse.withJsonOK(instance)));
+        return instance;
+      }).exceptionally(throwable -> {
+        log.error("getCodexInstancesById failed!", throwable);
+        asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesByIdResponse.withPlainInternalServerError(throwable.getCause().getMessage())));
+        return null;
+      });
   }
 }

@@ -2,6 +2,7 @@ package org.folio.config;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collector;
 
 import org.folio.rest.RestVerticle;
@@ -16,7 +17,6 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.vertx.core.Future;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -81,10 +81,10 @@ public final class RMAPIConfiguration {
    * @param okapiHeaders The headers for the current API call.
    * @return The RMI API configuration for the tenant.
    */
-  public static Future<RMAPIConfiguration> getConfiguration(final Map<String, String> okapiHeaders) {
+  public static CompletableFuture<RMAPIConfiguration> getConfiguration(final Map<String, String> okapiHeaders) {
     final Map<String, String> okapiHeadersLocal = new HashMap<>(okapiHeaders);
     final String tenantId = TenantTool.calculateTenantId(okapiHeadersLocal.get(RestVerticle.OKAPI_HEADER_TENANT));
-    final String okapiURL = okapiHeadersLocal.get("x-okapi-url");
+    final String okapiURL = okapiHeadersLocal.get("x-okapi-url") != null ? okapiHeadersLocal.get("x-okapi-url") : System.getProperty("okapi.url");
 
     // We need to remove this header before calling another module or okapi
     // will not be able to find the route. Since we don't own the headers map,
@@ -92,13 +92,18 @@ public final class RMAPIConfiguration {
     // this class.
     okapiHeadersLocal.remove("x-okapi-module-id");
 
-    Future<RMAPIConfiguration> future = Future.future();
+    CompletableFuture<RMAPIConfiguration> future = new CompletableFuture<>();
+
+    if (okapiURL == null) {
+      future.completeExceptionally(new IllegalArgumentException("The Okapi URL cannot be null"));
+      return future;
+    }
 
     try {
       final HttpClientInterface httpClient = HttpClientFactory.getHttpClient(okapiURL, tenantId);
 
       httpClient.request(CONFIGURATIONS_ENTRIES_ENDPOINT_PATH, okapiHeadersLocal)
-        .whenComplete((response, throwable) -> {
+        .whenCompleteAsync((response, throwable) -> {
           if (Response.isSuccess(response.getCode())) {
             final JsonObject responseBody = response.getBody();
             final JsonArray configs = responseBody.getJsonArray("configs");
@@ -106,12 +111,12 @@ public final class RMAPIConfiguration {
             mapResults(configs, future);
           } else {
             LOG.error("Cannot get configuration data: " + response.getError().toString(), response.getException());
-            future.fail(response.getException());
+            future.completeExceptionally(new IllegalStateException(response.getError().toString()));
           }
         });
     } catch (Exception e) {
       LOG.error("Cannot get configuration data: " + e.getMessage(), e);
-      future.fail(e);
+      future.completeExceptionally(e);
     }
 
     return future;
@@ -125,7 +130,7 @@ public final class RMAPIConfiguration {
    * @param future The future that will store the RMAPIConfiguration object or
    *        the reason for failure.
    */
-  private static void mapResults(JsonArray configs, Future<RMAPIConfiguration> future) {
+  private static void mapResults(JsonArray configs, CompletableFuture<RMAPIConfiguration> future) {
     try {
       RMAPIConfiguration mappedValue = configs.stream()
           .filter(JsonObject.class::isInstance)
@@ -148,12 +153,12 @@ public final class RMAPIConfiguration {
 
       if (mappedValue.getCustomerId() == null ||
           mappedValue.getAPIKey() == null) {
-        future.fail("Configuration data is invalid");
+        future.completeExceptionally(new IllegalStateException("Configuration data is invalid"));
       } else {
         future.complete(mappedValue);
       }
     } catch (Exception ex) {
-      future.fail(ex);
+      future.completeExceptionally(ex);
     }
   }
 }
