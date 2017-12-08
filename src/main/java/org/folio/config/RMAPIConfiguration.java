@@ -34,6 +34,7 @@ public final class RMAPIConfiguration {
 
   private String customerId;
   private String apiKey;
+  private String url;
 
   /**
    * Constructs a new RMAPIConfiguration. Keeping this private for now, only
@@ -45,9 +46,11 @@ public final class RMAPIConfiguration {
   @JsonCreator
   private RMAPIConfiguration(
       @JsonProperty("customer-id") final String customerId,
-      @JsonProperty("api-key") final String apiKey) {
+      @JsonProperty("api-key") final String apiKey,
+      @JsonProperty("url") final String url) {
     this.customerId = customerId;
     this.apiKey = apiKey;
+    this.url = url;
   }
 
   /**
@@ -68,10 +71,19 @@ public final class RMAPIConfiguration {
     return apiKey;
   }
 
+  /**
+   * Returns the PM API URL.
+   *
+   * @return The RM API URL.
+   */
+  public String getUrl() {
+    return url;
+  }
+
   @Override
   public String toString() {
     return "RMAPIConfiguration [customerId=" + customerId
-        + ", apiKey=" + apiKey + ']';
+        + ", apiKey=" + apiKey + ", url=" + url + ']';
   }
 
   /**
@@ -137,22 +149,28 @@ public final class RMAPIConfiguration {
           .map(JsonObject.class::cast)
           .collect(Collector.of(JsonObject::new,
               (result, entry) -> {
-                // This seems kind of fragile, but any failure will fail the
-                // request, which is what we want. However,
-                // ArrayIndexOutOfBoundsException or NPE are not ideal failure
-                // messages. :)
-                final String value = entry.getString("value");
-                final String [] values = value.split("&");
-                for (String v : values) {
-                  final String [] kv = v.split("=");
-                  result.put(kv[0], kv[1]);
+                final String code = entry.getString("code");
+                  if ("kb.ebsco.credentials".equalsIgnoreCase(code)) {
+                  // This seems kind of fragile, but any failure will fail the
+                  // request, which is what we want. However,
+                  // ArrayIndexOutOfBoundsException or NPE are not ideal failure
+                  // messages. :)
+                  final String value = entry.getString("value");
+                  final String [] values = value.split("&");
+                  for (String v : values) {
+                    final String [] kv = v.split("=");
+                    result.put(kv[0], kv[1]);
+                  }
+                } else if ("kb.ebsco.url".equalsIgnoreCase(code)) {
+                  result.put("url", entry.getString("value"));
                 }
               },
               JsonObject::mergeIn,
               result -> result.mapTo(RMAPIConfiguration.class)));
 
       if (mappedValue.getCustomerId() == null ||
-          mappedValue.getAPIKey() == null) {
+          mappedValue.getAPIKey() == null ||
+          mappedValue.getUrl() == null) {
         future.completeExceptionally(new IllegalStateException("Configuration data is invalid"));
       } else {
         future.complete(mappedValue);

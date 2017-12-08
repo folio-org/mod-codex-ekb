@@ -1,7 +1,7 @@
 {
   "mocks": [
     {
-      "description": "toString() RM API Configuration",
+      "description": "Missing customer ID RM API Configuration",
       "url": "/configurations/entries?query=%28module%3D%3DKB_EBSCO%20AND%20configName%3D%3Dapi_credentials%29",
       "method": "get",
       "status": 200,
@@ -13,31 +13,17 @@
           "code" : "kb.ebsco.credentials",
           "description" : "EBSCO RM-API Credentials",
           "enabled" : true,
-          "value" : "customer-id=myid&api-key=mykey",
+          "value" : "customer-id=examplecorp&api-key=8675309",
           "metadata" : {
             "createdDate" : "2017-11-29T18:39:15.182+0000",
             "createdByUserId" : "1ad737b0-d847-11e6-bf26-cec0c932ce01",
             "updatedDate" : "2017-11-29T18:39:15.182+0000",
             "updatedByUserId" : "1ad737b0-d847-11e6-bf26-cec0c932ce01"
           }
-        }, {
-          "id" : "c1690a96-a138-4fb4-a3f0-deae960b2261",
-          "module" : "KB_EBSCO",
-          "configName" : "api_credentials",
-          "code" : "kb.ebsco.url",
-          "description" : "EBSCO RM-API URL",
-          "enabled" : true,
-          "value" : "https://rmapi.example.com",
-          "metadata" : {
-            "createdDate" : "2017-12-08T15:11:52.562+0000",
-            "createdByUserId" : "1ad737b0-d847-11e6-bf26-cec0c932ce01",
-            "updatedDate" : "2017-12-08T15:11:52.562+0000",
-            "updatedByUserId" : "1ad737b0-d847-11e6-bf26-cec0c932ce01"
-          }
         } ],
-        "totalRecords" : 2,
+        "totalRecords" : 1,
         "resultInfo" : {
-          "totalRecords" : 2,
+          "totalRecords" : 1,
           "facets" : [ ]
         }
       },
