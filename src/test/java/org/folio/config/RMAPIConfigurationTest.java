@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
 
 import org.folio.rest.RestVerticle;
 import org.folio.rest.tools.client.test.HttpClientMock2;
@@ -13,7 +14,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import io.vertx.core.DeploymentOptions;
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
@@ -83,11 +83,11 @@ public class RMAPIConfigurationTest {
     vertx.deployVerticle(RestVerticle.class.getName(), opt,
         context.asyncAssertSuccess());
 
-    okapiHeaders.put("X-Okapi-Tenant", "rmapiconfigurationtest");
-    okapiHeaders.put("X-Okapi-Url", "http://localhost:" + Integer.toString(port));
+    okapiHeaders.put("x-okapi-tenant", "rmapiconfigurationtest");
+    okapiHeaders.put("x-okapi-url", "http://localhost:" + Integer.toString(port));
 
     // HACK ALERT! See above for the reason this is being created.
-    httpClientMock = new HttpClientMock2(okapiHeaders.get("X-Okapi-Tenant"), okapiHeaders.get("X-Okapi-Url"));
+    httpClientMock = new HttpClientMock2(okapiHeaders.get("x-okapi-tenant"), okapiHeaders.get("x-okapi-url"));
   }
 
   /**
@@ -111,12 +111,12 @@ public class RMAPIConfigurationTest {
           " - reason: " + e.getMessage());
     }
 
-    Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+    CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
 
-    config.setHandler(result -> {
-      context.assertTrue(result.succeeded());
+    config.whenCompleteAsync((result, exception) -> {
+      context.assertNotNull(result);
 
-      RMAPIConfiguration rmAPIConfig = result.result();
+      RMAPIConfiguration rmAPIConfig = result;
 
       context.assertEquals("examplecorp", rmAPIConfig.getCustomerId());
       context.assertEquals("8675309", rmAPIConfig.getAPIKey());
@@ -137,10 +137,10 @@ public class RMAPIConfigurationTest {
           " - reason: " + e.getMessage());
     }
 
-    Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+    CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
 
-    config.setHandler(result -> {
-      context.assertTrue(result.failed());
+    config.whenCompleteAsync((result, exception) -> {
+      context.assertNull(result);
       async.complete();
     });
   }
@@ -158,10 +158,10 @@ public class RMAPIConfigurationTest {
           e.getMessage());
     }
 
-    Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+    CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
 
-    config.setHandler(result -> {
-      context.assertTrue(result.failed());
+    config.whenCompleteAsync((result, exception) -> {
+      context.assertNull(result);
       async.complete();
     });
   }
@@ -179,10 +179,10 @@ public class RMAPIConfigurationTest {
           e.getMessage());
     }
 
-    Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+    CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
 
-    config.setHandler(result -> {
-      context.assertTrue(result.failed());
+    config.whenCompleteAsync((result, exception) -> {
+      context.assertNull(result);
       async.complete();
     });
   }
@@ -199,11 +199,11 @@ public class RMAPIConfigurationTest {
           MOCK_CONTENT_SUCCESS_MULTIPLE_FILE + " - reason: " + e.getMessage());
     }
 
-    Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
-    config.setHandler(result -> {
-      context.assertTrue(result.succeeded());
+    CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+    config.whenCompleteAsync((result, exception) -> {
+      context.assertNotNull(result);
 
-      RMAPIConfiguration rmAPIConfig = result.result();
+      RMAPIConfiguration rmAPIConfig = result;
 
       context.assertEquals("examplecorp", rmAPIConfig.getCustomerId());
       context.assertEquals("8675309", rmAPIConfig.getAPIKey());
@@ -224,11 +224,11 @@ public class RMAPIConfigurationTest {
           MOCK_CONTENT_SUCCESS_TO_STRING_FILE + " - reason: " + e.getMessage());
     }
 
-    Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
-    config.setHandler(result -> {
-      context.assertTrue(result.succeeded());
+    CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+    config.whenCompleteAsync((result, exception) -> {
+      context.assertNotNull(result);
 
-      RMAPIConfiguration rmAPIConfig = result.result();
+      RMAPIConfiguration rmAPIConfig = result;
 
       context.assertEquals("RMAPIConfiguration [customerId=myid, apiKey=mykey]", rmAPIConfig.toString());
 
@@ -248,9 +248,9 @@ public class RMAPIConfigurationTest {
           MOCK_CONTENT_FAIL_404_FILE + " - reason: " + e.getMessage());
     }
 
-    Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
-    config.setHandler(result -> {
-      context.assertTrue(result.failed());
+    CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+    config.whenCompleteAsync((result, exception) -> {
+      context.assertNull(result);
 
       async.complete();
     });
@@ -268,10 +268,10 @@ public class RMAPIConfigurationTest {
           MOCK_CONTENT_FAIL_INTERNAL_ERROR_FILE + " - reason: " + e.getMessage());
     }
 
-    Future<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
-    config.setHandler(result -> {
-      context.assertTrue(result.failed());
-      context.assertTrue(result.cause() instanceof NullPointerException);
+    CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+    config.whenCompleteAsync((result, exception) -> {
+      context.assertNull(result);
+      context.assertTrue(exception instanceof NullPointerException);
 
       async.complete();
     });
