@@ -151,7 +151,7 @@ public class CQLParserForRMAPI {
 
 	private void parseCQLBooleanNode(CQLBooleanNode node) throws QueryValidationException {
 		if (node instanceof CQLAndNode) {
-		  final String MULTIPLE_FIELDS_ERROR = "Search on multiple fields is not supported";
+		  final String MULTIPLE_FIELDS_ERROR = error + "Search on multiple fields is not supported.";
 			final CQLNode leftNode = node.getLeftOperand();
 			final CQLNode rightNode = node.getRightOperand();
 			if((leftNode != null) && (rightNode != null) && ((leftNode instanceof CQLTermNode) && (rightNode instanceof CQLTermNode))) {
