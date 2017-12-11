@@ -53,10 +53,10 @@ public class CQLParserForRMAPI {
 		  final CQLNode node = initCQLParser(query);
 	    checkNodeInstance(node);
 	    final int pageOffsetRMAPI = computePageOffsetForRMAPI(offset, limit);
-	    queriesForRMAPI.add(buildRMAPIQuery(offset, limit, pageOffsetRMAPI));
+	    queriesForRMAPI.add(buildRMAPIQuery(limit, pageOffsetRMAPI));
 	    instanceIndex = computeInstanceIndex(offset, limit);
 	    if(checkIfSecondQueryIsNeeded(offset, limit, pageOffsetRMAPI)) {
-	      queriesForRMAPI.add(buildRMAPIQuery(offset, limit, pageOffsetRMAPI+1));
+	      queriesForRMAPI.add(buildRMAPIQuery(limit, pageOffsetRMAPI+1));
 	    }
 		} else {
 		  throw new QueryValidationException(error + "Limit suggests that no results need to be returned.");
@@ -182,7 +182,7 @@ public class CQLParserForRMAPI {
 		}
 	}
 
-	String buildRMAPIQuery(int offset, int limit, int pageOffsetRMAPI) throws QueryValidationException, UnsupportedEncodingException  {
+	String buildRMAPIQuery(int limit, int pageOffsetRMAPI) throws QueryValidationException, UnsupportedEncodingException  {
 		final StringBuilder builder = new StringBuilder();
 
 		if ((searchValue != null) && (searchField != null)) {
@@ -215,7 +215,7 @@ public class CQLParserForRMAPI {
 	}
 
   private int computePageOffsetForRMAPI(int offset, int limit) {
-    final float value = offset/limit;
+    final float value = offset/(float)limit;
     final double floor = Math.floor(value);
     final double pageOffset = floor + 1;
     return (int) pageOffset;
@@ -233,7 +233,7 @@ public class CQLParserForRMAPI {
     return (offset%limit);
   }
 
-  public ArrayList<String> getRMAPIQueries() {
+  public List<String> getRMAPIQueries() {
 	  return queriesForRMAPI;
 	}
 

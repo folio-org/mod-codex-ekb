@@ -52,7 +52,7 @@ public final class RMAPIToCodex {
 
     final RMAPIService rmAPIService = new RMAPIService(rmAPIConfig.getCustomerId(),
         rmAPIConfig.getAPIKey(), RMAPIService.getBaseURI(), vertxContext.owner());
-    final ArrayList<String> queries = cql.getRMAPIQueries();
+    final ArrayList<String> queries = (ArrayList<String>) cql.getRMAPIQueries();
     final String query = queries.get(0);
     final CompletableFuture<InstanceCollection> cf = new CompletableFuture<>();
 
