@@ -1,5 +1,6 @@
 package org.folio.codex;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -49,13 +50,13 @@ public final class RMAPIToCodex {
     final CompletableFuture<Instance> cf = new CompletableFuture<>();
 
     rmAPIService.getTileById(id).whenComplete((rmapiResult, throwable) -> {
-      if (throwable != null)
+      if (throwable != null) {
         cf.completeExceptionally(throwable);
-      else {
+      } else {
         try {
           final Instance codexInstance = convertRMAPITitleToCodex(rmapiResult);
           cf.complete(codexInstance);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
           cf.completeExceptionally(ex);
         }
       }
@@ -70,17 +71,18 @@ public final class RMAPIToCodex {
 
     final RMAPIService rmAPIService = new RMAPIService(rmAPIConfig.getCustomerId(), rmAPIConfig.getAPIKey(),
         rmAPIConfig.getUrl(), vertxContext.owner());
-    final String query = cql.getRMAPIQuery();
+    final ArrayList<String> queries = (ArrayList<String>) cql.getRMAPIQueries();
+    final String query = queries.get(0); //Loop over the queries instead of getting the first one
     final CompletableFuture<InstanceCollection> cf = new CompletableFuture<>();
 
     rmAPIService.getTitleList(query).whenComplete((rmapiResult, throwable) -> {
-      if (throwable != null)
+      if (throwable != null) {
         cf.completeExceptionally(throwable);
-      else {
+      } else {
         try {
           final InstanceCollection codexInstances = convertRMTitleListToCodex(rmapiResult);
           cf.complete(codexInstances);
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
           cf.completeExceptionally(ex);
         }
       }
@@ -90,13 +92,13 @@ public final class RMAPIToCodex {
 
   /**
    * Converts RMAPI Title to Codex instance
-   * 
+   *
    * @param svcTitle
    * @return
    */
   private static Instance convertRMAPITitleToCodex(Title svcTitle) {
 
-    Instance codexInstance = new Instance();
+    final Instance codexInstance = new Instance();
 
     codexInstance.setId(Integer.toString(svcTitle.titleId));
     codexInstance.setTitle(svcTitle.titleName);
@@ -107,9 +109,9 @@ public final class RMAPIToCodex {
     codexInstance.setVersion(svcTitle.edition);
 
     if ((svcTitle.identifiersList != null) && (!svcTitle.identifiersList.isEmpty())) {
-      Set<Identifier> identifiers = new HashSet<>();
+      final Set<Identifier> identifiers = new HashSet<>();
       svcTitle.identifiersList.forEach(id -> {
-        Identifier codexId = convertRMIdentifierToCodex(id);
+        final Identifier codexId = convertRMIdentifierToCodex(id);
         if (codexId != null) {
           identifiers.add(codexId);
         }
@@ -120,7 +122,7 @@ public final class RMAPIToCodex {
     }
 
     if ((svcTitle.contributorsList != null) && (!svcTitle.contributorsList.isEmpty())) {
-      Set<Contributor> contributors = new HashSet<>();
+      final Set<Contributor> contributors = new HashSet<>();
       svcTitle.contributorsList.forEach(contributor -> contributors.add(convertRMContributorToCodex(contributor)));
       codexInstance.setContributor(contributors);
     }
@@ -128,9 +130,9 @@ public final class RMAPIToCodex {
   }
 
   private static Identifier convertRMIdentifierToCodex(org.folio.rmapi.model.Identifier rmIdentifier) {
-    Identifier codexIdentifier = new Identifier();
-    String type = getDisplayType(rmIdentifier.type);
-    String subType = getDisplaySubType(rmIdentifier.subtype);
+    final Identifier codexIdentifier = new Identifier();
+    final String type = getDisplayType(rmIdentifier.type);
+    final String subType = getDisplaySubType(rmIdentifier.subtype);
 
     String codexType = null;
     if (!type.isEmpty()) {
@@ -147,7 +149,7 @@ public final class RMAPIToCodex {
   }
 
   private static Contributor convertRMContributorToCodex(org.folio.rmapi.model.Contributor rmContributor) {
-    Contributor codexContributor = new Contributor();
+    final Contributor codexContributor = new Contributor();
     codexContributor.setName(rmContributor.titleContributor);
     codexContributor.setType(rmContributor.type);
     return codexContributor;
@@ -180,8 +182,8 @@ public final class RMAPIToCodex {
 
   private static InstanceCollection convertRMTitleListToCodex(Titles rmTitles) {
 
-    InstanceCollection instances = new InstanceCollection();
-    List<Instance> codexInstances = rmTitles.titleList.stream().map(RMAPIToCodex::convertRMAPITitleToCodex)
+    final InstanceCollection instances = new InstanceCollection();
+    final List<Instance> codexInstances = rmTitles.titleList.stream().map(RMAPIToCodex::convertRMAPITitleToCodex)
         .collect(Collectors.toList());
     instances.setInstances(codexInstances);
     instances.setTotalRecords(rmTitles.totalResults);
