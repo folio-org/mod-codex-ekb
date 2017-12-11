@@ -1,9 +1,10 @@
 package org.folio.rmapi;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.folio.rmapi.model.Title;
 import org.folio.rmapi.model.Titles;
 
-import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
@@ -52,9 +53,10 @@ public class RMAPIService {
    * @param titleId
    * @return
    */
-  public Future<Title> getTileById(String titleId) {
+  public CompletableFuture<Title> getTileById(String titleId) {
 
-    Future<Title> future = Future.future();
+    CompletableFuture<Title> future = new CompletableFuture<>();
+
     final HttpClientRequest request = httpClient.getAbs(constructURL(String.format("titles/%s", titleId)));
 
     request.headers().add(HTTP_HEADER_ACCEPT, APPLICATION_JSON);
@@ -81,13 +83,14 @@ public class RMAPIService {
           future.complete(rmapiTitles);
         } catch (Exception e) {
           LOG.info("failure  " + e.getMessage());
-          future.fail("Error parsing return json object" + e.getMessage());
+          future.completeExceptionally(e);
         } finally {
           httpClient.close();
         }
       } else {
         httpClient.close();
-        future.fail("Invalid status code from RMAPI" + response.statusCode());
+        future
+            .completeExceptionally(new RMAPIServiceException("Invalid status code from RMAPI" + response.statusCode()));
       }
     }));
     request.end();
@@ -104,9 +107,10 @@ public class RMAPIService {
    * @return
    */
 
-  public Future<Titles> getTitleList(String rmapiQuery) {
+  public CompletableFuture<Titles> getTitleList(String rmapiQuery) {
 
-    Future<Titles> future = Future.future();
+    CompletableFuture<Titles> future = new CompletableFuture<>();
+
     final HttpClientRequest request = httpClient.getAbs(constructURL(String.format("titles?%s", rmapiQuery)));
 
     request.headers().add(HTTP_HEADER_ACCEPT, APPLICATION_JSON);
@@ -130,13 +134,14 @@ public class RMAPIService {
 
         } catch (Exception e) {
           LOG.info("failure  " + e.getMessage());
-          future.fail("Error parsing return json object" + e.getMessage());
+          future.completeExceptionally(e);
         } finally {
           httpClient.close();
         }
       } else {
         httpClient.close();
-        future.fail("Invalid status code from RMAPI" + response.statusCode());
+        future
+            .completeExceptionally(new RMAPIServiceException("Invalid status code from RMAPI" + response.statusCode()));
       }
     }));
     request.end();
