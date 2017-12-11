@@ -1,5 +1,6 @@
 package org.folio.codex;
 
+import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
 
 import org.folio.config.RMAPIConfiguration;
@@ -51,7 +52,8 @@ public final class RMAPIToCodex {
 
     final RMAPIService rmAPIService = new RMAPIService(rmAPIConfig.getCustomerId(),
         rmAPIConfig.getAPIKey(), RMAPIService.getBaseURI(), vertxContext.owner());
-    final String query = cql.getRMAPIQuery();
+    final ArrayList<String> queries = cql.getRMAPIQueries();
+    final String query = queries.get(0);
     final CompletableFuture<InstanceCollection> cf = new CompletableFuture<>();
 
     rmAPIService.getTitleList(query).setHandler(rmapiResult -> {
