@@ -2,6 +2,8 @@ package org.folio.rest.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import javax.ws.rs.core.Response;
 
@@ -16,7 +18,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
@@ -29,10 +30,6 @@ import io.vertx.core.logging.LoggerFactory;
 public final class CodexInstancesResourceImpl implements CodexInstancesResource {
   private final Logger log = LoggerFactory.getLogger(CodexInstancesResourceImpl.class);
 
-  public CodexInstancesResourceImpl(Vertx vertx, String tenantId) {
-    super();
-  }
-
   /* (non-Javadoc)
    * @see org.folio.rest.jaxrs.resource.InstancesResource#getCodexInstances(java.lang.String, int, int, java.lang.String, java.util.Map, io.vertx.core.Handler, io.vertx.core.Context)
    */
@@ -42,32 +39,28 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
       Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext)
       throws Exception {
-    log.info("method call: getInstances");
-
-    log.info("Calling CQL Parser");
-    final CQLParserForRMAPI parserForRMAPI;
-    try {
-        parserForRMAPI = new CQLParserForRMAPI(query, offset, limit);
-    } catch (final QueryValidationException e) {
-      asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainBadRequest(e.getMessage())));
-      return;
-    } catch (final UnsupportedEncodingException e) {
-      // Since a URL encoding error is server side and not something the
-      // client can fix, we return a 500.
-      asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainInternalServerError(e.getMessage())));
-      return;
-    }
+    log.info("method call: getCodexInstances");
 
     RMAPIConfiguration.getConfiguration(okapiHeaders)
-      .thenComposeAsync(rmAPIConfig -> {
-        log.info("RM API Config: " + rmAPIConfig);
-        return RMAPIToCodex.getInstances(parserForRMAPI, vertxContext, rmAPIConfig);
-      }).thenApplyAsync(instances -> {
-        asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withJsonOK(instances)));
-        return instances;
-      }).exceptionally(throwable -> {
+      .thenCombineAsync(CompletableFuture.supplyAsync(() -> {
+        try {
+          return new CQLParserForRMAPI(query, offset, limit);
+        } catch (UnsupportedEncodingException | QueryValidationException e) {
+          throw new CompletionException(e);
+        }
+      }), (rmAPIConfig, parserForRMAPI) ->
+        RMAPIToCodex.getInstances(parserForRMAPI, vertxContext, rmAPIConfig)
+      ).thenCompose(instances ->
+        instances
+      ).thenAcceptAsync(instances ->
+         asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withJsonOK(instances)))
+      ).exceptionally(throwable -> {
         log.error("getCodexInstances failed!", throwable);
-        asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainInternalServerError(throwable.getCause().getMessage())));
+        if (throwable.getCause() instanceof QueryValidationException) {
+          asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainBadRequest(throwable.getCause().getMessage())));
+        } else {
+          asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainInternalServerError(throwable.getCause().getMessage())));
+        }
         return null;
       });
   }
@@ -78,13 +71,12 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
       Map<String, String> okapiHeaders,
       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext)
       throws Exception {
-    log.info("method call: getInstancesById");
+    log.info("method call: getCodexInstancesById");
 
     RMAPIConfiguration.getConfiguration(okapiHeaders)
-      .thenComposeAsync(rmAPIConfig -> {
-        log.info("RM API Config: " + rmAPIConfig);
-        return RMAPIToCodex.getInstance(id, vertxContext, rmAPIConfig);
-      }).thenApplyAsync(instance -> {
+      .thenComposeAsync(rmAPIConfig ->
+        RMAPIToCodex.getInstance(id, vertxContext, rmAPIConfig)
+      ).thenApplyAsync(instance -> {
         asyncResultHandler.handle(Future.succeededFuture(
             instance == null ?
                 CodexInstancesResource.GetCodexInstancesByIdResponse.withPlainNotFound(id) :
