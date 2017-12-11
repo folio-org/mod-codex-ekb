@@ -121,9 +121,7 @@ public final class RMAPIToCodex {
 
     if ((svcTitle.contributorsList != null) && (!svcTitle.contributorsList.isEmpty())) {
       Set<Contributor> contributors = new HashSet<>();
-      svcTitle.contributorsList.forEach(contributor -> {
-        contributors.add(convertRMContributorToCodex(contributor));
-      });
+      svcTitle.contributorsList.forEach(contributor -> contributors.add(convertRMContributorToCodex(contributor)));
       codexInstance.setContributor(contributors);
     }
     return codexInstance;
