@@ -74,9 +74,9 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
     log.info("method call: getCodexInstancesById");
 
     RMAPIConfiguration.getConfiguration(okapiHeaders)
-      .thenComposeAsync(rmAPIConfig -> {
-        return RMAPIToCodex.getInstance(id, vertxContext, rmAPIConfig);
-      }).thenApplyAsync(instance -> {
+      .thenComposeAsync(rmAPIConfig ->
+        RMAPIToCodex.getInstance(id, vertxContext, rmAPIConfig)
+      ).thenApplyAsync(instance -> {
         asyncResultHandler.handle(Future.succeededFuture(
             instance == null ?
                 CodexInstancesResource.GetCodexInstancesByIdResponse.withPlainNotFound(id) :
