@@ -37,7 +37,7 @@ public class CQLParserForRMAPI {
 	String sortType;
 	int countRMAPI;
 	int instanceIndex;
-	ArrayList<String> queriesForRMAPI = new ArrayList<String>();
+	List<String> queriesForRMAPI = new ArrayList<>();
 
 	private enum RMAPISupportedSearchFields {
 		TITLE, PUBLISHER, ISSN, ISBN, ISXN, TYPE

@@ -1,6 +1,5 @@
 package org.folio.codex;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -71,7 +70,7 @@ public final class RMAPIToCodex {
 
     final RMAPIService rmAPIService = new RMAPIService(rmAPIConfig.getCustomerId(), rmAPIConfig.getAPIKey(),
         rmAPIConfig.getUrl(), vertxContext.owner());
-    final ArrayList<String> queries = (ArrayList<String>) cql.getRMAPIQueries();
+    final List<String> queries = cql.getRMAPIQueries();
     final String query = queries.get(0); //Loop over the queries instead of getting the first one
     final CompletableFuture<InstanceCollection> cf = new CompletableFuture<>();
 
