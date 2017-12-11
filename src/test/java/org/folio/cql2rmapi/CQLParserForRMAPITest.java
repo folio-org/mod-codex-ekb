@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 
 import org.junit.Test;
 import org.z3950.zing.cql.CQLNode;
@@ -130,8 +131,8 @@ public class CQLParserForRMAPITest {
   @Test
   public void CQLParserReturnsExpectedQueryStringIfValidQueryIsPassedTest()
       throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_QUERY, 0, 0);
-    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=0&offset=1", parser.getRMAPIQuery());
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_QUERY, 10, 10);
+    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=10&offset=2", parser.getRMAPIQueries().get(0));
   }
 
   @Test(expected = QueryValidationException.class)
@@ -139,81 +140,81 @@ public class CQLParserForRMAPITest {
     final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_QUERY, 0, 0);
     parser.searchField = null;
     parser.searchValue = null;
-    parser.buildRMAPIQuery();
+    parser.buildRMAPIQuery(10, 1);
   }
 
   @Test(expected = QueryValidationException.class)
   public void CQLParserThrowsExceptionIfsearchValueIsNullTest() throws QueryValidationException, UnsupportedEncodingException {
     final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_QUERY, 0, 0);
     parser.searchValue = null;
-    parser.buildRMAPIQuery();
+    parser.buildRMAPIQuery(10, 1);
   }
 
   @Test(expected = QueryValidationException.class)
   public void CQLParserThrowsExceptionIfsearchFieldIsNullTest() throws QueryValidationException, UnsupportedEncodingException {
     final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_QUERY, 0, 0);
     parser.searchField = null;
-    parser.buildRMAPIQuery();
+    parser.buildRMAPIQuery(10, 1);
   }
 
   @Test
   public void CQLParserMapsISBNToISXNTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_ISBN_QUERY, 0, 0);
-    assertEquals("search=12345&searchfield=isxn&orderby=titlename&count=0&offset=1", parser.getRMAPIQuery());
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_ISBN_QUERY, 0, 10);
+    assertEquals("search=12345&searchfield=isxn&orderby=titlename&count=10&offset=1", parser.getRMAPIQueries().get(0));
   }
 
   @Test
   public void CQLParserMapsISSNToISXNTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_ISSN_QUERY, 0, 0);
-    assertEquals("search=12345&searchfield=isxn&orderby=titlename&count=0&offset=1", parser.getRMAPIQuery());
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_ISSN_QUERY, 0, 10);
+    assertEquals("search=12345&searchfield=isxn&orderby=titlename&count=10&offset=1", parser.getRMAPIQueries().get(0));
   }
 
   @Test
   public void CQLParserPassesAlongOffsetIfNotEqualToZeroTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_ISSN_QUERY, 10, 0);
-    assertEquals("search=12345&searchfield=isxn&orderby=titlename&count=0&offset=10", parser.getRMAPIQuery());
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_ISSN_QUERY, 10, 10);
+    assertEquals("search=12345&searchfield=isxn&orderby=titlename&count=10&offset=2", parser.getRMAPIQueries().get(0));
   }
 
   @Test
   public void CQLParserDoesNotAppendResourceTypeIfTypeNotPassedAlongTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_ISSN_QUERY, 10, 0);
-    assertEquals("search=12345&searchfield=isxn&orderby=titlename&count=0&offset=10", parser.getRMAPIQuery());
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_ISSN_QUERY, 10, 10);
+    assertEquals("search=12345&searchfield=isxn&orderby=titlename&count=10&offset=2", parser.getRMAPIQueries().get(0));
   }
 
   @Test
   public void CQLParserDoesNotAppendResourceTypeIfFilterTypeIsNullTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_FILTER_QUERY, 10, 0);
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_FILTER_QUERY, 10, 10);
     parser.filterType = null;
-    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=0&offset=10", parser.buildRMAPIQuery());
+    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=10&offset=1", parser.buildRMAPIQuery(10, 1));
   }
 
   @Test
   public void CQLParserDoesNotAppendResourceTypeIfFilTerValueIsNullTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_FILTER_QUERY, 10, 0);
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_FILTER_QUERY, 10, 10);
     parser.filterValue = null;
-    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=0&offset=10", parser.buildRMAPIQuery());
+    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=10&offset=1", parser.buildRMAPIQuery(10, 1));
   }
 
   @Test
   public void CQLParserAppendsResourceTypeIfFilterTypeAndFilTerValueAreValidTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_FILTER_QUERY, 10, 0);
-    assertEquals("search=bridget&searchfield=titlename&resourcetype=journal&orderby=titlename&count=0&offset=10",
-        parser.getRMAPIQuery());
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_FILTER_QUERY, 10, 10);
+    assertEquals("search=bridget&searchfield=titlename&resourcetype=journal&orderby=titlename&count=10&offset=2",
+        parser.getRMAPIQueries().get(0));
   }
 
   @Test(expected = QueryValidationException.class)
   public void CQLParserThrowsExceptionIfMultipleSearchFieldsAreProvidedTest() throws UnsupportedEncodingException, QueryValidationException {
-    new CQLParserForRMAPI("title=something AND publisher=EBSCO" , 10, 0);
+    new CQLParserForRMAPI("title=something AND publisher=EBSCO" , 10, 10);
   }
 
   @Test(expected = QueryValidationException.class)
   public void CQLParserThrowsExceptionIfANDSearchIsInvalidTest() throws UnsupportedEncodingException, QueryValidationException {
-    new CQLParserForRMAPI("title=something AND SORTBY TITLE" , 10, 0);
+    new CQLParserForRMAPI("title=something AND SORTBY TITLE" , 10, 10);
   }
 
   @Test
   public void CQLParserSetsExpectedValuesInCaseOfValidSearchTest() throws UnsupportedEncodingException, QueryValidationException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI("type=journal AND title=bridget" , 10, 0);
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI("type=journal AND title=bridget" , 10, 10);
     assertEquals("titlename", parser.searchField);
     assertEquals("bridget", parser.searchValue);
     assertEquals("type", parser.filterType);
@@ -222,15 +223,36 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void CQLParserSetsExpectedValuesInCaseOfValidISXNsearchTest() throws UnsupportedEncodingException, QueryValidationException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI("identifier.value=12345 AND identifier.type=isxn" , 10, 0);
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI("identifier.value=12345 AND identifier.type=isxn" , 10, 10);
     assertEquals("isxn", parser.searchField);
     assertEquals("12345", parser.searchValue);
   }
 
   @Test
   public void CQLParserSetsExpectedValuesInCaseOfValidISBNsearchTest() throws UnsupportedEncodingException, QueryValidationException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI("identifier.type=isbn AND identifier.value=12345" , 10, 0);
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI("identifier.type=isbn AND identifier.value=12345" , 10, 10);
     assertEquals("isxn", parser.searchField);
     assertEquals("12345", parser.searchValue);
+  }
+
+  @Test
+  public void CQLParserComputesQueriesAndIndexForRMAPICorrectlyTest() throws UnsupportedEncodingException, QueryValidationException {
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI("title=bridget" , 900, 100);
+    final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
+    assertEquals(1, queries.size());
+    assertEquals(0, parser.getInstanceIndex());
+    for (final String query: queries) {
+      assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=100&offset=10", query);
+    }
+  }
+
+  @Test
+  public void CQLParserComputesMultipleQueriesAndIndexForRMAPICorrectlyTest() throws UnsupportedEncodingException, QueryValidationException {
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI("title=bridget" , 31, 15);
+    final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
+    assertEquals(2, queries.size());
+    assertEquals(1, parser.getInstanceIndex());
+    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=15&offset=3", queries.get(0));
+    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=15&offset=4", queries.get(1));
   }
 }

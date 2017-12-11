@@ -3,6 +3,7 @@ package org.folio.cql2rmapi;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang3.EnumUtils;
@@ -34,9 +35,9 @@ public class CQLParserForRMAPI {
 	String filterType;
 	String filterValue;
 	String sortType;
-	private int offset;
-	private final int limit;
-	String queryForRMAPI;
+	int countRMAPI;
+	int instanceIndex;
+	List<String> queriesForRMAPI = new ArrayList<>();
 
 	private enum RMAPISupportedSearchFields {
 		TITLE, PUBLISHER, ISSN, ISBN, ISXN, TYPE
@@ -48,14 +49,21 @@ public class CQLParserForRMAPI {
 	}
 
 	public CQLParserForRMAPI(String query, int offset, int limit) throws QueryValidationException, UnsupportedEncodingException {
-		this.offset = offset;
-		this.limit = limit;
-		final CQLNode node = initCQLParser(query);
-		checkNodeInstance(node);
-		queryForRMAPI = buildRMAPIQuery();
+		if(limit != 0) {
+		  final CQLNode node = initCQLParser(query);
+	    checkNodeInstance(node);
+	    final int pageOffsetRMAPI = computePageOffsetForRMAPI(offset, limit);
+	    queriesForRMAPI.add(buildRMAPIQuery(limit, pageOffsetRMAPI));
+	    instanceIndex = computeInstanceIndex(offset, limit);
+	    if(checkIfSecondQueryIsNeeded(offset, limit, pageOffsetRMAPI)) {
+	      queriesForRMAPI.add(buildRMAPIQuery(limit, pageOffsetRMAPI+1));
+	    }
+		} else {
+		  throw new QueryValidationException(error + "Limit suggests that no results need to be returned.");
+		}
 	}
 
-	CQLNode initCQLParser(String query) throws QueryValidationException {
+  CQLNode initCQLParser(String query) throws QueryValidationException {
 		final CQLParser parser = new CQLParser();
 		try {
 			return parser.parse(query);
@@ -174,7 +182,7 @@ public class CQLParserForRMAPI {
 		}
 	}
 
-	String buildRMAPIQuery() throws QueryValidationException, UnsupportedEncodingException  {
+	String buildRMAPIQuery(int limit, int pageOffsetRMAPI) throws QueryValidationException, UnsupportedEncodingException  {
 		final StringBuilder builder = new StringBuilder();
 
 		if ((searchValue != null) && (searchField != null)) {
@@ -189,9 +197,6 @@ public class CQLParserForRMAPI {
 			if (sortType == null) {
 				sortType = RM_API_TITLE; // orderby is a mandatory field, otherwise RMAPI throws error
 			}
-			if (offset == 0) {
-				offset = 1; // calculate offsets correctly
-			}
 			builder.append("search=");
 			builder.append(URLEncoder.encode(searchValue, "UTF-8"));
 			builder.append("&searchfield=" + searchField);
@@ -201,16 +206,38 @@ public class CQLParserForRMAPI {
 				builder.append("&resourcetype=" + filterValue);
 			}
 			builder.append("&orderby=" + sortType);
-
 			builder.append("&count=" + limit);
-			builder.append("&offset=" + offset);
+			builder.append("&offset=" + pageOffsetRMAPI);
 		}else {
-			throw new QueryValidationException("Invalid query format, unsupported search parameters");
+			throw new QueryValidationException(error + "Invalid query format, unsupported search parameters");
 		}
 		return builder.toString();
 	}
 
-	public String getRMAPIQuery() {
-	  return queryForRMAPI;
+  private int computePageOffsetForRMAPI(int offset, int limit) {
+    final float value = offset/(float)limit;
+    final double floor = Math.floor(value);
+    final double pageOffset = floor + 1;
+    return (int) pageOffset;
+  }
+
+  private boolean checkIfSecondQueryIsNeeded(int offset, int limit, int pageOffsetRMAPI) {
+    boolean secondQueryNeeded = false;
+    if((offset + limit) > (pageOffsetRMAPI * limit)) {
+      secondQueryNeeded = true;
+    }
+    return secondQueryNeeded;
+  }
+
+  public int computeInstanceIndex(int offset, int limit) {
+    return (offset%limit);
+  }
+
+  public List<String> getRMAPIQueries() {
+	  return queriesForRMAPI;
 	}
+
+  public int getInstanceIndex() {
+    return instanceIndex;
+  }
 }
