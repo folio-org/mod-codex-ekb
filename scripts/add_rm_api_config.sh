@@ -73,12 +73,8 @@ if [[ -z "$tenant" || -z "$rm_api_key" || -z "$rm_api_customer_id" ||
     exit 1
 fi
 
-echo "Tenant: $tenant"
-echo "RM API Key: $rm_api_key"
-echo "RM API Customer ID: $rm_api_customer_id"
-echo "RM API URL: $rm_api_url"
-echo "Okapi URL: $okapi_url"
-echo "Okapi Token: $okapi_token"
+module="EKB"
+config_name="api_access"
 
 curl -X POST \
   $okapi_url'/configurations/entries' \
@@ -88,12 +84,12 @@ curl -X POST \
   -H 'x-okapi-tenant: '$tenant \
   -H 'x-okapi-token: '$okapi_token \
   -d '{
-            "module": "KB_EBSCO",
-            "configName": "api_credentials",
-            "code": "kb.ebsco.credentials",
-            "description": "EBSCO RM-API Credentials",
+            "module": "'$module'",
+            "configName": "'$config_name'",
+            "code": "kb.ebsco.customerId",
+            "description": "EBSCO RM-API Customer ID",
             "enabled": true,
-            "value": "customer-id='$rm_api_customer_id'&api-key='$rm_api_key'"
+            "value": "'$rm_api_customer_id'"
 }'
 
 curl -X POST \
@@ -104,8 +100,24 @@ curl -X POST \
   -H 'x-okapi-tenant: '$tenant \
   -H 'x-okapi-token: '$okapi_token \
   -d '{
-            "module": "KB_EBSCO",
-            "configName": "api_credentials",
+            "module": "'$module'",
+            "configName": "'$config_name'",
+            "code": "kb.ebsco.apiKey",
+            "description": "EBSCO RM-API API Key",
+            "enabled": true,
+            "value": "'$rm_api_key'"
+}'
+
+curl -X POST \
+  $okapi_url'/configurations/entries' \
+  -H 'accept: application/json, text/plain' \
+  -H 'cache-control: no-cache' \
+  -H 'content-type: application/json' \
+  -H 'x-okapi-tenant: '$tenant \
+  -H 'x-okapi-token: '$okapi_token \
+  -d '{
+            "module": "'$module'",
+            "configName": "'$config_name'",
             "code": "kb.ebsco.url",
             "description": "EBSCO RM-API URL",
             "enabled": true,

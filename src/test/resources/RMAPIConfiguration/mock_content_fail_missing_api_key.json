@@ -1,29 +1,43 @@
 {
   "mocks": [
     {
-      "description": "Missing customer ID RM API Configuration",
-      "url": "/configurations/entries?query=%28module%3D%3DKB_EBSCO%20AND%20configName%3D%3Dapi_credentials%29",
+      "description": "Missing API Key RM API Configuration",
+      "url": "/configurations/entries?query=%28module%3D%3DEKB%20AND%20configName%3D%3Dapi_access%29",
       "method": "get",
       "status": 200,
       "receivedData": {
         "configs" : [ {
           "id" : "ca841444-70c0-429a-9ff4-c6e3daeae324",
-          "module" : "KB_EBSCO",
-          "configName" : "api_credentials",
-          "code" : "kb.ebsco.credentials",
+          "module" : "EKB",
+          "configName" : "api_access",
+          "code" : "kb.ebsco.customerId",
           "description" : "EBSCO RM-API Credentials",
           "enabled" : true,
-          "value" : "customer-id=examplecorp",
+          "value" : "examplecorp",
           "metadata" : {
             "createdDate" : "2017-11-29T18:39:15.182+0000",
             "createdByUserId" : "1ad737b0-d847-11e6-bf26-cec0c932ce01",
             "updatedDate" : "2017-11-29T18:39:15.182+0000",
             "updatedByUserId" : "1ad737b0-d847-11e6-bf26-cec0c932ce01"
           }
+        }, {
+         "id" : "081cf659-4c9c-461f-90af-2ec8d0eded5c",
+          "module" : "EKB",
+          "configName" : "api_access",
+          "code" : "kb.ebsco.url",
+          "description" : "EBSCO RM-API URL",
+          "enabled" : true,
+          "value" : "https://sandbox.ebsco.io",
+          "metadata" : {
+            "createdDate" : "2017-12-12T14:06:19.499+0000",
+            "createdByUserId" : "1ad737b0-d847-11e6-bf26-cec0c932ce01",
+            "updatedDate" : "2017-12-12T14:06:19.499+0000",
+            "updatedByUserId" : "1ad737b0-d847-11e6-bf26-cec0c932ce01"
+          }
         } ],
-        "totalRecords" : 1,
+        "totalRecords" : 2,
         "resultInfo" : {
-          "totalRecords" : 1,
+          "totalRecords" : 2,
           "facets" : [ ]
         }
       },
