@@ -275,8 +275,8 @@
         </executions>
       </plugin>
 
-      <!-- Replace the baseUri and the protocols in the RAMLs that have been 
-        copied to apidocs directory so that they can be used via the local html api 
+      <!-- Replace the baseUri and the protocols in the RAMLs that have been
+        copied to apidocs directory so that they can be used via the local html api
         console. -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -369,7 +369,7 @@
           <pushChanges>false</pushChanges>
           <localCheckout>true</localCheckout>
         </configuration>
-      </plugin>      
+      </plugin>
     </plugins>
   </build>
 </project>
