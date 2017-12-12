@@ -33,7 +33,7 @@ public class RMAPIService {
   /**
    * Constructs an RMAPI Service object which is used to make passthru requests to
    * rmapi
-   * 
+   *
    * @param customerId
    * @param apiKey
    * @param baseURI
@@ -47,9 +47,9 @@ public class RMAPIService {
   }
 
   /**
-   * 
+   *
    * Retrieve title by id from rmapi service
-   * 
+   *
    * @param titleId
    * @return
    */
@@ -99,10 +99,10 @@ public class RMAPIService {
   }
 
   /**
-   * 
+   *
    * Retrieve list of titles from rmapi service (based on rmapi query that is
    * passed in)
-   * 
+   *
    * @param rmapiQuery
    * @return
    */
@@ -152,7 +152,7 @@ public class RMAPIService {
 
   /**
    * Constructs full rmapi path
-   * 
+   *
    * @param path
    * @return
    */
