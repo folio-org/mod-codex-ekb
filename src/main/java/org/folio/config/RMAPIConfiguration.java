@@ -3,7 +3,6 @@ package org.folio.config;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collector;
 
 import org.folio.rest.RestVerticle;
 import org.folio.rest.tools.client.HttpClientFactory;
@@ -12,10 +11,6 @@ import org.folio.rest.tools.client.interfaces.HttpClientInterface;
 import org.folio.rest.tools.utils.TenantTool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -27,33 +22,19 @@ import io.vertx.core.json.JsonObject;
  *
  * TODO: Store a Map (Cluster wide?) of tenant to RMIConfiguration objects.
  */
-@JsonIgnoreProperties(ignoreUnknown = true)
 public final class RMAPIConfiguration {
   private static final Logger LOG = LoggerFactory.getLogger(RMAPIConfiguration.class);
-  private static final String CONFIGURATIONS_ENTRIES_ENDPOINT_PATH = "/configurations/entries?query=%28module%3D%3DKB_EBSCO%20AND%20configName%3D%3Dapi_credentials%29";
+  private static final String CONFIGURATIONS_ENTRIES_ENDPOINT_PATH = "/configurations/entries?query=%28module%3D%3DEKB%20AND%20configName%3D%3Dapi_access%29";
 
   private String customerId;
   private String apiKey;
   private String url;
 
-  /**
-   * Constructs a new RMAPIConfiguration. Keeping this private for now, only
-   * this class should be able to build one.
-   *
-   * @param customerId The customer ID.
-   * @param apiKey the API Key.
-   */
-  @JsonCreator
-  private RMAPIConfiguration(
-      @JsonProperty("customer-id") final String customerId,
-      @JsonProperty("api-key") final String apiKey,
-      @JsonProperty("url") final String url) {
-    this.customerId = customerId;
-    this.apiKey = apiKey;
-    this.url = url;
+  private RMAPIConfiguration() {
+    super();
   }
 
-  /**
+ /**
    * Returns the customer ID.
    *
    * @return The customer ID.
@@ -115,7 +96,7 @@ public final class RMAPIConfiguration {
       final HttpClientInterface httpClient = HttpClientFactory.getHttpClient(okapiURL, tenantId);
 
       httpClient.request(CONFIGURATIONS_ENTRIES_ENDPOINT_PATH, okapiHeadersLocal)
-        .whenCompleteAsync((response, throwable) -> {
+        .whenComplete((response, throwable) -> {
           if (Response.isSuccess(response.getCode())) {
             final JsonObject responseBody = response.getBody();
             final JsonArray configs = responseBody.getJsonArray("configs");
@@ -144,36 +125,28 @@ public final class RMAPIConfiguration {
    */
   private static void mapResults(JsonArray configs, CompletableFuture<RMAPIConfiguration> future) {
     try {
-      RMAPIConfiguration mappedValue = configs.stream()
-          .filter(JsonObject.class::isInstance)
-          .map(JsonObject.class::cast)
-          .collect(Collector.of(JsonObject::new,
-              (result, entry) -> {
-                final String code = entry.getString("code");
-                  if ("kb.ebsco.credentials".equalsIgnoreCase(code)) {
-                  // This seems kind of fragile, but any failure will fail the
-                  // request, which is what we want. However,
-                  // ArrayIndexOutOfBoundsException or NPE are not ideal failure
-                  // messages. :)
-                  final String value = entry.getString("value");
-                  final String [] values = value.split("&");
-                  for (String v : values) {
-                    final String [] kv = v.split("=");
-                    result.put(kv[0], kv[1]);
-                  }
-                } else if ("kb.ebsco.url".equalsIgnoreCase(code)) {
-                  result.put("url", entry.getString("value"));
-                }
-              },
-              JsonObject::mergeIn,
-              result -> result.mapTo(RMAPIConfiguration.class)));
+      RMAPIConfiguration config = new RMAPIConfiguration();
 
-      if (mappedValue.getCustomerId() == null ||
-          mappedValue.getAPIKey() == null ||
-          mappedValue.getUrl() == null) {
+      configs.stream()
+        .filter(JsonObject.class::isInstance)
+        .map(JsonObject.class::cast)
+        .forEach(entry -> {
+          final String code = entry.getString("code");
+          final String value = entry.getString("value");
+          if ("kb.ebsco.customerId".equalsIgnoreCase(code)) {
+            config.customerId = value;
+          } else if ("kb.ebsco.apiKey".equalsIgnoreCase(code)) {
+            config.apiKey = value;
+          } else if ("kb.ebsco.url".equalsIgnoreCase(code)) {
+            config.url = value;
+          }
+        });
+
+      if (config.getCustomerId() == null || config.getAPIKey() == null ||
+          config.getUrl() == null) {
         future.completeExceptionally(new IllegalStateException("Configuration data is invalid"));
       } else {
-        future.complete(mappedValue);
+        future.complete(config);
       }
     } catch (Exception ex) {
       future.completeExceptionally(ex);
