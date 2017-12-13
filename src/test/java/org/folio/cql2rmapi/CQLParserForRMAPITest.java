@@ -264,7 +264,7 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void CQLParserReturnsExpectedQueriesIfSelectionIsSetToTrueTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI("title=bridget and type = journal and selected=true" , 900, 100);
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI("title=bridget and type = journal and ext.selected=true" , 900, 100);
     final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
     assertEquals(1, queries.size());
     assertEquals(0, parser.getInstanceIndex());
@@ -275,7 +275,7 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void CQLParserReturnsExpectedQueriesIfSelectionIsSetToAllTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI("title=bridget and type = journal and selected=all" , 900, 100);
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI("title=bridget and type = journal and ext.selected=all" , 900, 100);
     final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
     assertEquals(1, queries.size());
     assertEquals(0, parser.getInstanceIndex());
@@ -286,7 +286,7 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void CQLParserReturnsExpectedQueriesIfSelectionIsSetToFalseTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI("title=bridget and type = journal and selected=false" , 900, 100);
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI("title=bridget and type = journal and ext.selected=false" , 900, 100);
     final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
     assertEquals(1, queries.size());
     assertEquals(0, parser.getInstanceIndex());
