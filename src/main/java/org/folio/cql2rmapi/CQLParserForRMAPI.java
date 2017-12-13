@@ -30,7 +30,7 @@ public class CQLParserForRMAPI {
   private static final String CQL_ALL_RECORDS = "cql.allRecords";
   private static final String RM_API_TITLE = "titlename";
   private static final String SOURCE = "source";
-  private static final String SELECTED = "selected";
+  private static final String SELECTED = "ext.selected";
   private static final String TITLE = "title";
   private static final String TYPE = "type";
 
@@ -287,7 +287,7 @@ public class CQLParserForRMAPI {
           break;
         case "true":
           builder.append(queryParam);
-          builder.append(SELECTED);
+          builder.append("selected");
           break;
         case "false":
           builder.append(queryParam);
