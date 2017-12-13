@@ -114,7 +114,7 @@ public class RMAPIConfigurationTest {
 
     CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
 
-    config.whenCompleteAsync((result, exception) -> {
+    config.whenComplete((result, exception) -> {
       context.assertNotNull(result);
 
       RMAPIConfiguration rmAPIConfig = result;
@@ -141,7 +141,7 @@ public class RMAPIConfigurationTest {
 
     CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
 
-    config.whenCompleteAsync((result, exception) -> {
+    config.whenComplete((result, exception) -> {
       context.assertNull(result);
       async.complete();
     });
@@ -162,7 +162,7 @@ public class RMAPIConfigurationTest {
 
     CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
 
-    config.whenCompleteAsync((result, exception) -> {
+    config.whenComplete((result, exception) -> {
       context.assertNull(result);
       async.complete();
     });
@@ -183,7 +183,7 @@ public class RMAPIConfigurationTest {
 
     CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
 
-    config.whenCompleteAsync((result, exception) -> {
+    config.whenComplete((result, exception) -> {
       context.assertNull(result);
       async.complete();
     });
@@ -204,7 +204,7 @@ public class RMAPIConfigurationTest {
 
     CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
 
-    config.whenCompleteAsync((result, exception) -> {
+    config.whenComplete((result, exception) -> {
       context.assertNull(result);
       async.complete();
     });
@@ -223,7 +223,7 @@ public class RMAPIConfigurationTest {
     }
 
     CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
-    config.whenCompleteAsync((result, exception) -> {
+    config.whenComplete((result, exception) -> {
       context.assertNotNull(result);
 
       RMAPIConfiguration rmAPIConfig = result;
@@ -249,7 +249,7 @@ public class RMAPIConfigurationTest {
     }
 
     CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
-    config.whenCompleteAsync((result, exception) -> {
+    config.whenComplete((result, exception) -> {
       context.assertNotNull(result);
 
       RMAPIConfiguration rmAPIConfig = result;
@@ -273,7 +273,7 @@ public class RMAPIConfigurationTest {
     }
 
     CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
-    config.whenCompleteAsync((result, exception) -> {
+    config.whenComplete((result, exception) -> {
       context.assertNull(result);
 
       async.complete();
@@ -293,9 +293,24 @@ public class RMAPIConfigurationTest {
     }
 
     CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
-    config.whenCompleteAsync((result, exception) -> {
+    config.whenComplete((result, exception) -> {
       context.assertNull(result);
       context.assertTrue(exception instanceof NullPointerException);
+
+      async.complete();
+    });
+  }
+
+  @Test
+  public void missingOkapiURLHeaderTest(TestContext context) {
+    Async async = context.async();
+
+    okapiHeaders.remove("x-okapi-url");
+
+    CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+    config.whenComplete((result, exception) -> {
+      context.assertNull(result);
+      context.assertTrue(exception instanceof IllegalArgumentException);
 
       async.complete();
     });
