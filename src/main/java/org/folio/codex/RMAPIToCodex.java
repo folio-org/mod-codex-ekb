@@ -1,5 +1,6 @@
 package org.folio.codex;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -46,47 +47,24 @@ public final class RMAPIToCodex {
     final RMAPIService rmAPIService = new RMAPIService(rmAPIConfig.getCustomerId(), rmAPIConfig.getAPIKey(),
         rmAPIConfig.getUrl(), vertxContext.owner());
 
-    final CompletableFuture<Instance> cf = new CompletableFuture<>();
-
-    rmAPIService.getTileById(id).whenComplete((rmapiResult, throwable) -> {
-      if (throwable != null) {
-        cf.completeExceptionally(throwable);
-      } else {
-        try {
-          final Instance codexInstance = convertRMAPITitleToCodex(rmapiResult);
-          cf.complete(codexInstance);
-        } catch (final Exception ex) {
-          cf.completeExceptionally(ex);
-        }
-      }
-    });
-
-    return cf;
+    return rmAPIService.getTileById(id)
+        .thenApply(RMAPIToCodex::convertRMAPITitleToCodex);
   }
 
   public static CompletableFuture<InstanceCollection> getInstances(CQLParserForRMAPI cql, Context vertxContext,
       RMAPIConfiguration rmAPIConfig) {
     log.info("Calling getInstances");
 
-    final RMAPIService rmAPIService = new RMAPIService(rmAPIConfig.getCustomerId(), rmAPIConfig.getAPIKey(),
-        rmAPIConfig.getUrl(), vertxContext.owner());
-    final List<String> queries = cql.getRMAPIQueries();
-    final String query = queries.get(0); //Loop over the queries instead of getting the first one
-    final CompletableFuture<InstanceCollection> cf = new CompletableFuture<>();
+    final List<CompletableFuture<Titles>> titleCfs = new ArrayList<>();
 
-    rmAPIService.getTitleList(query).whenComplete((rmapiResult, throwable) -> {
-      if (throwable != null) {
-        cf.completeExceptionally(throwable);
-      } else {
-        try {
-          final InstanceCollection codexInstances = convertRMTitleListToCodex(rmapiResult);
-          cf.complete(codexInstances);
-        } catch (final Exception ex) {
-          cf.completeExceptionally(ex);
-        }
-      }
-    });
-    return cf;
+    // We need to create a new RMAPIService for each call so that we don't close
+    // the HTTP client connection.
+    for (String query : cql.getRMAPIQueries()) {
+      titleCfs.add(new RMAPIService(rmAPIConfig.getCustomerId(), rmAPIConfig.getAPIKey(),
+          rmAPIConfig.getUrl(), vertxContext.owner()).getTitleList(query));
+    }
+
+    return convertRMTitleListToCodex(titleCfs, cql.getInstanceIndex());
   }
 
   /**
@@ -179,14 +157,36 @@ public final class RMAPIToCodex {
     }
   }
 
-  private static InstanceCollection convertRMTitleListToCodex(Titles rmTitles) {
+  private static CompletableFuture<InstanceCollection> convertRMTitleListToCodex(List<CompletableFuture<Titles>> titleCfs, int index) {
+    return CompletableFuture.allOf(titleCfs.toArray(new CompletableFuture[titleCfs.size()]))
+    .thenApply(result -> {
+      final InstanceCollection instanceCollection = new InstanceCollection();
+      List<Instance> instances = new ArrayList<>();
+      int totalResults = 0;
+      int page = 0;
 
-    final InstanceCollection instances = new InstanceCollection();
-    final List<Instance> codexInstances = rmTitles.titleList.stream().map(RMAPIToCodex::convertRMAPITitleToCodex)
-        .collect(Collectors.toList());
-    instances.setInstances(codexInstances);
-    instances.setTotalRecords(rmTitles.totalResults);
-    return instances;
+      for (CompletableFuture<Titles> titleCf : titleCfs) {
+        final Titles titles = titleCf.join();
+        totalResults = Math.max(totalResults, titles.totalResults);
+        page = Math.max(page, titles.titleList.size());
+        instances.addAll(titles.titleList.stream()
+            .map(RMAPIToCodex::convertRMAPITitleToCodex)
+            .collect(Collectors.toList()));
+      }
+
+      if (index > 0) {
+        if (instances.size() >= index) {
+          int end = Math.min(instances.size(), (page * (titleCfs.size() - 1)) + index);
+          instances = instances.subList(index, end);
+        } else {
+          instances.clear();
+        }
+      }
+
+      instanceCollection.setInstances(instances);
+      instanceCollection.setTotalRecords(totalResults);
+
+      return instanceCollection;
+    });
   }
-
 }

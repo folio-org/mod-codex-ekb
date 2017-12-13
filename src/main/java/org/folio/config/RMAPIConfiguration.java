@@ -95,16 +95,20 @@ public final class RMAPIConfiguration {
     try {
       final HttpClientInterface httpClient = HttpClientFactory.getHttpClient(okapiURL, tenantId);
 
-      httpClient.request(CONFIGURATIONS_ENTRIES_ENDPOINT_PATH, okapiHeadersLocal)
-        .whenComplete((response, throwable) -> {
-          if (Response.isSuccess(response.getCode())) {
-            final JsonObject responseBody = response.getBody();
-            final JsonArray configs = responseBody.getJsonArray("configs");
+      future = httpClient.request(CONFIGURATIONS_ENTRIES_ENDPOINT_PATH, okapiHeadersLocal)
+        .thenApply(response -> {
+          try {
+            if (Response.isSuccess(response.getCode())) {
+              final JsonObject responseBody = response.getBody();
+              final JsonArray configs = responseBody.getJsonArray("configs");
 
-            mapResults(configs, future);
-          } else {
-            LOG.error("Cannot get configuration data: " + response.getError().toString(), response.getException());
-            future.completeExceptionally(new IllegalStateException(response.getError().toString()));
+              return mapResults(configs);
+            } else {
+              LOG.error("Cannot get configuration data: " + response.getError().toString(), response.getException());
+              throw new IllegalStateException(response.getError().toString());
+            }
+          } finally {
+            httpClient.closeClient();
           }
         });
     } catch (Exception e) {
@@ -120,36 +124,30 @@ public final class RMAPIConfiguration {
    *
    * @param configs All the RM API related configurations returned by
    *        mod-configuration.
-   * @param future The future that will store the RMAPIConfiguration object or
-   *        the reason for failure.
    */
-  private static void mapResults(JsonArray configs, CompletableFuture<RMAPIConfiguration> future) {
-    try {
-      RMAPIConfiguration config = new RMAPIConfiguration();
+  private static RMAPIConfiguration mapResults(JsonArray configs) {
+    RMAPIConfiguration config = new RMAPIConfiguration();
 
-      configs.stream()
-        .filter(JsonObject.class::isInstance)
-        .map(JsonObject.class::cast)
-        .forEach(entry -> {
-          final String code = entry.getString("code");
-          final String value = entry.getString("value");
-          if ("kb.ebsco.customerId".equalsIgnoreCase(code)) {
-            config.customerId = value;
-          } else if ("kb.ebsco.apiKey".equalsIgnoreCase(code)) {
-            config.apiKey = value;
-          } else if ("kb.ebsco.url".equalsIgnoreCase(code)) {
-            config.url = value;
-          }
-        });
+    configs.stream()
+      .filter(JsonObject.class::isInstance)
+      .map(JsonObject.class::cast)
+      .forEach(entry -> {
+        final String code = entry.getString("code");
+        final String value = entry.getString("value");
+        if ("kb.ebsco.customerId".equalsIgnoreCase(code)) {
+          config.customerId = value;
+        } else if ("kb.ebsco.apiKey".equalsIgnoreCase(code)) {
+          config.apiKey = value;
+        } else if ("kb.ebsco.url".equalsIgnoreCase(code)) {
+          config.url = value;
+        }
+      });
 
-      if (config.getCustomerId() == null || config.getAPIKey() == null ||
-          config.getUrl() == null) {
-        future.completeExceptionally(new IllegalStateException("Configuration data is invalid"));
-      } else {
-        future.complete(config);
-      }
-    } catch (Exception ex) {
-      future.completeExceptionally(ex);
+    if (config.getCustomerId() == null || config.getAPIKey() == null ||
+        config.getUrl() == null) {
+      throw new IllegalStateException("Configuration data is invalid");
     }
+
+    return config;
   }
 }
