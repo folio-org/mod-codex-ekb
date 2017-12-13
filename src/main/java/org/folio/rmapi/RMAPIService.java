@@ -53,7 +53,7 @@ public class RMAPIService {
    * @param titleId
    * @return
    */
-  public CompletableFuture<Title> getTitleById(String titleId) {
+  public CompletableFuture<Title> getTileById(String titleId) {
 
     CompletableFuture<Title> future = new CompletableFuture<>();
 

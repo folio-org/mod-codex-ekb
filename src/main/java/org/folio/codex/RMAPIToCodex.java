@@ -42,7 +42,7 @@ public final class RMAPIToCodex {
     final RMAPIService rmAPIService = new RMAPIService(rmAPIConfig.getCustomerId(), rmAPIConfig.getAPIKey(),
         rmAPIConfig.getUrl(), vertxContext.owner());
 
-    return rmAPIService.getTitleById(id)
+    return rmAPIService.getTileById(id)
         .thenApply(RMAPIToCodex::convertRMAPITitleToCodex);
   }
 
