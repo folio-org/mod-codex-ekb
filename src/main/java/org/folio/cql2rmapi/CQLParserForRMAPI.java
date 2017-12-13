@@ -24,7 +24,8 @@ import org.z3950.zing.cql.ModifierSet;
 
 public class CQLParserForRMAPI {
 
-  private String error = "Unsupported Query Format : ";
+  private final String error = "Unsupported Query Format : ";
+  private final String notSupported = " is not supported.";
   private static final String CQL_SERVER_CHOICE = "cql.serverchoice";
   private static final String CQL_ALL_RECORDS = "cql.allRecords";
   private static final String RM_API_TITLE = "titlename";
@@ -82,8 +83,7 @@ public class CQLParserForRMAPI {
     try {
       return parser.parse(query);
     } catch (CQLParseException | IOException e) {
-      error += "Search query is in an unsupported format.";
-      throw new QueryValidationException(error, e);
+      throw new QueryValidationException(error + "Search query is in an unsupported format.", e);
     }
   }
 
@@ -105,10 +105,13 @@ public class CQLParserForRMAPI {
 
     final String indexNode = node.getIndex(); // gives the search field
     final String termNode = node.getTerm(); // gives the search value
-
+    final StringBuilder builder = new StringBuilder();
+    builder.append(error);
     switch(indexNode.toLowerCase()) {
     case CQL_ALL_RECORDS:
-      throw new QueryValidationException(error + " This query is not supported.");
+      builder.append(" This query");
+      builder.append(notSupported);
+      throw new QueryValidationException(builder.toString());
     case CQL_SERVER_CHOICE:
       // If no search field is passed, default it to title search. This is the default
       // search supported by RMAPI
@@ -129,13 +132,17 @@ public class CQLParserForRMAPI {
     default:
       if (!EnumUtils.isValidEnum(RMAPISupportedSearchFields.class, indexNode.toUpperCase())) {
         // If search field is not supported, log and return an error response
-        error += "Search field " + indexNode + " is not supported.";
-        throw new QueryValidationException(error);
+        builder.append("Search field ");
+        builder.append(indexNode);
+        builder.append(notSupported);
+        throw new QueryValidationException(builder.toString());
       } else if((searchField == null) && (searchValue == null)){
         searchField = indexNode;
         searchValue = termNode;
       } else {
-        throw new QueryValidationException(error + "Search on multiple fields is not supported.");
+        builder.append("Search on multiple fields");
+        builder.append(notSupported);
+        throw new QueryValidationException(builder.toString());
       }
     }
   }
@@ -144,16 +151,24 @@ public class CQLParserForRMAPI {
     if(EnumUtils.isValidEnum(validSelections.class, termNode.toUpperCase())) {
       selection = termNode;
     } else {
-      error += "Selected " + termNode + " is not supported.";
-      throw new QueryValidationException(error);
+      final StringBuilder builder = new StringBuilder();
+      builder.append(error);
+      builder.append("Selected ");
+      builder.append(termNode);
+      builder.append(notSupported);
+      throw new QueryValidationException(builder.toString());
     }
   }
 
   private void checkSource(String termNode) throws QueryValidationException {
     //Throw an exception and log an error if source is invalid, if it is valid, do nothing.
     if(!EnumUtils.isValidEnum(validSources.class, termNode.toUpperCase())) {
-      error += "Source " + termNode + " is not supported.";
-      throw new QueryValidationException(error);
+      final StringBuilder builder = new StringBuilder();
+      builder.append(error);
+      builder.append("Source ");
+      builder.append(termNode);
+      builder.append(notSupported);
+      throw new QueryValidationException(builder.toString());
     }
   }
 
@@ -162,13 +177,20 @@ public class CQLParserForRMAPI {
     if(filterValue == null) {
       filterValue = termNode;
     } else {
-      error += "Filtering on multiple types is not supported.";
-      throw new QueryValidationException(error);
+      final StringBuilder builder = new StringBuilder();
+      builder.append(error);
+      builder.append("Filtering on multiple types ");
+      builder.append(notSupported);
+      throw new QueryValidationException(builder.toString());
     }
     if((filterValue != null) && !EnumUtils.isValidEnum(RMAPISupportedFilterValues.class, filterValue.toUpperCase())) {
       // If filter value is not supported, log and return an error response
-      error += "Filter on resource type whose value is " + filterValue + " is not supported.";
-      throw new QueryValidationException(error);
+      final StringBuilder builder = new StringBuilder();
+      builder.append(error);
+      builder.append("Filter on resource type whose value is ");
+      builder.append(filterValue);
+      builder.append(notSupported);
+      throw new QueryValidationException(builder.toString());
     }
   }
 
@@ -181,16 +203,20 @@ public class CQLParserForRMAPI {
     final String comparator = node.getRelation().getBase(); // gives operator
     // If comparison operators are not supported, log and return an error response
     if (!comparator.equals("=")) {
-      error += "Search with " + comparator + " operator is not supported.";
-      throw new QueryValidationException(error);
+      final StringBuilder builder = new StringBuilder();
+      builder.append(error);
+      builder.append("Search with ");
+      builder.append(comparator);
+      builder.append(" operator");
+      builder.append(notSupported);
+      throw new QueryValidationException(builder.toString());
     }
   }
 
   private void parseCQLSortNode(CQLSortNode node) throws QueryValidationException {
     final List<ModifierSet> sortIndexes = node.getSortIndexes();
     if (sortIndexes.size() > 1) {
-      error += "Sorting on multiple keys is unsupported.";
-      throw new QueryValidationException(error);
+      throw new QueryValidationException(error + "Sorting on multiple keys" + notSupported);
     }
     // At this point RM API supports only sort by title and relevance
     // front end does not support relevance, so we ignore everything but title
@@ -220,7 +246,10 @@ public class CQLParserForRMAPI {
       checkNodeInstance(leftNode);
       checkNodeInstance(rightNode);
     } else {
-      throw new QueryUnsupportedFeatureException(error + "Boolean operators OR, NOT and PROX are unsupported.");
+      final StringBuilder builder = new StringBuilder();
+      builder.append(error);
+      builder.append("Boolean operators OR, NOT and PROX are unsupported.");
+      throw new QueryUnsupportedFeatureException(builder.toString());
     }
   }
 
@@ -250,16 +279,27 @@ public class CQLParserForRMAPI {
 
       if (selection != null) {
         // Map fields to RM API
+        final String queryParam = "&selection=";
         switch(selection.toLowerCase()) {
         case "all":
-          builder.append("&selection=" + "all");
+          builder.append(queryParam);
+          builder.append("all");
           break;
         case "true":
-          builder.append("&selection=" + "selected");
+          builder.append(queryParam);
+          builder.append(SELECTED);
           break;
         case "false":
-          builder.append("&selection=" + "notselected");
+          builder.append(queryParam);
+          builder.append("notselected");
           break;
+        default:
+          final StringBuilder errorMsgBuilder = new StringBuilder();
+          errorMsgBuilder.append(error);
+          errorMsgBuilder.append("Selected value ");
+          errorMsgBuilder.append(selection);
+          errorMsgBuilder.append(notSupported);
+          throw new QueryValidationException(errorMsgBuilder.toString());
         }
       }
 
