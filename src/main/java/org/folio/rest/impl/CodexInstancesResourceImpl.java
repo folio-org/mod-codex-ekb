@@ -2,7 +2,6 @@ package org.folio.rest.impl;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import javax.ws.rs.core.Response;
@@ -42,17 +41,15 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
     log.info("method call: getCodexInstances");
 
     RMAPIConfiguration.getConfiguration(okapiHeaders)
-      .thenCombineAsync(CompletableFuture.supplyAsync(() -> {
+      .thenCompose(rmAPIConfig -> {
+        final CQLParserForRMAPI parserForRMAPI;
         try {
-          return new CQLParserForRMAPI(query, offset, limit);
+          parserForRMAPI = new CQLParserForRMAPI(query, offset, limit);
         } catch (UnsupportedEncodingException | QueryValidationException e) {
           throw new CompletionException(e);
         }
-      }), (rmAPIConfig, parserForRMAPI) ->
-        RMAPIToCodex.getInstances(parserForRMAPI, vertxContext, rmAPIConfig)
-      ).thenCompose(instances ->
-        instances
-      ).thenAcceptAsync(instances ->
+        return RMAPIToCodex.getInstances(parserForRMAPI, vertxContext, rmAPIConfig);
+      }).thenAccept(instances ->
          asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withJsonOK(instances)))
       ).exceptionally(throwable -> {
         log.error("getCodexInstances failed!", throwable);
@@ -74,9 +71,9 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
     log.info("method call: getCodexInstancesById");
 
     RMAPIConfiguration.getConfiguration(okapiHeaders)
-      .thenComposeAsync(rmAPIConfig ->
+      .thenCompose(rmAPIConfig ->
         RMAPIToCodex.getInstance(id, vertxContext, rmAPIConfig)
-      ).thenApplyAsync(instance -> {
+      ).thenApply(instance -> {
         asyncResultHandler.handle(Future.succeededFuture(
             instance == null ?
                 CodexInstancesResource.GetCodexInstancesByIdResponse.withPlainNotFound(id) :
