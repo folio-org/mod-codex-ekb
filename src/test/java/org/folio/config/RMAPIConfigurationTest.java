@@ -124,6 +124,10 @@ public class RMAPIConfigurationTest {
       context.assertEquals("https://rmapi.example.com", rmAPIConfig.getUrl());
 
       async.complete();
+    }).exceptionally(throwable -> {
+      context.fail(throwable);
+      async.complete();
+      return null;
     });
   }
 
@@ -233,6 +237,10 @@ public class RMAPIConfigurationTest {
       context.assertEquals("https://rmapi.example.com", rmAPIConfig.getUrl());
 
       async.complete();
+    }).exceptionally(throwable -> {
+      context.fail(throwable);
+      async.complete();
+      return null;
     });
   }
 
@@ -257,6 +265,10 @@ public class RMAPIConfigurationTest {
       context.assertEquals("RMAPIConfiguration [customerId=myid, apiKey=mykey, url=https://rmapi.example.com]", rmAPIConfig.toString());
 
       async.complete();
+    }).exceptionally(throwable -> {
+      context.fail(throwable);
+      async.complete();
+      return null;
     });
   }
 
