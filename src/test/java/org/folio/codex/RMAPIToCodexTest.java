@@ -92,6 +92,10 @@ public class RMAPIToCodexTest {
         req.response().setStatusCode(200).end("{\"titleId\":1619585,\"titleName\":\"Tom, Dick and Harry\",\"publisherName\":\"Project Gutenberg Literary Archive Foundation\",\"identifiersList\":[{\"id\":\"1619585\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":[],\"isTitleCustom\":false,\"pubType\":\"Book\",\"customerResourcesList\":[{\"titleId\":1619585,\"packageId\":6750,\"packageName\":\"Project Gutenberg eBooks\",\"packageType\":\"Variable\",\"proxy\":{\"id\":\"<n>\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":953,\"vendorName\":\"Project Gutenberg\",\"locationId\":5137360,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://www.gutenberg.org/ebooks/20992\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null},{\"titleId\":1619585,\"packageId\":19153,\"packageName\":\"Project Gutenberg eBooks Archive Collection\",\"packageType\":\"Variable\",\"proxy\":{\"id\":\"<n>\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":953,\"vendorName\":\"Project Gutenberg\",\"locationId\":7435416,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"https://archive.org/details/tomdickandharry20992gut\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}],\"description\":null,\"edition\":null,\"isPeerReviewed\":false,\"contributorsList\":[{\"type\":\"author\",\"contributor\":\"Reed, Talbot Baines\"}]}");
       } else if (req.path().equals("/rm/rmaccounts/test/titles/4581052")) {
         req.response().setStatusCode(200).end("{\"titleId\":4581052,\"titleName\":\"The World According to Philip K. Dick\",\"publisherName\":\"Palgrave Macmillan Ltd.\",\"identifiersList\":[{\"id\":\"3114209\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9},{\"id\":\"978-1-137-41458-8\",\"source\":\"ResourceIdentifier\",\"subtype\":1,\"type\":1},{\"id\":\"978-1-137-41459-5\",\"source\":\"ResourceIdentifier\",\"subtype\":2,\"type\":1},{\"id\":\"978-1-349-49032-5\",\"source\":\"ResourceIdentifier\",\"subtype\":1,\"type\":1},{\"id\":\"998217\",\"source\":\"ResourceIdentifier\",\"subtype\":0,\"type\":7}],\"subjectsList\":[{\"type\":\"BISAC\",\"subject\":\"LITERARY CRITICISM / Science Fiction & Fantasy\"}],\"isTitleCustom\":false,\"pubType\":\"Book\",\"customerResourcesList\":[{\"titleId\":4581052,\"packageId\":3814,\"packageName\":\"Palgrave Connect Literature & Performing Arts eBook Collection\",\"packageType\":\"Complete\",\"proxy\":{\"id\":\"<n>\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":262,\"vendorName\":\"Palgrave Macmillan Ltd\",\"locationId\":16869169,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"2015-01-01\",\"endCoverage\":\"2015-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://www.palgraveconnect.com/pc/doifinder/10.1057/9781137414595\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null},{\"titleId\":4581052,\"packageId\":3831,\"packageName\":\"Palgrave Connect Complete eBook Collection\",\"packageType\":\"Variable\",\"proxy\":{\"id\":\"<n>\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":262,\"vendorName\":\"Palgrave Macmillan Ltd\",\"locationId\":12282411,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"2015-01-01\",\"endCoverage\":\"2015-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://www.palgraveconnect.com/pc/doifinder/10.1057/9781137414595\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null},{\"titleId\":4581052,\"packageId\":5207,\"packageName\":\"EBSCO eBooks\",\"packageType\":\"Selectable\",\"proxy\":{\"id\":\"proxy-id-123\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":19,\"vendorName\":\"EBSCO\",\"locationId\":12699213,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"2015-01-01\",\"endCoverage\":\"2015-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=998217\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null},{\"titleId\":4581052,\"packageId\":1244867,\"packageName\":\"Palgrave Connect Literature eBook Collection 2015\",\"packageType\":\"Complete\",\"proxy\":{\"id\":\"<n>\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":262,\"vendorName\":\"Palgrave Macmillan Ltd\",\"locationId\":16870606,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"2015-01-01\",\"endCoverage\":\"2015-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://www.palgraveconnect.com/pc/doifinder/10.1057/9781137414595\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}],\"description\":null,\"edition\":null,\"isPeerReviewed\":false,\"contributorsList\":[{\"type\":\"editor\",\"contributor\":\"Stefan Schlensag\"},{\"type\":\"editor\",\"contributor\":\"Alexander Dunst\"},{\"type\":\"author\",\"contributor\":\"Dunst, Alexander\"},{\"type\":\"author\",\"contributor\":\"Schlensag, Stefan\"}]}");
+      } else if (req.path().equals("/rm/rmaccounts/test/titles/1619586")) {
+        req.response().setStatusCode(200).end("{\"titleId\":1619586,\"titleName\":\"Tom, Dick and Harry\",\"publisherName\":\"Project Gutenberg Literary Archive Foundation\",\"subjectsList\":[],\"isTitleCustom\":false,\"pubType\":\"Book\",\"customerResourcesList\":[{\"titleId\":1619585,\"packageId\":6750,\"packageName\":\"Project Gutenberg eBooks\",\"packageType\":\"Variable\",\"proxy\":{\"id\":\"<n>\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":953,\"vendorName\":\"Project Gutenberg\",\"locationId\":5137360,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://www.gutenberg.org/ebooks/20992\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null},{\"titleId\":1619585,\"packageId\":19153,\"packageName\":\"Project Gutenberg eBooks Archive Collection\",\"packageType\":\"Variable\",\"proxy\":{\"id\":\"<n>\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":953,\"vendorName\":\"Project Gutenberg\",\"locationId\":7435416,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"https://archive.org/details/tomdickandharry20992gut\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}],\"description\":null,\"edition\":null,\"isPeerReviewed\":false,\"contributorsList\":[]}");
+      } else if (req.path().equals("/rm/rmaccounts/test/titles/4581057")) {
+        req.response().setStatusCode(200).end("{\"titleId\":4581057,\"titleName\":\"The World According to Philip K. Dick\",\"publisherName\":\"Palgrave Macmillan Ltd.\",\"identifiersList\":[{\"id\":\"3114209\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9},{\"id\":\"978-1-137-41458-8\",\"source\":\"ResourceIdentifier\",\"subtype\":9,\"type\":1},{\"id\":\"978-1-137-41459-5\",\"source\":\"ResourceIdentifier\",\"subtype\":2,\"type\":1},{\"id\":\"978-1-349-49032-5\",\"source\":\"ResourceIdentifier\",\"subtype\":1,\"type\":1},{\"id\":\"998217\",\"source\":\"ResourceIdentifier\",\"subtype\":0,\"type\":7}],\"subjectsList\":[{\"type\":\"BISAC\",\"subject\":\"LITERARY CRITICISM / Science Fiction & Fantasy\"}],\"isTitleCustom\":false,\"pubType\":\"Book\",\"customerResourcesList\":[{\"titleId\":4581052,\"packageId\":3814,\"packageName\":\"Palgrave Connect Literature & Performing Arts eBook Collection\",\"packageType\":\"Complete\",\"proxy\":{\"id\":\"<n>\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":262,\"vendorName\":\"Palgrave Macmillan Ltd\",\"locationId\":16869169,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"2015-01-01\",\"endCoverage\":\"2015-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://www.palgraveconnect.com/pc/doifinder/10.1057/9781137414595\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null},{\"titleId\":4581052,\"packageId\":3831,\"packageName\":\"Palgrave Connect Complete eBook Collection\",\"packageType\":\"Variable\",\"proxy\":{\"id\":\"<n>\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":262,\"vendorName\":\"Palgrave Macmillan Ltd\",\"locationId\":12282411,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"2015-01-01\",\"endCoverage\":\"2015-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://www.palgraveconnect.com/pc/doifinder/10.1057/9781137414595\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null},{\"titleId\":4581052,\"packageId\":5207,\"packageName\":\"EBSCO eBooks\",\"packageType\":\"Selectable\",\"proxy\":{\"id\":\"proxy-id-123\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":19,\"vendorName\":\"EBSCO\",\"locationId\":12699213,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"2015-01-01\",\"endCoverage\":\"2015-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=998217\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null},{\"titleId\":4581052,\"packageId\":1244867,\"packageName\":\"Palgrave Connect Literature eBook Collection 2015\",\"packageType\":\"Complete\",\"proxy\":{\"id\":\"<n>\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":262,\"vendorName\":\"Palgrave Macmillan Ltd\",\"locationId\":16870606,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"2015-01-01\",\"endCoverage\":\"2015-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://www.palgraveconnect.com/pc/doifinder/10.1057/9781137414595\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}],\"description\":null,\"edition\":null,\"isPeerReviewed\":false,\"contributorsList\":[{\"type\":\"editor\",\"contributor\":\"Stefan Schlensag\"},{\"type\":\"editor\",\"contributor\":\"Alexander Dunst\"},{\"type\":\"author\",\"contributor\":\"Dunst, Alexander\"},{\"type\":\"author\",\"contributor\":\"Schlensag, Stefan\"}]}");
       }
     });
     server.listen(serverPort, host, ar -> {
@@ -146,6 +150,10 @@ public class RMAPIToCodexTest {
       context.assertTrue(response.getLanguage().isEmpty());
 
       async.complete();
+    }).exceptionally(throwable -> {
+      context.fail(throwable);
+      async.complete();
+      return null;
     });
   }
 
@@ -205,6 +213,98 @@ public class RMAPIToCodexTest {
       context.assertTrue(response.getLanguage().isEmpty());
 
       async.complete();
+    }).exceptionally(throwable -> {
+      context.fail(throwable);
+      async.complete();
+      return null;
+    });
+  }
+
+  @Test
+  public void testGetInstance3(TestContext context) {
+    Async async = context.async();
+
+    RMAPIConfiguration.getConfiguration(okapiHeaders).thenCompose(config -> {
+      return RMAPIToCodex.getInstance("4581057", vertx.getOrCreateContext(), config);
+    }).whenComplete((response, throwable) -> {
+      context.assertEquals("4581057", response.getId());
+      context.assertEquals("The World According to Philip K. Dick", response.getTitle());
+      context.assertEquals(4, response.getContributor().size());
+      boolean foundAuthor1 = false;
+      boolean foundAuthor2 = false;
+      boolean foundEditor1 = false;
+      boolean foundEditor2 = false;
+      for (Contributor c : response.getContributor()) {
+        if ("author".equals(c.getType()) && "Schlensag, Stefan".equals(c.getName())) {
+          foundAuthor1 = true;
+        } else if ("author".equals(c.getType()) && "Dunst, Alexander".equals(c.getName())) {
+          foundAuthor2 = true;
+        } else if ("editor".equals(c.getType()) && "Stefan Schlensag".equals(c.getName())) {
+          foundEditor1 = true;
+        } else if ("editor".equals(c.getType()) && "Alexander Dunst".equals(c.getName())) {
+          foundEditor2 = true;
+        } else {
+          context.fail("Unknown contributor: " + c.getName() + ' ' + c.getType());
+        }
+      }
+      context.assertTrue(foundAuthor1);
+      context.assertTrue(foundAuthor2);
+      context.assertTrue(foundEditor1);
+      context.assertTrue(foundEditor2);
+      context.assertEquals("Palgrave Macmillan Ltd.", response.getPublisher());
+      context.assertEquals("Book", response.getType());
+      context.assertEquals("Electronic Resource", response.getFormat());
+      context.assertEquals(3, response.getIdentifier().size());
+      boolean foundIdentifier1 = false;
+      boolean foundIdentifier2 = false;
+      boolean foundIdentifier3 = false;
+      for (Identifier identifier : response.getIdentifier()) {
+        if ("ISBN(Online)".equals(identifier.getType()) && "978-1-137-41459-5".equals(identifier.getValue()) && identifier.getAdditionalProperties().isEmpty()) {
+          foundIdentifier1 = true;
+        } else if ("ISBN".equals(identifier.getType()) && "978-1-137-41458-8".equals(identifier.getValue()) && identifier.getAdditionalProperties().isEmpty()) {
+          foundIdentifier2 = true;
+        } else if ("ISBN(Print)".equals(identifier.getType()) && "978-1-349-49032-5".equals(identifier.getValue()) && identifier.getAdditionalProperties().isEmpty()) {
+          foundIdentifier3 = true;
+        } else {
+          context.fail("Unknown identifier: " + identifier.getValue() + ' ' + identifier.getType() + ' ' + identifier.getAdditionalProperties());
+        }
+      }
+      context.assertTrue(foundIdentifier1);
+      context.assertTrue(foundIdentifier2);
+      context.assertTrue(foundIdentifier3);
+      context.assertEquals("kb", response.getSource());
+      context.assertTrue(response.getLanguage().isEmpty());
+
+      async.complete();
+    }).exceptionally(throwable -> {
+      context.fail(throwable);
+      async.complete();
+      return null;
+    });
+  }
+
+  @Test
+  public void testGetInstanceEmptyContributorList(TestContext context) {
+    Async async = context.async();
+
+    RMAPIConfiguration.getConfiguration(okapiHeaders).thenCompose(config -> {
+      return RMAPIToCodex.getInstance("1619586", vertx.getOrCreateContext(), config);
+    }).whenComplete((response, throwable) -> {
+      context.assertEquals("1619586", response.getId());
+      context.assertEquals("Tom, Dick and Harry", response.getTitle());
+      context.assertTrue(response.getContributor().isEmpty());
+      context.assertEquals("Project Gutenberg Literary Archive Foundation", response.getPublisher());
+      context.assertEquals("Book", response.getType());
+      context.assertEquals("Electronic Resource", response.getFormat());
+      context.assertTrue(response.getIdentifier().isEmpty());
+      context.assertEquals("kb", response.getSource());
+      context.assertTrue(response.getLanguage().isEmpty());
+
+      async.complete();
+    }).exceptionally(throwable -> {
+      context.fail(throwable);
+      async.complete();
+      return null;
     });
   }
 
@@ -229,6 +329,10 @@ public class RMAPIToCodexTest {
       context.assertEquals(5, response.getInstances().size());
 
       async.complete();
+    }).exceptionally(throwable -> {
+      context.fail(throwable);
+      async.complete();
+      return null;
     });
   }
 
@@ -251,6 +355,10 @@ public class RMAPIToCodexTest {
       context.assertEquals("60 minutes. Dick Clarke", response.getInstances().get(0).getTitle());
 
       async.complete();
+    }).exceptionally(throwable -> {
+      context.fail(throwable);
+      async.complete();
+      return null;
     });
   }
 
@@ -272,6 +380,10 @@ public class RMAPIToCodexTest {
       context.assertEquals(0, response.getInstances().size());
 
       async.complete();
+    }).exceptionally(throwable -> {
+      context.fail(throwable);
+      async.complete();
+      return null;
     });
   }
 
