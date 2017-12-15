@@ -433,4 +433,17 @@ public class RMAPIToCodexTest {
     context.assertEquals("Print", SubType.PRINT.getDisplayName());
     context.assertEquals(1, SubType.PRINT.getCode());
   }
+
+  @Test
+  public void pubTypeTest(TestContext context) {
+    context.assertEquals("streamingaudio", PubType.fromCodex("audio").getRmAPI());
+
+    try {
+      PubType.fromRMAPI("bad-match");
+    } catch (IllegalArgumentException e) {
+      return;
+    }
+
+    context.fail("Expected exception");
+  }
 }
