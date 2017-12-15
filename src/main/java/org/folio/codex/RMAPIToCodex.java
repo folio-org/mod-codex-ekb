@@ -74,7 +74,7 @@ public final class RMAPIToCodex {
     codexInstance.setId(Integer.toString(svcTitle.titleId));
     codexInstance.setTitle(svcTitle.titleName);
     codexInstance.setPublisher(svcTitle.publisherName);
-    codexInstance.setType(svcTitle.pubType);
+    codexInstance.setType(PubType.fromRMAPI(svcTitle.pubType).getCodex());
     codexInstance.setFormat(E_RESOURCE_FORMAT);
     codexInstance.setSource(E_RESOURCE_SOURCE);
     codexInstance.setVersion(svcTitle.edition);

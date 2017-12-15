@@ -16,6 +16,7 @@ import org.folio.cql2rmapi.QueryValidationException;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Identifier;
+import org.folio.rest.jaxrs.model.Instance;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.junit.After;
 import org.junit.Before;
@@ -145,7 +146,7 @@ public class RMAPIToCodexTest {
       context.assertEquals("author", response.getContributor().iterator().next().getType());
       context.assertEquals("Reed, Talbot Baines", response.getContributor().iterator().next().getName());
       context.assertEquals("Project Gutenberg Literary Archive Foundation", response.getPublisher());
-      context.assertEquals("Book", response.getType());
+      context.assertEquals(Instance.Type.EBOOKS, response.getType());
       context.assertEquals("Electronic Resource", response.getFormat());
       context.assertTrue(response.getIdentifier().isEmpty());
       context.assertEquals("kb", response.getSource());
@@ -191,21 +192,21 @@ public class RMAPIToCodexTest {
       context.assertTrue(foundEditor1);
       context.assertTrue(foundEditor2);
       context.assertEquals("Palgrave Macmillan Ltd.", response.getPublisher());
-      context.assertEquals("Book", response.getType());
+      context.assertEquals(Instance.Type.EBOOKS, response.getType());
       context.assertEquals("Electronic Resource", response.getFormat());
       context.assertEquals(3, response.getIdentifier().size());
       boolean foundIdentifier1 = false;
       boolean foundIdentifier2 = false;
       boolean foundIdentifier3 = false;
       for (Identifier identifier : response.getIdentifier()) {
-        if ("ISBN(Online)".equals(identifier.getType()) && "978-1-137-41459-5".equals(identifier.getValue()) && identifier.getAdditionalProperties().isEmpty()) {
+        if ("ISBN(Online)".equals(identifier.getType()) && "978-1-137-41459-5".equals(identifier.getValue())) {
           foundIdentifier1 = true;
-        } else if ("ISBN(Print)".equals(identifier.getType()) && "978-1-137-41458-8".equals(identifier.getValue()) && identifier.getAdditionalProperties().isEmpty()) {
+        } else if ("ISBN(Print)".equals(identifier.getType()) && "978-1-137-41458-8".equals(identifier.getValue())) {
           foundIdentifier2 = true;
-        } else if ("ISBN(Print)".equals(identifier.getType()) && "978-1-349-49032-5".equals(identifier.getValue()) && identifier.getAdditionalProperties().isEmpty()) {
+        } else if ("ISBN(Print)".equals(identifier.getType()) && "978-1-349-49032-5".equals(identifier.getValue())) {
           foundIdentifier3 = true;
         } else {
-          context.fail("Unknown identifier: " + identifier.getValue() + ' ' + identifier.getType() + ' ' + identifier.getAdditionalProperties());
+          context.fail("Unknown identifier: " + identifier.getValue() + ' ' + identifier.getType());
         }
       }
       context.assertTrue(foundIdentifier1);
@@ -254,21 +255,21 @@ public class RMAPIToCodexTest {
       context.assertTrue(foundEditor1);
       context.assertTrue(foundEditor2);
       context.assertEquals("Palgrave Macmillan Ltd.", response.getPublisher());
-      context.assertEquals("Book", response.getType());
+      context.assertEquals(Instance.Type.EBOOKS, response.getType());
       context.assertEquals("Electronic Resource", response.getFormat());
       context.assertEquals(3, response.getIdentifier().size());
       boolean foundIdentifier1 = false;
       boolean foundIdentifier2 = false;
       boolean foundIdentifier3 = false;
       for (Identifier identifier : response.getIdentifier()) {
-        if ("ISBN(Online)".equals(identifier.getType()) && "978-1-137-41459-5".equals(identifier.getValue()) && identifier.getAdditionalProperties().isEmpty()) {
+        if ("ISBN(Online)".equals(identifier.getType()) && "978-1-137-41459-5".equals(identifier.getValue())) {
           foundIdentifier1 = true;
-        } else if ("ISBN".equals(identifier.getType()) && "978-1-137-41458-8".equals(identifier.getValue()) && identifier.getAdditionalProperties().isEmpty()) {
+        } else if ("ISBN".equals(identifier.getType()) && "978-1-137-41458-8".equals(identifier.getValue())) {
           foundIdentifier2 = true;
-        } else if ("ISBN(Print)".equals(identifier.getType()) && "978-1-349-49032-5".equals(identifier.getValue()) && identifier.getAdditionalProperties().isEmpty()) {
+        } else if ("ISBN(Print)".equals(identifier.getType()) && "978-1-349-49032-5".equals(identifier.getValue())) {
           foundIdentifier3 = true;
         } else {
-          context.fail("Unknown identifier: " + identifier.getValue() + ' ' + identifier.getType() + ' ' + identifier.getAdditionalProperties());
+          context.fail("Unknown identifier: " + identifier.getValue() + ' ' + identifier.getType());
         }
       }
       context.assertTrue(foundIdentifier1);
@@ -298,7 +299,7 @@ public class RMAPIToCodexTest {
       context.assertEquals("author", response.getContributor().iterator().next().getType());
       context.assertEquals("Reed, Talbot Baines", response.getContributor().iterator().next().getName());
       context.assertEquals("Project Gutenberg Literary Archive Foundation", response.getPublisher());
-      context.assertEquals("Book", response.getType());
+      context.assertEquals(Instance.Type.EBOOKS, response.getType());
       context.assertEquals("Electronic Resource", response.getFormat());
       context.assertTrue(response.getIdentifier().isEmpty());
       context.assertEquals("kb", response.getSource());
@@ -323,7 +324,7 @@ public class RMAPIToCodexTest {
       context.assertEquals("Tom, Dick and Harry", response.getTitle());
       context.assertTrue(response.getContributor().isEmpty());
       context.assertEquals("Project Gutenberg Literary Archive Foundation", response.getPublisher());
-      context.assertEquals("Book", response.getType());
+      context.assertEquals(Instance.Type.EBOOKS, response.getType());
       context.assertEquals("Electronic Resource", response.getFormat());
       context.assertTrue(response.getIdentifier().isEmpty());
       context.assertEquals("kb", response.getSource());
