@@ -5,6 +5,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.z3950.zing.cql.CQLAndNode;
@@ -30,9 +31,16 @@ public class CQLParserForRMAPI {
   private static final String CQL_ALL_RECORDS = "cql.allRecords";
   private static final String RM_API_TITLE = "titlename";
   private static final String SOURCE = "source";
+  private static final String CODEX_SOURCE = "codex.source";
   private static final String SELECTED = "ext.selected";
   private static final String TITLE = "title";
+  private static final String CODEX_TITLE = "codex.title";
   private static final String TYPE = "type";
+  private static final String CODEX_TYPE = "codex.type";
+  private static final String IDENTIFIER = "identifier";
+  private static final String CODEX_IDENTIFIER = "codex.identifier";
+  private static final String PUBLISHER = "publisher";
+  private static final String CODEX_PUBLISHER = "codex.publisher";
 
   String searchField;
   String searchValue;
@@ -45,10 +53,6 @@ public class CQLParserForRMAPI {
 
   List<String> queriesForRMAPI = new ArrayList<>();
 
-  private enum RMAPISupportedSearchFields {
-    TITLE, PUBLISHER, IDENTIFIER
-  }
-
   private enum RMAPISupportedFilterValues {
     ALL, JOURNAL, NEWSLETTER, REPORT, PROCEEDINGS, WEBSITE, NEWSPAPER, UNSPECIFIED, BOOK, BOOKSERIES,
     DATABASE, THESISDISSERTATION, STREAMINGAUDIO, STREAMINGVIDEO, AUDIOBOOK
@@ -57,11 +61,6 @@ public class CQLParserForRMAPI {
   private enum validSources {
     ALL, KB
   }
-
-  private enum validSelections {
-    ALL, TRUE, FALSE
-  }
-
 
   public CQLParserForRMAPI(String query, int offset, int limit) throws QueryValidationException, UnsupportedEncodingException {
     if(limit != 0) {
@@ -117,10 +116,12 @@ public class CQLParserForRMAPI {
       // search supported by RMAPI
       setSearchValuesByTitle(termNode);
       break;
+    case CODEX_TYPE:
     case TYPE:
       //Set filter values based on type
       setFilterValuesByType(indexNode, termNode);
       break;
+    case CODEX_SOURCE:
     case SOURCE:
       //Ensure that source is supported
       checkSource(termNode);
@@ -130,8 +131,8 @@ public class CQLParserForRMAPI {
       setSelection(termNode);
       break;
     default:
-      if (!EnumUtils.isValidEnum(RMAPISupportedSearchFields.class, indexNode.toUpperCase())) {
-        // If search field is not supported, log and return an error response
+      if(!Stream.of(TITLE, CODEX_TITLE, IDENTIFIER, CODEX_IDENTIFIER, PUBLISHER, CODEX_PUBLISHER).anyMatch(indexNode::equalsIgnoreCase)) {
+     // If search field is not supported, log and return an error response
         builder.append("Search field ");
         builder.append(indexNode);
         builder.append(UNSUPPORTED);
@@ -148,16 +149,7 @@ public class CQLParserForRMAPI {
   }
 
   private void setSelection(String termNode) throws QueryValidationException {
-    if(EnumUtils.isValidEnum(validSelections.class, termNode.toUpperCase())) {
       selection = termNode;
-    } else {
-      final StringBuilder builder = new StringBuilder();
-      builder.append(ERROR);
-      builder.append("Selected ");
-      builder.append(termNode);
-      builder.append(UNSUPPORTED);
-      throw new QueryValidationException(builder.toString());
-    }
   }
 
   private void checkSource(String termNode) throws QueryValidationException {
@@ -222,7 +214,7 @@ public class CQLParserForRMAPI {
     // front end does not support relevance, so we ignore everything but title
     for (final ModifierSet ms : sortIndexes) {
       sortType = ms.getBase();
-      if (sortType.equalsIgnoreCase(TITLE)) {
+      if (sortType.equalsIgnoreCase(TITLE) || (sortType.equalsIgnoreCase(CODEX_TITLE))) {
         sortType = RM_API_TITLE;
       } else {
         final StringBuilder builder = new StringBuilder();
@@ -258,13 +250,14 @@ public class CQLParserForRMAPI {
 
     if ((searchValue != null) && (searchField != null)) {
       // Map fields to RM API
-
-      if (searchField.equalsIgnoreCase(TITLE)) {
+      if (searchField.equalsIgnoreCase(TITLE) || searchField.equalsIgnoreCase(CODEX_TITLE)) {
         searchField = RM_API_TITLE;
-      }
-      if (searchField.equalsIgnoreCase("identifier")) {
+      } else if (searchField.equalsIgnoreCase(IDENTIFIER) || searchField.equalsIgnoreCase(CODEX_IDENTIFIER)) {
         searchField = "isxn";
+      } else if (searchField.equalsIgnoreCase(PUBLISHER) || searchField.equalsIgnoreCase(CODEX_PUBLISHER)) {
+        searchField = "publisher";
       }
+
       if (sortType == null) {
         sortType = RM_API_TITLE; // orderby is a mandatory field, otherwise RMAPI throws error
       }
