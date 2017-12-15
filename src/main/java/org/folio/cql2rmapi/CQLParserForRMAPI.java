@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.EnumUtils;
+import org.folio.codex.PubType;
 import org.z3950.zing.cql.CQLAndNode;
 import org.z3950.zing.cql.CQLBooleanNode;
 import org.z3950.zing.cql.CQLNode;
@@ -52,11 +53,6 @@ public class CQLParserForRMAPI {
   int instanceIndex;
 
   List<String> queriesForRMAPI = new ArrayList<>();
-
-  private enum RMAPISupportedFilterValues {
-    ALL, JOURNAL, NEWSLETTER, REPORT, PROCEEDINGS, WEBSITE, NEWSPAPER, UNSPECIFIED, BOOK, BOOKSERIES,
-    DATABASE, THESISDISSERTATION, STREAMINGAUDIO, STREAMINGVIDEO, AUDIOBOOK
-  }
 
   private enum validSources {
     ALL, KB
@@ -167,20 +163,11 @@ public class CQLParserForRMAPI {
   private void setFilterValuesByType(String indexNode, String termNode) throws QueryValidationException {
     filterType = indexNode;
     if(filterValue == null) {
-      filterValue = termNode;
+      filterValue = PubType.fromCodex(termNode).getRmAPI();
     } else {
       final StringBuilder builder = new StringBuilder();
       builder.append(ERROR);
       builder.append("Filtering on multiple types ");
-      builder.append(UNSUPPORTED);
-      throw new QueryValidationException(builder.toString());
-    }
-    if((filterValue != null) && !EnumUtils.isValidEnum(RMAPISupportedFilterValues.class, filterValue.toUpperCase())) {
-      // If filter value is not supported, log and return an error response
-      final StringBuilder builder = new StringBuilder();
-      builder.append(ERROR);
-      builder.append("Filter on resource type whose value is ");
-      builder.append(filterValue);
       builder.append(UNSUPPORTED);
       throw new QueryValidationException(builder.toString());
     }
@@ -211,11 +198,11 @@ public class CQLParserForRMAPI {
       throw new QueryValidationException(ERROR + "Sorting on multiple keys" + UNSUPPORTED);
     }
     // At this point RM API supports only sort by title and relevance
-    // front end does not support relevance, so we ignore everything but title
+    // relevance gives better results, so even if we get title, we just pass along relevance
     for (final ModifierSet ms : sortIndexes) {
       sortType = ms.getBase();
       if (sortType.equalsIgnoreCase(TITLE) || (sortType.equalsIgnoreCase(CODEX_TITLE))) {
-        sortType = RM_API_TITLE;
+        sortType = "relevance";
       } else {
         final StringBuilder builder = new StringBuilder();
         builder.append(ERROR);
