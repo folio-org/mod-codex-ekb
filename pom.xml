@@ -117,6 +117,24 @@
       <artifactId>vertx-unit</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>au.com.dius</groupId>
+      <artifactId>pact-jvm-consumer-junit_2.12</artifactId>
+      <version>3.5.10</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>au.com.dius</groupId>
+      <artifactId>pact-jvm-consumer-java8_2.12</artifactId>
+      <version>3.5.10</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>io.rest-assured</groupId>
+      <artifactId>rest-assured</artifactId>
+      <version>3.0.6</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
