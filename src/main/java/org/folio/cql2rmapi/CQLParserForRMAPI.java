@@ -237,7 +237,7 @@ public class CQLParserForRMAPI {
       } else if (searchField.equalsIgnoreCase(IDENTIFIER) || searchField.equalsIgnoreCase(CODEX_IDENTIFIER)) {
         searchField = "isxn";
       } else if (searchField.equalsIgnoreCase(PUBLISHER) || searchField.equalsIgnoreCase(CODEX_PUBLISHER)) {
-        searchField = "publisher";
+        searchField = PUBLISHER;
       }
 
       if (sortType == null) {
