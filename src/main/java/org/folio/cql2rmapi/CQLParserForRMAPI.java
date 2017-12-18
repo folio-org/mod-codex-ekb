@@ -158,7 +158,15 @@ public class CQLParserForRMAPI {
   private void setFilterValuesByType(String indexNode, String termNode) throws QueryValidationException {
     filterType = indexNode;
     if(filterValue == null) {
-      filterValue = PubType.fromCodex(termNode).getRmAPI();
+      try {
+        filterValue = PubType.fromCodex(termNode).getRmAPI();
+      } catch (final IllegalArgumentException e) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(ERROR);
+        builder.append("Filtering on type ");
+        builder.append(UNSUPPORTED);
+        throw new QueryValidationException(builder.toString());
+      }
     } else {
       final StringBuilder builder = new StringBuilder();
       builder.append(ERROR);
