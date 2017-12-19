@@ -29,7 +29,6 @@ public class CQLParserForRMAPI {
   private static final String ERROR = "Unsupported Query Format : ";
   private static final String UNSUPPORTED = " is not supported.";
   private static final String CQL_SERVER_CHOICE = "cql.serverchoice";
-  private static final String CQL_ALL_RECORDS = "cql.allRecords";
   private static final String RM_API_TITLE = "titlename";
   private static final String SOURCE = "source";
   private static final String CODEX_SOURCE = "codex.source";
@@ -103,10 +102,6 @@ public class CQLParserForRMAPI {
     final StringBuilder builder = new StringBuilder();
     builder.append(ERROR);
     switch(indexNode.toLowerCase()) {
-    case CQL_ALL_RECORDS:
-      builder.append(" This query");
-      builder.append(UNSUPPORTED);
-      throw new QueryValidationException(builder.toString());
     case CQL_SERVER_CHOICE:
       // If no search field is passed, default it to title search. This is the default
       // search supported by RMAPI
@@ -144,7 +139,7 @@ public class CQLParserForRMAPI {
     }
   }
 
-  private void setSelection(String termNode) throws QueryValidationException {
+  private void setSelection(String termNode) {
       selection = termNode;
   }
 
@@ -163,7 +158,15 @@ public class CQLParserForRMAPI {
   private void setFilterValuesByType(String indexNode, String termNode) throws QueryValidationException {
     filterType = indexNode;
     if(filterValue == null) {
-      filterValue = PubType.fromCodex(termNode).getRmAPI();
+      try {
+        filterValue = PubType.fromCodex(termNode).getRmAPI();
+      } catch (final IllegalArgumentException e) {
+        final StringBuilder builder = new StringBuilder();
+        builder.append(ERROR);
+        builder.append("Filtering on type ");
+        builder.append(UNSUPPORTED);
+        throw new QueryValidationException(builder.toString());
+      }
     } else {
       final StringBuilder builder = new StringBuilder();
       builder.append(ERROR);
@@ -242,7 +245,7 @@ public class CQLParserForRMAPI {
       } else if (searchField.equalsIgnoreCase(IDENTIFIER) || searchField.equalsIgnoreCase(CODEX_IDENTIFIER)) {
         searchField = "isxn";
       } else if (searchField.equalsIgnoreCase(PUBLISHER) || searchField.equalsIgnoreCase(CODEX_PUBLISHER)) {
-        searchField = "publisher";
+        searchField = PUBLISHER;
       }
 
       if (sortType == null) {

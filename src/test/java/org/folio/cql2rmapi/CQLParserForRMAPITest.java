@@ -72,13 +72,13 @@ public class CQLParserForRMAPITest {
     assertEquals("streamingvideo", parser.filterValue);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = QueryValidationException.class)
   public void CQLParserThrowsExceptionIfInvalidFilterValueIsPassedTest() throws QueryValidationException, UnsupportedEncodingException {
     final String invalidFilterQuery = "title = bridget and type = hardcopy sortby title";
     new CQLParserForRMAPI(invalidFilterQuery, 1, 10);
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = QueryValidationException.class)
   public void CQLParserThrowsExceptionIfNullFilterValueIsPassedTest() throws QueryValidationException, UnsupportedEncodingException {
     final String invalidFilterQuery = "title = bridget and type = null sortby title";
     final CQLParserForRMAPI parser = new CQLParserForRMAPI(invalidFilterQuery, 1, 10);
@@ -87,19 +87,19 @@ public class CQLParserForRMAPITest {
 
   @Test(expected = QueryValidationException.class)
   public void CQLParserThrowsExceptionIfMultipleFiltersSepartedByAndAreProvidedTest() throws QueryValidationException, UnsupportedEncodingException {
-    final String multipleFilterQuery = "title = bridget and type = journal and type = audiobook sortby title, publisher";
+    final String multipleFilterQuery = "title = bridget and type = databases and type = audiobook sortby title";
     new CQLParserForRMAPI(multipleFilterQuery, 1, 10);
   }
 
   @Test(expected = QueryValidationException.class)
   public void CQLParserThrowsExceptionIfMultipleFiltersSepartedByCommaAreProvidedTest() throws QueryValidationException, UnsupportedEncodingException {
-    final String multipleFilterQuery = "title = bridget and type = journal, audiobook sortby title, publisher";
+    final String multipleFilterQuery = "title = bridget and type = databases, audiobook sortby title";
     new CQLParserForRMAPI(multipleFilterQuery, 1, 10);
   }
 
   @Test(expected = QueryValidationException.class)
   public void CQLParserThrowsExceptionIfMultipleFiltersSepartedBySpaceAreProvidedTest() throws QueryValidationException, UnsupportedEncodingException {
-    final String multipleFilterQuery = "title = bridget and type = journal audiobook sortby title, publisher";
+    final String multipleFilterQuery = "title = bridget and type = databases audiobook sortby title";
     new CQLParserForRMAPI(multipleFilterQuery, 1, 10);
   }
 
@@ -302,7 +302,7 @@ public class CQLParserForRMAPITest {
 
   @Test(expected = QueryValidationException.class)
   public void CQLParserThrowsExceptionIfAllRecordsAreRequestedTest() throws QueryValidationException, UnsupportedEncodingException {
-    new CQLParserForRMAPI("query=cql.allrecords" , 900, 100);
+    new CQLParserForRMAPI("cql.allRecords=all" , 900, 100);
   }
 
   @Test
@@ -349,7 +349,7 @@ public class CQLParserForRMAPITest {
     }
   }
 
-  @Test(expected = IllegalArgumentException.class)
+  @Test(expected = QueryValidationException.class)
   public void CQLParserThrowsExceptionIfInvalidSearchFieldWithPrefixIsPassedTest() throws QueryValidationException, UnsupportedEncodingException {
     new CQLParserForRMAPI("codex.type=12345" , 900, 100);
   }
