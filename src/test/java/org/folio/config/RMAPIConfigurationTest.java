@@ -3,11 +3,11 @@ package org.folio.config;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 
 import org.folio.rest.RestVerticle;
 import org.folio.rest.tools.client.test.HttpClientMock2;
+import org.folio.utils.Utils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,9 +56,6 @@ public class RMAPIConfigurationTest {
   private static final String MOCK_CONTENT_FAIL_INTERNAL_ERROR_FILE = "RMAPIConfiguration/mock_content_fail_internal_error.json";
 
   private final Logger logger = LoggerFactory.getLogger("okapi");
-  // Use a random ephemeral port if not defined via a system property
-  private final int port = Integer.parseInt(System.getProperty("port",
-      Integer.toString(new Random().nextInt(16_384) + 49_152)));
 
   private Vertx vertx;
   private Map<String, String> okapiHeaders = new HashMap<>();
@@ -71,6 +68,8 @@ public class RMAPIConfigurationTest {
    */
   @Before
   public void setUp(TestContext context) throws Exception {
+    final int port = Utils.getRandomPort();
+
     vertx = Vertx.vertx();
 
     JsonObject conf = new JsonObject()

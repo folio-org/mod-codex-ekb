@@ -7,7 +7,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.CompletionException;
 
 import org.folio.config.RMAPIConfiguration;
@@ -18,6 +17,7 @@ import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Identifier;
 import org.folio.rest.jaxrs.model.Instance;
 import org.folio.rest.tools.client.test.HttpClientMock2;
+import org.folio.utils.Utils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,9 +45,6 @@ public class RMAPIToCodexTest {
   private final Logger logger = LoggerFactory.getLogger("okapi");
 
   private Vertx vertx;
-  // Use a random ephemeral port if not defined via a system property
-  private final int port = Integer.parseInt(System.getProperty("port",
-      Integer.toString(new Random().nextInt(16_384) + 49_152)));
 
   private Map<String, String> okapiHeaders = new HashMap<>();
   // HACK ALERT! This object is needed to modify RMAPIConfiguration's local
@@ -59,6 +56,8 @@ public class RMAPIToCodexTest {
    */
   @Before
   public void setUp(TestContext context) throws Exception {
+    final int port = Utils.getRandomPort();
+
     vertx = Vertx.vertx();
 
     JsonObject conf = new JsonObject()
