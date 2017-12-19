@@ -1,0 +1,157 @@
+{
+	"totalResults": 1385,
+	"titles": [
+		{
+			"titleId": 999999,
+			"titleName": "Test Title 1",
+			"identifiersList": [
+				{
+					"id": "111111",
+					"source": "AtoZ",
+					"subtype": 0,
+					"type": 9
+				}
+			],
+			"subjectsList": null,
+			"isTitleCustom": false,
+			"pubType": "Book",
+			"customerResourcesList": [
+				{
+					"titleId": 999999,
+					"packageId": 2151,
+					"packageName": "Test Package 1",
+					"isPackageCustom": false,
+					"vendorId": 35,
+					"vendorName": "Test Vendor 1",
+					"locationId": 30001078,
+					"isSelected": false,
+					"isTokenNeeded": false,
+					"visibilityData": {
+						"isHidden": false,
+						"reason": ""
+					},
+					"managedCoverageList": [
+						{
+							"beginCoverage": "2012-01-01",
+							"endCoverage": "2012-12-31"
+						}
+					],
+					"customCoverageList": [],
+					"coverageStatement": null,
+					"managedEmbargoPeriod": {
+						"embargoUnit": null,
+						"embargoValue": 0
+					},
+					"customEmbargoPeriod": {
+						"embargoUnit": null,
+						"embargoValue": 0
+					},
+					"url": "http://test",
+					"userDefinedField1": null,
+					"userDefinedField2": null,
+					"userDefinedField3": null,
+					"userDefinedField4": null,
+					"userDefinedField5": null
+				}
+			]
+		},
+		{
+			"titleId": 888888,
+			"titleName": "Test Title 2",
+			"publisherName": "Test Publisher 2",
+			"identifiersList": [
+				{
+					"id": "999-99-99",
+					"source": "ResourceIdentifier",
+					"subtype": 1,
+					"type": 1
+				},
+				{
+					"id": "888-88-88",
+					"source": "ResourceIdentifier",
+					"subtype": 2,
+					"type": 1
+				}
+			],
+			"subjectsList": [
+				{
+					"type": "TLI",
+					"subject": "Secondary Education"
+				}
+			],
+			"isTitleCustom": false,
+			"pubType": "Book",
+			"customerResourcesList": [
+				{
+					"titleId": 888888,
+					"packageId": 5207,
+					"packageName": "Package 2",
+					"isPackageCustom": false,
+					"vendorId": 19,
+					"vendorName": "Vendor 2",
+					"locationId": 25112141,
+					"isSelected": true,
+					"isTokenNeeded": false,
+					"visibilityData": {
+						"isHidden": false,
+						"reason": ""
+					},
+					"managedCoverageList": [
+						{
+							"beginCoverage": "2016-01-01",
+							"endCoverage": "2016-12-31"
+						}
+					],
+					"customCoverageList": [],
+					"coverageStatement": null,
+					"managedEmbargoPeriod": {
+						"embargoUnit": null,
+						"embargoValue": 0
+					},
+					"customEmbargoPeriod": {
+						"embargoUnit": null,
+						"embargoValue": 0
+					},
+					"url": "http://testlocation",
+					"userDefinedField1": null,
+					"userDefinedField2": null,
+					"userDefinedField3": null,
+					"userDefinedField4": null,
+					"userDefinedField5": null
+				},
+				{
+					"titleId": 888888,
+					"packageId": 1887786,
+					"packageName": "Package 3",
+					"isPackageCustom": false,
+					"vendorId": 22,
+					"vendorName": "Vendor3",
+					"locationId": 27899231,
+					"isSelected": false,
+					"isTokenNeeded": true,
+					"visibilityData": {
+						"isHidden": false,
+						"reason": ""
+					},
+					"managedCoverageList": [],
+					"customCoverageList": [],
+					"coverageStatement": null,
+					"managedEmbargoPeriod": {
+						"embargoUnit": null,
+						"embargoValue": 0
+					},
+					"customEmbargoPeriod": {
+						"embargoUnit": null,
+						"embargoValue": 0
+					},
+					"url": "http://testurl",
+					"userDefinedField1": null,
+					"userDefinedField2": null,
+					"userDefinedField3": null,
+					"userDefinedField4": null,
+					"userDefinedField5": null
+				}
+			]
+		}
+	]
+}

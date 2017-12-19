@@ -34,12 +34,18 @@ public class RMAPIServiceTest {
   private final String testAPIKey = "TESTAPIKEY";
   private final String testRMAPIHOST = "localhost";
   private final String SuccessTitleId = "99999";
+  private final String TitleNotFoundTitleId = "1";
+  private final String BadJSONTitleId = "88888";
+  private final String SuccessTitleListQuery = "search=autism&searchfield=titlename&selection=0&orderby=titlename&count=5&offset=1";
 
   private Vertx vertx;
   private final int okapiPort = Integer.parseInt(System.getProperty("port", getRandomPort()));
   private final int rmapiPort = Integer.parseInt(System.getProperty("rmapiport", getRandomPort()));
 
   private static final String MOCK_CONTENT_SUCCESS_GET_TITLE_BY_ID = "RMAPIService/SuccessGetTitleById.json";
+  private static final String MOCK_CONTENT_SUCCESS_GET_TITLELIST = "RMAPIService/SuccessGetTitleList.json";
+  private static final String MOCK_CONTENT_TITLE_NOT_FOUND = "RMAPIService/TitleNotFound.json";
+  private static final String MOCK_CONTENT_BAD_JSON = "RMAPIService/BadJson.json";
 
   /**
    * @throws java.lang.Exception
@@ -68,9 +74,20 @@ public class RMAPIServiceTest {
 
     HttpServer server = vertx.createHttpServer();
     server.requestHandler(req -> {
-      if (req.path().equals("/rm/rmaccounts/TESTCUSTID/titles/99999")) {
+      if (req.path().equals(String.format("/rm/rmaccounts/TESTCUSTID/titles/%s", SuccessTitleId))) {
         req.response().setStatusCode(200).putHeader("content-type", "application/json")
             .end(readMockFile(MOCK_CONTENT_SUCCESS_GET_TITLE_BY_ID));
+      } else if (req.path().equals(String.format("/rm/rmaccounts/TESTCUSTID/titles/%s", TitleNotFoundTitleId))) {
+        req.response().setStatusCode(404).putHeader("content-type", "application/json")
+            .end(readMockFile(MOCK_CONTENT_TITLE_NOT_FOUND));
+      } else if (req.path().equals(String.format("/rm/rmaccounts/TESTCUSTID/titles/%s", BadJSONTitleId))) {
+        req.response().setStatusCode(200).putHeader("content-type", "application/json")
+            .end(readMockFile(MOCK_CONTENT_BAD_JSON));
+      } else if (req.path().equals("/rm/rmaccounts/TESTCUSTID/titles")) {
+        if (SuccessTitleListQuery.equals(req.query())) {
+          req.response().setStatusCode(200).putHeader("content-type", "application/json")
+              .end(readMockFile(MOCK_CONTENT_SUCCESS_GET_TITLELIST));
+        }
       }
     });
 
@@ -110,6 +127,63 @@ public class RMAPIServiceTest {
       context.assertEquals(1, rmapiResult.contributorsList.size());
       context.assertEquals("Quinn, Harper", rmapiResult.contributorsList.get(0).titleContributor);
       context.assertEquals("author", rmapiResult.contributorsList.get(0).type);
+      async.complete();
+    }).exceptionally(throwable -> {
+      context.fail(throwable);
+      async.complete();
+      return null;
+    });
+  }
+
+  @Test
+  public final void testSuccessGetTitleList(TestContext context) {
+    final Async async = context.async();
+
+    RMAPIService svc = new RMAPIService(testCustId, testAPIKey, String.format("http://%s:%s", testRMAPIHOST, rmapiPort),
+        vertx);
+
+    svc.getTitleList(SuccessTitleListQuery).whenCompleteAsync((rmapiResult, throwable) -> {
+      context.assertNull(throwable);
+      context.assertNotNull(rmapiResult);
+      context.assertEquals(1385, rmapiResult.totalResults);
+      context.assertNotNull(rmapiResult.titleList);
+      context.assertEquals(2, rmapiResult.titleList.size());
+      context.assertEquals(999999, rmapiResult.titleList.get(0).titleId);
+      context.assertEquals("Test Title 1", rmapiResult.titleList.get(0).titleName);
+      async.complete();
+    });
+  }
+
+  @Test
+  public final void testTitleNotFound(TestContext context) {
+
+    final Async async = context.async();
+
+    RMAPIService svc = new RMAPIService(testCustId, testAPIKey, String.format("http://%s:%s", testRMAPIHOST, rmapiPort),
+        vertx);
+
+    svc.getTitleById(TitleNotFoundTitleId).whenCompleteAsync((rmapiResult, throwable) -> {
+      context.assertNotNull(throwable);
+      context.assertEquals("org.folio.rmapi.RMAPIServiceException", throwable.getClass().getName());
+      RMAPIServiceException ex = (RMAPIServiceException) throwable;
+      context.assertEquals(404, ex.getRMAPICode());
+      context.assertEquals("Not Found", ex.getRMAPIMessage());
+      async.complete();
+    });
+
+  }
+
+  @Test
+  public final void testResultsBadJSON(TestContext context) {
+
+    final Async async = context.async();
+
+    RMAPIService svc = new RMAPIService(testCustId, testAPIKey, String.format("http://%s:%s", testRMAPIHOST, rmapiPort),
+        vertx);
+
+    svc.getTitleById(BadJSONTitleId).whenCompleteAsync((rmapiResult, throwable) -> {
+      context.assertNotNull(throwable);
+      context.assertEquals("org.folio.rmapi.RMAPIResultsProcessingException", throwable.getClass().getName());
       async.complete();
     });
 
