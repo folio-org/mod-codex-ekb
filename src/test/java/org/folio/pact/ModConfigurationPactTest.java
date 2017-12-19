@@ -3,11 +3,14 @@ package org.folio.pact;
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.folio.config.RMAPIConfiguration;
+import org.folio.rest.tools.client.HttpClientFactory;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -38,13 +41,34 @@ public class ModConfigurationPactTest {
   @Rule
   public final PactProviderRuleMk2 mockProvider = new PactProviderRuleMk2("mod-configuration", this);
 
+  private Field mock = null;
+  private Object previousMock = null;
+
   /**
    * @throws java.lang.Exception
    */
   @Before
   public void setUp(TestContext context) throws Exception {
+    // Ugh... Because previous tests can enable mock mode in the
+    // HttpClientFactory and setting that is static, i.e. first use binds it to
+    // either mock or not mock, we need to do some magic to fix it for this
+    // test.
+    mock = HttpClientFactory.class.getDeclaredField("mock");
+    mock.setAccessible(true);
+    previousMock = mock.get(null);
+    mock.set(null, Boolean.FALSE);
+
     okapiHeaders.put("x-okapi-tenant", "rmapiconfigurationtest");
     okapiHeaders.put("x-okapi-url", mockProvider.getUrl());
+  }
+
+  @After
+  public void tearDown(TestContext context) throws Exception {
+    if (mock != null) {
+      // Reset mock to the previous value...
+      mock.setAccessible(true);
+      mock.set(null, previousMock);
+    }
   }
 
   @Pact(provider="mod-configuration", consumer="mod-codex-ekb")
