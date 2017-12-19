@@ -24,15 +24,18 @@ public class RMAPIService {
   private static final String HTTP_HEADER_ACCEPT = "Accept";
   private static final String RMAPI_API_KEY = "X-Api-Key";
 
+  private static final String JSON_RESPONSE_ERROR = "Error processing RMAPI Response";
+  private static final String INVALID_RMAPI_RESPONSE = "Invalid RMAPI response";
+
   private String customerId;
   private String apiKey;
   private String baseURI;
 
-  private HttpClient httpClient;
+  private Vertx vertx;
 
   /**
-   * Constructs an RMAPI Service object which is used to make passthru requests to
-   * rmapi
+   * Constructs an RMAPI Service object which is used to make pass through
+   * requests to rmapi
    *
    * @param customerId
    * @param apiKey
@@ -43,7 +46,62 @@ public class RMAPIService {
     this.customerId = customerId;
     this.apiKey = apiKey;
     this.baseURI = baseURI;
-    httpClient = vertx.createHttpClient();
+    this.vertx = vertx;
+  }
+
+  /**
+   * Issues a get request to RMAPI Service and returns a completablefuture for the
+   * target type
+   * 
+   * @param query
+   * @param clazz
+   * @return
+   */
+  private <T> CompletableFuture<T> getRequest(String query, Class<T> clazz) {
+
+    CompletableFuture<T> future = new CompletableFuture<>();
+
+    HttpClient httpClient = vertx.createHttpClient();
+
+    final HttpClientRequest request = httpClient.getAbs(query);
+
+    request.headers().add(HTTP_HEADER_ACCEPT, APPLICATION_JSON);
+    request.headers().add(HTTP_HEADER_CONTENT_TYPE, APPLICATION_JSON);
+    request.headers().add(RMAPI_API_KEY, apiKey);
+
+    LOG.info("RMAPI Service absolute URL is" + request.absoluteURI());
+
+    request.handler(response -> response.bodyHandler(body -> {
+      if (response.statusCode() == 200) {
+        try {
+          final JsonObject instanceJSON = new JsonObject(body.toString());
+          T results = instanceJSON.mapTo(clazz);
+          future.complete((T) results);
+        } catch (Exception e) {
+          LOG.error(
+              String.format("%s - Response = [%s] Target Type = [%s]", JSON_RESPONSE_ERROR, body.toString(), clazz));
+          future.completeExceptionally(
+              new RMAPIResultsProcessingException(String.format("%s for query = %s", JSON_RESPONSE_ERROR, query), e));
+        } finally {
+          httpClient.close();
+        }
+      } else {
+        httpClient.close();
+        LOG.error(String.format("%s for JSON [%s] into type [%s]", INVALID_RMAPI_RESPONSE, body.toString(), clazz));
+
+        RMAPIServiceException rmException = new RMAPIServiceException(String.format("%s Code = %s Message = %s",
+            INVALID_RMAPI_RESPONSE, response.statusCode(), response.statusMessage()), response.statusCode(),
+            response.statusMessage(), body.toString(), query);
+
+        future.completeExceptionally(rmException);
+      }
+
+    }));
+
+    request.end();
+
+    return future;
+
   }
 
   /**
@@ -54,100 +112,19 @@ public class RMAPIService {
    * @return
    */
   public CompletableFuture<Title> getTitleById(String titleId) {
-
-    CompletableFuture<Title> future = new CompletableFuture<>();
-
-    final HttpClientRequest request = httpClient.getAbs(constructURL(String.format("titles/%s", titleId)));
-
-    request.headers().add(HTTP_HEADER_ACCEPT, APPLICATION_JSON);
-    request.headers().add(HTTP_HEADER_CONTENT_TYPE, APPLICATION_JSON);
-    request.headers().add(RMAPI_API_KEY, apiKey);
-
-    LOG.info("absolute URL is" + request.absoluteURI());
-
-    request.handler(response ->
-
-    response.bodyHandler(body -> {
-
-      LOG.info("rmapi request status code =" + response.statusCode());
-
-      // need to only handle status code = 200
-      // other status codes should return and throw an error
-      if (response.statusCode() == 200) {
-        try {
-          LOG.info(body.toString());
-          final JsonObject instanceJSON = new JsonObject(body.toString());
-
-          Title rmapiTitles = instanceJSON.mapTo(Title.class);
-
-          future.complete(rmapiTitles);
-        } catch (Exception e) {
-          LOG.info("failure  " + e.getMessage());
-          future.completeExceptionally(e);
-        } finally {
-          httpClient.close();
-        }
-      } else {
-        httpClient.close();
-        future
-            .completeExceptionally(new RMAPIServiceException("Invalid status code from RMAPI" + response.statusCode()));
-      }
-    }));
-    request.end();
-
-    return future;
+    return this.<Title>getRequest(constructURL(String.format("titles/%s", titleId)), Title.class);
   }
 
   /**
    *
-   * Retrieve list of titles from rmapi service (based on rmapi query that is
-   * passed in)
+   * Retrieve list of titles from rmapi service (based on supplied rmapi query)
    *
    * @param rmapiQuery
    * @return
    */
 
   public CompletableFuture<Titles> getTitleList(String rmapiQuery) {
-
-    CompletableFuture<Titles> future = new CompletableFuture<>();
-
-    final HttpClientRequest request = httpClient.getAbs(constructURL(String.format("titles?%s", rmapiQuery)));
-
-    request.headers().add(HTTP_HEADER_ACCEPT, APPLICATION_JSON);
-    request.headers().add(HTTP_HEADER_CONTENT_TYPE, APPLICATION_JSON);
-    request.headers().add(RMAPI_API_KEY, apiKey);
-
-    LOG.info("absolute URL is" + request.absoluteURI());
-
-    request.handler(response ->
-
-    response.bodyHandler(body -> {
-
-      LOG.info("rmapi request status code =" + response.statusCode());
-
-      if (response.statusCode() == 200) {
-        try {
-          LOG.info(body.toString());
-          final JsonObject instanceJSON = new JsonObject(body.toString());
-          Titles rmapiTitles = instanceJSON.mapTo(Titles.class);
-          future.complete(rmapiTitles);
-
-        } catch (Exception e) {
-          LOG.info("failure  " + e.getMessage());
-          future.completeExceptionally(e);
-        } finally {
-          httpClient.close();
-        }
-      } else {
-        httpClient.close();
-        future
-            .completeExceptionally(new RMAPIServiceException("Invalid status code from RMAPI" + response.statusCode()));
-      }
-    }));
-    request.end();
-
-    return future;
-
+    return this.<Titles>getRequest(constructURL(String.format("titles?%s", rmapiQuery)), Titles.class);
   }
 
   /**

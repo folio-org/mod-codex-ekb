@@ -1,0 +1,25 @@
+{
+  "titleId": 99999,
+  "titleName": "Test Title",
+  "publisherName": "Test Publisher",
+  "identifiersList": [
+    {
+      "id": "888888",
+      "source": "ResourceIdentifier",
+      "subtype": 0,
+      "type": 7
+    },
+    {
+      "id": "999-9-9999-9999-9",
+      "source": "ResourceIdentifier",
+      "subtype": 2,
+      "type": 1
+    }
+  ],
+  "subjectsList": [
+    {
+      "type": "BISAC",
+      "subject": "MEDICAL / Physician & Patient"
+    }
+
+}

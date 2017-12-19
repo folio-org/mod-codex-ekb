@@ -4,12 +4,33 @@ public class RMAPIServiceException extends Exception {
 
   private static final long serialVersionUID = 1L;
 
-  public RMAPIServiceException(String message) {
+  private Integer rmapiCode;
+  private final String rmapiQuery;
+  private final String rmapiMessage;
+  private final String responseBody;
+
+  public RMAPIServiceException(String message, Integer rmapiCode, String rmapiMessage, String responseBody,
+      String rmapiQuery) {
     super(message);
+    this.rmapiCode = rmapiCode;
+    this.rmapiMessage = rmapiMessage;
+    this.responseBody = responseBody;
+    this.rmapiQuery = rmapiQuery;
   }
 
-  public RMAPIServiceException(String message, Exception e) {
-    super(message, e);
+  public Integer getRMAPICode() {
+    return this.rmapiCode;
   }
 
+  public String getRMAPIMessage() {
+    return this.rmapiMessage;
+  }
+
+  public String getResponseBody() {
+    return this.responseBody;
+  }
+
+  public String getRMAPIQuery() {
+    return this.rmapiQuery;
+  }
 }
