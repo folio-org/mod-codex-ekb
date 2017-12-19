@@ -4,7 +4,7 @@ public class RMAPIServiceException extends Exception {
 
   private static final long serialVersionUID = 1L;
 
-  private Integer rmapiCode;
+  private final Integer rmapiCode;
   private final String rmapiQuery;
   private final String rmapiMessage;
   private final String responseBody;
