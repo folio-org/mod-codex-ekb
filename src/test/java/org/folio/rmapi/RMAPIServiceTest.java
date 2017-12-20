@@ -1,10 +1,10 @@
 package org.folio.rmapi;
 
 import java.io.InputStream;
-import java.util.Random;
 
 import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
+import org.folio.utils.Utils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -37,15 +37,29 @@ public class RMAPIServiceTest {
   private final String TitleNotFoundTitleId = "1";
   private final String BadJSONTitleId = "88888";
   private final String SuccessTitleListQuery = "search=autism&searchfield=titlename&selection=0&orderby=titlename&count=5&offset=1";
+  private final String GatewayTimeoutTitleListQuery = "search=muslim%journal&searchfield=relevance&selection=0&orderby=titlename&count=5&offset=1";
+  private final String NoResultsTitleListQuery = "search=nnnnnnn&searchfield=relevance&selection=0&orderby=titlename&count=5&offset=1";
+  private final String ForbiddenTitleListQuery = "search=moby%20dick&searchfield=relevance&selection=0&orderby=titlename&count=5&offset=1";
+  private final String UnAuthorizedTitleId = "77777";
 
   private Vertx vertx;
-  private final int okapiPort = Integer.parseInt(System.getProperty("port", getRandomPort()));
-  private final int rmapiPort = Integer.parseInt(System.getProperty("rmapiport", getRandomPort()));
+  private final int okapiPort = Integer.parseInt(System.getProperty("port", Integer.toString(Utils.getRandomPort())));
+  private final int rmapiPort = Integer
+      .parseInt(System.getProperty("rmapiport", Integer.toString(Utils.getRandomPort())));
 
   private static final String MOCK_CONTENT_SUCCESS_GET_TITLE_BY_ID = "RMAPIService/SuccessGetTitleById.json";
   private static final String MOCK_CONTENT_SUCCESS_GET_TITLELIST = "RMAPIService/SuccessGetTitleList.json";
   private static final String MOCK_CONTENT_TITLE_NOT_FOUND = "RMAPIService/TitleNotFound.json";
   private static final String MOCK_CONTENT_BAD_JSON = "RMAPIService/BadJson.json";
+  private static final String MOCK_CONTENT_GATEWAY_TIMEOUT_JSON = "RMAPIService/GatewayTimeout.json";
+  private static final String MOCK_CONTENT_SEARCH_NO_RESULTS_JSON = "RMAPIService/SearchNoResults.json";
+  private static final String MOCK_CONTENT_FORBIDDEN_JSON = "RMAPIService/Forbidden.json";
+  private static final String MOCK_CONTENT_UNAUTHORIZED_JSON = "RMAPIService/UnAuthorized.json";
+
+  private static final String RMAPI_SERVICE_EXCEPTION_CLASS = "org.folio.rmapi.RMAPIServiceException";
+  private static final String RMAPI_RESULT_PROCESSING_EXCEPTION_CLASS = "org.folio.rmapi.RMAPIResultsProcessingException";
+  private static final String RMAPI_RESOURCE_NOT_FOUND_EXCEPTION_CLASS = "org.folio.rmapi.RMAPIResourceNotFoundException";
+  private static final String RMAPI_UNAUTHORIZED_EXCEPTION_CLASS = "org.folio.rmapi.RMAPIUnAuthorizedException";
 
   /**
    * @throws java.lang.Exception
@@ -83,10 +97,22 @@ public class RMAPIServiceTest {
       } else if (req.path().equals(String.format("/rm/rmaccounts/TESTCUSTID/titles/%s", BadJSONTitleId))) {
         req.response().setStatusCode(200).putHeader("content-type", "application/json")
             .end(readMockFile(MOCK_CONTENT_BAD_JSON));
+      } else if (req.path().equals(String.format("/rm/rmaccounts/TESTCUSTID/titles/%s", UnAuthorizedTitleId))) {
+        req.response().setStatusCode(401).putHeader("content-type", "application/json")
+            .end(readMockFile(MOCK_CONTENT_UNAUTHORIZED_JSON));
       } else if (req.path().equals("/rm/rmaccounts/TESTCUSTID/titles")) {
         if (SuccessTitleListQuery.equals(req.query())) {
           req.response().setStatusCode(200).putHeader("content-type", "application/json")
               .end(readMockFile(MOCK_CONTENT_SUCCESS_GET_TITLELIST));
+        } else if (GatewayTimeoutTitleListQuery.equals(req.query())) {
+          req.response().setStatusCode(504).putHeader("content-type", "application/json")
+              .end(readMockFile(MOCK_CONTENT_GATEWAY_TIMEOUT_JSON));
+        } else if (NoResultsTitleListQuery.equals(req.query())) {
+          req.response().setStatusCode(200).putHeader("content-type", "application/json")
+              .end(readMockFile(MOCK_CONTENT_SEARCH_NO_RESULTS_JSON));
+        } else if (ForbiddenTitleListQuery.equals(req.query())) {
+          req.response().setStatusCode(403).putHeader("content-type", "application/json")
+              .end(readMockFile(MOCK_CONTENT_FORBIDDEN_JSON));
         }
       }
     });
@@ -164,10 +190,7 @@ public class RMAPIServiceTest {
 
     svc.getTitleById(TitleNotFoundTitleId).whenCompleteAsync((rmapiResult, throwable) -> {
       context.assertNotNull(throwable);
-      context.assertEquals("org.folio.rmapi.RMAPIServiceException", throwable.getClass().getName());
-      RMAPIServiceException ex = (RMAPIServiceException) throwable;
-      context.assertEquals(404, ex.getRMAPICode());
-      context.assertEquals("Not Found", ex.getRMAPIMessage());
+      context.assertEquals(RMAPI_RESOURCE_NOT_FOUND_EXCEPTION_CLASS, throwable.getClass().getName());
       async.complete();
     });
 
@@ -183,10 +206,72 @@ public class RMAPIServiceTest {
 
     svc.getTitleById(BadJSONTitleId).whenCompleteAsync((rmapiResult, throwable) -> {
       context.assertNotNull(throwable);
-      context.assertEquals("org.folio.rmapi.RMAPIResultsProcessingException", throwable.getClass().getName());
+      context.assertEquals(RMAPI_RESULT_PROCESSING_EXCEPTION_CLASS, throwable.getClass().getName());
       async.complete();
     });
 
+  }
+
+  @Test
+  public final void testGatewayTimeout(TestContext context) {
+    final Async async = context.async();
+
+    RMAPIService svc = new RMAPIService(testCustId, testAPIKey, String.format("http://%s:%s", testRMAPIHOST, rmapiPort),
+        vertx);
+
+    svc.getTitleList(GatewayTimeoutTitleListQuery).whenCompleteAsync((rmapiResult, throwable) -> {
+      context.assertNotNull(throwable);
+      context.assertEquals(RMAPI_SERVICE_EXCEPTION_CLASS, throwable.getClass().getName());
+      RMAPIServiceException ex = (RMAPIServiceException) throwable;
+      context.assertEquals(504, ex.getRMAPICode());
+      context.assertEquals("Gateway Timeout", ex.getRMAPIMessage());
+      async.complete();
+    });
+  }
+
+  @Test
+  public final void testUnAuthorizedTitleId(TestContext context) {
+    final Async async = context.async();
+
+    RMAPIService svc = new RMAPIService(testCustId, testAPIKey, String.format("http://%s:%s", testRMAPIHOST, rmapiPort),
+        vertx);
+
+    svc.getTitleById(UnAuthorizedTitleId).whenCompleteAsync((rmapiResult, throwable) -> {
+      context.assertNotNull(throwable);
+      context.assertEquals(RMAPI_UNAUTHORIZED_EXCEPTION_CLASS, throwable.getClass().getName());
+      async.complete();
+    });
+  }
+
+  @Test
+  public final void testForbiddenResultList(TestContext context) {
+    final Async async = context.async();
+
+    RMAPIService svc = new RMAPIService(testCustId, testAPIKey, String.format("http://%s:%s", testRMAPIHOST, rmapiPort),
+        vertx);
+
+    svc.getTitleList(ForbiddenTitleListQuery).whenCompleteAsync((rmapiResult, throwable) -> {
+      context.assertNotNull(throwable);
+      context.assertEquals(RMAPI_UNAUTHORIZED_EXCEPTION_CLASS, throwable.getClass().getName());
+      async.complete();
+    });
+  }
+
+  @Test
+  public final void testNoResultsGetTitleList(TestContext context) {
+    final Async async = context.async();
+
+    RMAPIService svc = new RMAPIService(testCustId, testAPIKey, String.format("http://%s:%s", testRMAPIHOST, rmapiPort),
+        vertx);
+
+    svc.getTitleList(NoResultsTitleListQuery).whenCompleteAsync((rmapiResult, throwable) -> {
+      context.assertNull(throwable);
+      context.assertNotNull(rmapiResult);
+      context.assertEquals(0, rmapiResult.totalResults);
+      context.assertNotNull(rmapiResult.titleList);
+      context.assertEquals(0, rmapiResult.titleList.size());
+      async.complete();
+    });
   }
 
   private String readMockFile(String path) {
@@ -203,7 +288,4 @@ public class RMAPIServiceTest {
     return "";
   }
 
-  private String getRandomPort() {
-    return Integer.toString(new Random().nextInt(16_384) + 49_152);
-  }
 }
