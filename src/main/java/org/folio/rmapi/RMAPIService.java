@@ -87,13 +87,24 @@ public class RMAPIService {
         }
       } else {
         httpClient.close();
-        LOG.error(String.format("%s for JSON [%s] into type [%s]", INVALID_RMAPI_RESPONSE, body.toString(), clazz));
 
-        RMAPIServiceException rmException = new RMAPIServiceException(String.format("%s Code = %s Message = %s",
-            INVALID_RMAPI_RESPONSE, response.statusCode(), response.statusMessage()), response.statusCode(),
-            response.statusMessage(), body.toString(), query);
+        LOG.error(String.format("%s status code = [%s] status message = [%s] query = [%s] body = [%s]",
+            INVALID_RMAPI_RESPONSE, response.statusCode(), response.statusMessage(), query, body.toString()));
 
-        future.completeExceptionally(rmException);
+        if (response.statusCode() == 404) {
+          future.completeExceptionally(
+              new RMAPIResourceNotFoundException(String.format("Requested resource %s not found", query)));
+        } else if ((response.statusCode() == 401) || (response.statusCode() == 403)) {
+          future.completeExceptionally(
+              new RMAPIUnAuthorizedException(String.format("Unauthorized Access to %s", request.absoluteURI())));
+        } else {
+
+          future
+              .completeExceptionally(new RMAPIServiceException(
+                  String.format("%s Code = %s Message = %s", INVALID_RMAPI_RESPONSE, response.statusCode(),
+                      response.statusMessage()),
+                  response.statusCode(), response.statusMessage(), body.toString(), query));
+        }
       }
 
     }));
