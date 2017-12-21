@@ -137,8 +137,7 @@ public class CodexInstanceResourceImplTest {
     final Async asyncLocal = context.async();
     logger.info("Testing for response when title not found");
     RestAssured.given().header(tenantHeader).header(urlHeader).header(contentTypeHeader).get("/codex-instances/1")
-        .then().log().ifValidationFails().statusCode(500); // This test should be changed to check for 404 instead of
-                                                           // 500 after Carole's code is checked in
+        .then().log().ifValidationFails().statusCode(404);
     // Test done
     logger.info("Test done");
     asyncLocal.complete();
