@@ -18,6 +18,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import io.restassured.http.Header;
 import io.restassured.response.Response;
 import io.vertx.core.DeploymentOptions;
@@ -35,6 +36,10 @@ public class CodexInstanceResourceImplTest {
   private static final String MOCK_RMAPI_CONFIG_SUCCESS_FILE = "RMAPIToCodex/mock_content.json";
   private static final String MOCK_RMAPI_INSTANCE_TITLE_200_RESPONSE_WHEN_FOUND = "RMAPIService/SuccessGetTitleById.json";
   private static final String MOCK_RMAPI_INSTANCE_TITLE_404_RESPONSE_WHEN_NOT_FOUND = "RMAPIConfiguration/mock_content_fail_404.json";
+  private static final String MOCK_CODEX_INSTANCE_TITLE_COLLECTION_200_RESPONSE_WHEN_FOUND = "RMAPIService/SuccessGetTitleList.json";
+
+  private static final String SEARCH_TITLE_COLLECTION_WHEN_SEARCH_FIELD_NOT_GIVEN_SUCCESS_QUERY = "Bridget Jones";
+  private static final String SEARCH_TITLE_COLLECTION_FAILS_UNSUPPORTED_QUERY = "title = Bridget Jones or publisher = xyz";
 
   private final Logger logger = LoggerFactory.getLogger("CodexInstancesResourceImplTest");
 
@@ -82,6 +87,14 @@ public class CodexInstanceResourceImplTest {
       } else if (req.path().equals(String.format("/rm/rmaccounts/test/titles/%s", "1"))) {
         req.response().setStatusCode(404).putHeader("content-type", "text/plain")
             .end(readMockJsonFile(MOCK_RMAPI_INSTANCE_TITLE_404_RESPONSE_WHEN_NOT_FOUND));
+      } else if (req.path().equals("/rm/rmaccounts/test/titles")) {
+        if (req.uri().contains("search=Bridget+Jones&searchfield=titlename&orderby=titlename&count=10&offset=1")) {
+          req.response().setStatusCode(200).putHeader("content-type", "application/json")
+          .end(readMockJsonFile(MOCK_CODEX_INSTANCE_TITLE_COLLECTION_200_RESPONSE_WHEN_FOUND));
+        } else if(req.uri().contains("search=Bridget+Jones&searchfield=titlename&orderby=titlename&count=200&offset=1")) {
+          req.response().setStatusCode(404).putHeader("content-type", "application/json")
+          .end(readMockJsonFile(MOCK_RMAPI_INSTANCE_TITLE_404_RESPONSE_WHEN_NOT_FOUND));
+        }
       }
     });
 
@@ -108,36 +121,161 @@ public class CodexInstanceResourceImplTest {
   }
 
   @Test
-  public void getInstanceByIdSuccessTest(TestContext context) {
+  public void getCodexInstancesByIdSuccessTest(TestContext context) {
     final Async asyncLocal = context.async();
     logger.info("Testing for successful instance id");
-    final Response r = RestAssured.given().header(tenantHeader).header(urlHeader).header(contentTypeHeader)
-        .get("/codex-instances/99999").then().log().ifValidationFails().statusCode(200).extract().response();
+
+    final Response r = RestAssured
+        .given()
+          .header(tenantHeader)
+          .header(urlHeader)
+          .header(contentTypeHeader)
+        .get("/codex-instances/99999")
+          .then()
+            .contentType(ContentType.JSON)
+            .log()
+            .ifValidationFails()
+            .statusCode(200).extract().response();
+
     final String body = r.getBody().asString();
     final JsonObject json = new JsonObject(body);
+
     context.assertTrue("99999".equals(json.getString("id")), body);
+
     // Test done
     logger.info("Test done");
     asyncLocal.complete();
   }
 
   @Test
-  public void getInstancesByIdThrowsExceptionWhenOkapiURLIsEmptyTest(TestContext context) {
+  public void getCodexInstancesByIdThrowsExceptionWhenOkapiURLIsEmptyTest(TestContext context) {
     final Async asyncLocal = context.async();
     logger.info("Test when Okapi URL is null is starting");
-    RestAssured.given().header(tenantHeader).header(contentTypeHeader).get("/codex-instances/396805").then().log()
-        .ifValidationFails().statusCode(500).body(containsString("Okapi URL cannot be null"));
+
+    RestAssured
+      .given()
+        .header(tenantHeader)
+        .header(contentTypeHeader)
+      .get("/codex-instances/396805")
+        .then()
+          .log()
+          .ifValidationFails()
+          .statusCode(500).body(containsString("Okapi URL cannot be null"));
+
     // Test done
     logger.info("Test done");
     asyncLocal.complete();
   }
 
   @Test
-  public void getInstanceByIdTitleNotFoundTest(TestContext context) {
+  public void getCodexInstancesByIdTitleNotFoundTest(TestContext context) {
     final Async asyncLocal = context.async();
     logger.info("Testing for response when title not found");
-    RestAssured.given().header(tenantHeader).header(urlHeader).header(contentTypeHeader).get("/codex-instances/1")
-        .then().log().ifValidationFails().statusCode(404);
+
+    RestAssured
+    .given()
+      .header(tenantHeader)
+      .header(urlHeader)
+      .header(contentTypeHeader)
+    .get("/codex-instances/1")
+      .then()
+        .log()
+        .ifValidationFails()
+        .statusCode(404);
+
+    // Test done
+    logger.info("Test done");
+    asyncLocal.complete();
+  }
+
+  @Test
+  public void getCodexInstancesSuccessTest(TestContext context) {
+    final Async asyncLocal = context.async();
+    logger.info("Testing for successful instance collection");
+
+    final Response r = RestAssured
+        .given()
+          .header(tenantHeader)
+          .header(urlHeader)
+          .header(contentTypeHeader)
+        .get(String.format("/codex-instances?query=%s", SEARCH_TITLE_COLLECTION_WHEN_SEARCH_FIELD_NOT_GIVEN_SUCCESS_QUERY))
+          .then()
+            .contentType(ContentType.JSON)
+            .log()
+            .ifValidationFails()
+            .statusCode(200).extract().response();
+
+    if(r != null) { //Ensure that the response is not null
+      final String body = r.getBody().asString();
+      final JsonObject json = new JsonObject(body);
+      //Ensure that total records and instances keys are present in response
+      context.assertTrue(json.containsKey("totalRecords"));
+      context.assertTrue(json.containsKey("instances"));
+    }
+
+    // Test done
+    logger.info("Test done");
+    asyncLocal.complete();
+  }
+
+  @Test
+  public void getCodexInstancesHandlesInvalidQueryTest(TestContext context) {
+    final Async asyncLocal = context.async();
+    logger.info("Test when query is invalid, exception is thrown");
+
+    RestAssured
+      .given()
+        .header(tenantHeader)
+        .header(contentTypeHeader)
+        .header(urlHeader)
+      .get(String.format("/codex-instances?%s", SEARCH_TITLE_COLLECTION_WHEN_SEARCH_FIELD_NOT_GIVEN_SUCCESS_QUERY))
+        .then()
+          .log()
+          .ifValidationFails()
+          .statusCode(500);
+
+    // Test done
+    logger.info("Test done");
+    asyncLocal.complete();
+  }
+
+  @Test
+  public void getCodexInstancesHandlesUnsupportedQueryTest(TestContext context) {
+    final Async asyncLocal = context.async();
+    logger.info("Test when query is invalid, exception is thrown");
+
+    RestAssured
+      .given()
+        .header(tenantHeader)
+        .header(contentTypeHeader)
+        .header(urlHeader)
+      .get(String.format("/codex-instances?query=%s", SEARCH_TITLE_COLLECTION_FAILS_UNSUPPORTED_QUERY))
+        .then()
+          .log()
+          .ifValidationFails()
+          .statusCode(400);
+
+    // Test done
+    logger.info("Test done");
+    asyncLocal.complete();
+  }
+
+  @Test
+  public void getCodexInstancesValidatesLimitTest(TestContext context) {
+    final Async asyncLocal = context.async();
+    logger.info("Test when query is invalid, exception is thrown");
+
+    RestAssured
+      .given()
+        .header(tenantHeader)
+        .header(contentTypeHeader)
+        .header(urlHeader)
+      .get(String.format("/codex-instances?query=%s&limit=%d", SEARCH_TITLE_COLLECTION_WHEN_SEARCH_FIELD_NOT_GIVEN_SUCCESS_QUERY, 200))
+        .then()
+          .log()
+          .ifValidationFails()
+          .statusCode(500);
+
     // Test done
     logger.info("Test done");
     asyncLocal.complete();
