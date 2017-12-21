@@ -91,9 +91,6 @@ public class CodexInstanceResourceImplTest {
         if (req.uri().contains("search=Bridget+Jones&searchfield=titlename&orderby=titlename&count=10&offset=1")) {
           req.response().setStatusCode(200).putHeader("content-type", "application/json")
           .end(readMockJsonFile(MOCK_CODEX_INSTANCE_TITLE_COLLECTION_200_RESPONSE_WHEN_FOUND));
-        } else if(req.uri().contains("search=Bridget+Jones&searchfield=titlename&orderby=titlename&count=200&offset=1")) {
-          req.response().setStatusCode(404).putHeader("content-type", "application/json")
-          .end(readMockJsonFile(MOCK_RMAPI_INSTANCE_TITLE_404_RESPONSE_WHEN_NOT_FOUND));
         }
       }
     });
@@ -254,27 +251,6 @@ public class CodexInstanceResourceImplTest {
           .log()
           .ifValidationFails()
           .statusCode(400);
-
-    // Test done
-    logger.info("Test done");
-    asyncLocal.complete();
-  }
-
-  @Test
-  public void getCodexInstancesValidatesLimitTest(TestContext context) {
-    final Async asyncLocal = context.async();
-    logger.info("Test when query is invalid, exception is thrown");
-
-    RestAssured
-      .given()
-        .header(tenantHeader)
-        .header(contentTypeHeader)
-        .header(urlHeader)
-      .get(String.format("/codex-instances?query=%s&limit=%d", SEARCH_TITLE_COLLECTION_WHEN_SEARCH_FIELD_NOT_GIVEN_SUCCESS_QUERY, 200))
-        .then()
-          .log()
-          .ifValidationFails()
-          .statusCode(500);
 
     // Test done
     logger.info("Test done");
