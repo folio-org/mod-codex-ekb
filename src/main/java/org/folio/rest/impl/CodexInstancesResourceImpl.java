@@ -13,7 +13,6 @@ import org.folio.cql2rmapi.QueryValidationException;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.resource.CodexInstancesResource;
 import org.folio.rmapi.RMAPIResourceNotFoundException;
-import org.folio.rmapi.RMAPIUnAuthorizedException;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -57,9 +56,6 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
         log.error("getCodexInstances failed!", throwable);
         if (throwable.getCause() instanceof QueryValidationException) {
           asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainBadRequest(throwable.getCause().getMessage())));
-        } else if (throwable.getCause() instanceof RMAPIUnAuthorizedException) {
-          asyncResultHandler.handle(
-              Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainUnauthorized(query)));
         } else {
           asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainInternalServerError(throwable.getCause().getMessage())));
         }
@@ -89,9 +85,6 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
         if (throwable.getCause() instanceof RMAPIResourceNotFoundException) {
           asyncResultHandler.handle(
               Future.succeededFuture(CodexInstancesResource.GetCodexInstancesByIdResponse.withPlainNotFound(id)));
-        } else if (throwable.getCause() instanceof RMAPIUnAuthorizedException) {
-          asyncResultHandler.handle(
-              Future.succeededFuture(CodexInstancesResource.GetCodexInstancesByIdResponse.withPlainUnauthorized(id)));
         } else {
         asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesByIdResponse.withPlainInternalServerError(throwable.getCause().getMessage())));
         }
