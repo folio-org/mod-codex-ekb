@@ -201,11 +201,11 @@ public class CQLParserForRMAPI {
       throw new QueryValidationException(ERROR + "Sorting on multiple keys" + UNSUPPORTED);
     }
     // At this point RM API supports only sort by title and relevance
-    // relevance gives better results, so even if we get title, we just pass along relevance
+    // Inventory does not support relevance, so we only sort by title
     for (final ModifierSet ms : sortIndexes) {
       sortType = ms.getBase();
       if (sortType.equalsIgnoreCase(TITLE) || (sortType.equalsIgnoreCase(CODEX_TITLE))) {
-        sortType = "relevance";
+        sortType = RM_API_TITLE;
       } else {
         final StringBuilder builder = new StringBuilder();
         builder.append(ERROR);
