@@ -28,19 +28,21 @@ public class CQLParserForRMAPI {
 
   private static final String ERROR = "Unsupported Query Format : ";
   private static final String UNSUPPORTED = " is not supported.";
-  private static final String CQL_SERVER_CHOICE = "cql.serverchoice";
+  private static final String CQL_SERVER_CHOICE = "cql.serverChoice";
   private static final String RM_API_TITLE = "titlename";
   private static final String SOURCE = "source";
   private static final String CODEX_SOURCE = "codex.source";
   private static final String SELECTED = "ext.selected";
   private static final String TITLE = "title";
   private static final String CODEX_TITLE = "codex.title";
-  private static final String TYPE = "type";
-  private static final String CODEX_TYPE = "codex.type";
+  private static final String RESOURCE_TYPE = "resourceType";
+  private static final String CODEX_RESOURCE_TYPE = "codex.resourceType";
   private static final String IDENTIFIER = "identifier";
   private static final String CODEX_IDENTIFIER = "codex.identifier";
   private static final String PUBLISHER = "publisher";
   private static final String CODEX_PUBLISHER = "codex.publisher";
+  private static final String ID = "id";
+  private static final String CODEX_ID = "codex.id";
 
   String searchField;
   String searchValue;
@@ -50,8 +52,10 @@ public class CQLParserForRMAPI {
   String selection;
   int countRMAPI;
   int instanceIndex;
-
+  private boolean idSearchField;
+  private String idSearchFieldValue;
   List<String> queriesForRMAPI = new ArrayList<>();
+
 
   private enum validSources {
     ALL, KB
@@ -61,11 +65,14 @@ public class CQLParserForRMAPI {
     if(limit != 0) {
       final CQLNode node = initCQLParser(query);
       checkNodeInstance(node);
-      final int pageOffsetRMAPI = computePageOffsetForRMAPI(offset, limit);
-      queriesForRMAPI.add(buildRMAPIQuery(limit, pageOffsetRMAPI));
-      instanceIndex = computeInstanceIndex(offset, limit);
-      if(checkIfSecondQueryIsNeeded(offset, limit, pageOffsetRMAPI)) {
-        queriesForRMAPI.add(buildRMAPIQuery(limit, pageOffsetRMAPI+1));
+      //If it is an id search field, we do not need to build the query since we can directly invoke RM API to look for that id
+      if(!idSearchField) {
+        final int pageOffsetRMAPI = computePageOffsetForRMAPI(offset, limit);
+        queriesForRMAPI.add(buildRMAPIQuery(limit, pageOffsetRMAPI));
+        instanceIndex = computeInstanceIndex(offset, limit);
+        if(checkIfSecondQueryIsNeeded(offset, limit, pageOffsetRMAPI)) {
+          queriesForRMAPI.add(buildRMAPIQuery(limit, pageOffsetRMAPI+1));
+        }
       }
     } else {
       throw new QueryValidationException(ERROR + "Limit suggests that no results need to be returned.");
@@ -101,14 +108,14 @@ public class CQLParserForRMAPI {
     final String termNode = node.getTerm(); // gives the search value
     final StringBuilder builder = new StringBuilder();
     builder.append(ERROR);
-    switch(indexNode.toLowerCase()) {
+    switch(indexNode) {
     case CQL_SERVER_CHOICE:
       // If no search field is passed, default it to title search. This is the default
       // search supported by RMAPI
       setSearchValuesByTitle(termNode);
       break;
-    case CODEX_TYPE:
-    case TYPE:
+    case CODEX_RESOURCE_TYPE:
+    case RESOURCE_TYPE:
       //Set filter values based on type
       setFilterValuesByType(indexNode, termNode);
       break;
@@ -117,14 +124,20 @@ public class CQLParserForRMAPI {
       //Ensure that source is supported
       checkSource(termNode);
       break;
+    case CODEX_ID:
+    case ID:
+      //Extract id as a search field
+      idSearchField = true;
+      idSearchFieldValue = termNode;
+      break;
     case SELECTED:
       //Set holdings selection
       setSelection(termNode);
       break;
     default:
-      if(!Stream.of(TITLE, CODEX_TITLE, IDENTIFIER, CODEX_IDENTIFIER, PUBLISHER, CODEX_PUBLISHER).anyMatch(indexNode::equalsIgnoreCase)) {
+      if(!Stream.of(TITLE, CODEX_TITLE, IDENTIFIER, CODEX_IDENTIFIER, PUBLISHER, CODEX_PUBLISHER, ID, CODEX_ID).anyMatch(indexNode::equalsIgnoreCase)) {
      // If search field is not supported, log and return an error response
-        builder.append("Search field ");
+        builder.append("Search field or filter value ");
         builder.append(indexNode);
         builder.append(UNSUPPORTED);
         throw new QueryValidationException(builder.toString());
@@ -164,6 +177,7 @@ public class CQLParserForRMAPI {
         final StringBuilder builder = new StringBuilder();
         builder.append(ERROR);
         builder.append("Filtering on type ");
+        builder.append(filterValue);
         builder.append(UNSUPPORTED);
         throw new QueryValidationException(builder.toString());
       }
@@ -320,5 +334,13 @@ public class CQLParserForRMAPI {
 
   public int getInstanceIndex() {
     return instanceIndex;
+  }
+
+  public boolean isIDSearchField() {
+    return idSearchField;
+  }
+
+  public String getID() {
+    return idSearchFieldValue;
   }
 }

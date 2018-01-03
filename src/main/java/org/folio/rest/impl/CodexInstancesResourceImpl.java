@@ -75,10 +75,8 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
       .thenCompose(rmAPIConfig ->
         RMAPIToCodex.getInstance(id, vertxContext, rmAPIConfig)
       ).thenApply(instance -> {
-        asyncResultHandler.handle(Future.succeededFuture(
-            instance == null ?
-                CodexInstancesResource.GetCodexInstancesByIdResponse.withPlainNotFound(id) :
-                  CodexInstancesResource.GetCodexInstancesByIdResponse.withJsonOK(instance)));
+        asyncResultHandler.handle(
+            Future.succeededFuture(CodexInstancesResource.GetCodexInstancesByIdResponse.withJsonOK(instance)));
         return instance;
       }).exceptionally(throwable -> {
         log.error("getCodexInstancesById failed!", throwable);
