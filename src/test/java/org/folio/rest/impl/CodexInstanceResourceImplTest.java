@@ -206,7 +206,7 @@ public class CodexInstanceResourceImplTest {
       final String body = r.getBody().asString();
       final JsonObject json = new JsonObject(body);
       //Ensure that total records and instances keys are present in response
-      context.assertTrue(json.containsKey("totalRecords"));
+      context.assertTrue(json.containsKey("resultInfo"));
       context.assertTrue(json.containsKey("instances"));
     }
 

@@ -372,7 +372,7 @@ public class RMAPIToCodexTest {
 
       return RMAPIToCodex.getInstances(cql, vertx.getOrCreateContext(), config);
     }).whenComplete((response, throwable) -> {
-      context.assertEquals(524, response.getTotalRecords());
+      context.assertEquals(524, response.getResultInfo().getTotalRecords());
       context.assertEquals(5, response.getInstances().size());
 
       async.complete();
@@ -397,7 +397,7 @@ public class RMAPIToCodexTest {
 
       return RMAPIToCodex.getInstances(cql, vertx.getOrCreateContext(), config);
     }).whenComplete((response, throwable) -> {
-      context.assertEquals(524, response.getTotalRecords());
+      context.assertEquals(524, response.getResultInfo().getTotalRecords());
       context.assertEquals(5, response.getInstances().size());
       context.assertEquals("60 minutes. Dick Clarke", response.getInstances().get(0).getTitle());
 
@@ -423,7 +423,7 @@ public class RMAPIToCodexTest {
 
       return RMAPIToCodex.getInstances(cql, vertx.getOrCreateContext(), config);
     }).whenComplete((response, throwable) -> {
-      context.assertEquals(5, response.getTotalRecords());
+      context.assertEquals(5, response.getResultInfo().getTotalRecords());
       context.assertEquals(0, response.getInstances().size());
 
       async.complete();
