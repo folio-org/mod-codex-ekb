@@ -13,6 +13,7 @@ import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Identifier;
 import org.folio.rest.jaxrs.model.Instance;
 import org.folio.rest.jaxrs.model.InstanceCollection;
+import org.folio.rmapi.RMAPIResourceNotFoundException;
 import org.folio.rmapi.RMAPIService;
 import org.folio.rmapi.model.Title;
 import org.folio.rmapi.model.Titles;
@@ -39,10 +40,20 @@ public final class RMAPIToCodex {
       RMAPIConfiguration rmAPIConfig) {
     log.info("Calling getInstance");
 
+    final int titleId;
+    try {
+      titleId = Integer.parseInt(id);
+    } catch (NumberFormatException e) {
+      log.error("getInstance() called with an invalid id: " + id, e);
+      final CompletableFuture<Instance> failed = new CompletableFuture<>();
+      failed.completeExceptionally(new RMAPIResourceNotFoundException("Requested resource " + id + " not found"));
+      return failed;
+    }
+
     final RMAPIService rmAPIService = new RMAPIService(rmAPIConfig.getCustomerId(), rmAPIConfig.getAPIKey(),
         rmAPIConfig.getUrl(), vertxContext.owner());
 
-    return rmAPIService.getTitleById(id)
+    return rmAPIService.getTitleById(titleId)
         .thenApply(RMAPIToCodex::convertRMAPITitleToCodex);
   }
 
