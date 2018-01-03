@@ -33,14 +33,14 @@ public class RMAPIServiceTest {
   private final String testCustId = "TESTCUSTID";
   private final String testAPIKey = "TESTAPIKEY";
   private final String testRMAPIHOST = "localhost";
-  private final String SuccessTitleId = "99999";
-  private final String TitleNotFoundTitleId = "1";
-  private final String BadJSONTitleId = "88888";
+  private final int SuccessTitleId = 99999;
+  private final int TitleNotFoundTitleId = 1;
+  private final int BadJSONTitleId = 88888;
   private final String SuccessTitleListQuery = "search=autism&searchfield=titlename&selection=0&orderby=titlename&count=5&offset=1";
   private final String GatewayTimeoutTitleListQuery = "search=muslim%journal&searchfield=relevance&selection=0&orderby=titlename&count=5&offset=1";
   private final String NoResultsTitleListQuery = "search=nnnnnnn&searchfield=relevance&selection=0&orderby=titlename&count=5&offset=1";
   private final String ForbiddenTitleListQuery = "search=moby%20dick&searchfield=relevance&selection=0&orderby=titlename&count=5&offset=1";
-  private final String UnAuthorizedTitleId = "77777";
+  private final int UnAuthorizedTitleId = 77777;
 
   private Vertx vertx;
   private final int okapiPort = Integer.parseInt(System.getProperty("port", Integer.toString(Utils.getRandomPort())));
@@ -88,16 +88,16 @@ public class RMAPIServiceTest {
 
     HttpServer server = vertx.createHttpServer();
     server.requestHandler(req -> {
-      if (req.path().equals(String.format("/rm/rmaccounts/TESTCUSTID/titles/%s", SuccessTitleId))) {
+      if (req.path().equals(String.format("/rm/rmaccounts/TESTCUSTID/titles/%d", SuccessTitleId))) {
         req.response().setStatusCode(200).putHeader("content-type", "application/json")
             .end(readMockFile(MOCK_CONTENT_SUCCESS_GET_TITLE_BY_ID));
-      } else if (req.path().equals(String.format("/rm/rmaccounts/TESTCUSTID/titles/%s", TitleNotFoundTitleId))) {
+      } else if (req.path().equals(String.format("/rm/rmaccounts/TESTCUSTID/titles/%d", TitleNotFoundTitleId))) {
         req.response().setStatusCode(404).putHeader("content-type", "application/json")
             .end(readMockFile(MOCK_CONTENT_TITLE_NOT_FOUND));
-      } else if (req.path().equals(String.format("/rm/rmaccounts/TESTCUSTID/titles/%s", BadJSONTitleId))) {
+      } else if (req.path().equals(String.format("/rm/rmaccounts/TESTCUSTID/titles/%d", BadJSONTitleId))) {
         req.response().setStatusCode(200).putHeader("content-type", "application/json")
             .end(readMockFile(MOCK_CONTENT_BAD_JSON));
-      } else if (req.path().equals(String.format("/rm/rmaccounts/TESTCUSTID/titles/%s", UnAuthorizedTitleId))) {
+      } else if (req.path().equals(String.format("/rm/rmaccounts/TESTCUSTID/titles/%d", UnAuthorizedTitleId))) {
         req.response().setStatusCode(401).putHeader("content-type", "application/json")
             .end(readMockFile(MOCK_CONTENT_UNAUTHORIZED_JSON));
       } else if (req.path().equals("/rm/rmaccounts/TESTCUSTID/titles")) {

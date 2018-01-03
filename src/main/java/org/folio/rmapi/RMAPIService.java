@@ -52,7 +52,7 @@ public class RMAPIService {
   /**
    * Issues a get request to RMAPI Service and returns a completablefuture for the
    * target type
-   * 
+   *
    * @param query
    * @param clazz
    * @return
@@ -122,8 +122,8 @@ public class RMAPIService {
    * @param titleId
    * @return
    */
-  public CompletableFuture<Title> getTitleById(String titleId) {
-    return this.<Title>getRequest(constructURL(String.format("titles/%s", titleId)), Title.class);
+  public CompletableFuture<Title> getTitleById(int titleId) {
+    return this.<Title>getRequest(constructURL(String.format("titles/%d", titleId)), Title.class);
   }
 
   /**

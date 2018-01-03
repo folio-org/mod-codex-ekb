@@ -17,6 +17,7 @@ import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Identifier;
 import org.folio.rest.jaxrs.model.Instance;
 import org.folio.rest.tools.client.test.HttpClientMock2;
+import org.folio.rmapi.RMAPIResourceNotFoundException;
 import org.folio.utils.Utils;
 import org.junit.After;
 import org.junit.Before;
@@ -307,6 +308,23 @@ public class RMAPIToCodexTest {
       async.complete();
     }).exceptionally(throwable -> {
       context.fail(throwable);
+      async.complete();
+      return null;
+    });
+  }
+
+  @Test
+  public void testGetInstanceNonNumericId(TestContext context) {
+    Async async = context.async();
+
+    RMAPIConfiguration.getConfiguration(okapiHeaders).thenCompose(config -> {
+      return RMAPIToCodex.getInstance("123ABC", vertx.getOrCreateContext(), config);
+    }).whenComplete((response, throwable) -> {
+      context.assertNull(response);
+      context.assertTrue(throwable.getCause() instanceof RMAPIResourceNotFoundException);
+      async.complete();
+    }).exceptionally(throwable -> {
+      context.assertTrue(throwable.getCause() instanceof RMAPIResourceNotFoundException);
       async.complete();
       return null;
     });
