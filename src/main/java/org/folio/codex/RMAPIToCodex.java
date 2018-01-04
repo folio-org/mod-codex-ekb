@@ -1,6 +1,7 @@
 package org.folio.codex;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -63,6 +64,20 @@ public final class RMAPIToCodex {
 
     final List<CompletableFuture<Titles>> titleCfs = new ArrayList<>();
 
+    // If the client is searching by ID we need to do an ID lookup using the
+    // getInstance() method. We still need to return the it, if found or not,
+    // in an InstanceCollection.
+    if (cql.isIDSearchField()) {
+      return getInstance(cql.getID(), vertxContext, rmAPIConfig)
+          .thenApply(instance ->
+            new InstanceCollection()
+              .withInstances(Collections.singletonList(instance))
+              .withTotalRecords(Integer.valueOf(1))
+          ).exceptionally(throwable ->
+            new InstanceCollection().withTotalRecords(Integer.valueOf(0))
+          );
+    }
+
     // We need to create a new RMAPIService for each call so that we don't close
     // the HTTP client connection.
     for (String query : cql.getRMAPIQueries()) {
@@ -116,15 +131,15 @@ public final class RMAPIToCodex {
 
     final Identifier codexIdentifier;
     if (type != Type.UNKNOWN) {
-      codexIdentifier = new Identifier();
       String codexType = type.getDisplayName();
 
       if (subType != SubType.UNKNOWN) {
         codexType += '(' + subType.getDisplayName() + ')';
       }
 
-      codexIdentifier.setType(codexType);
-      codexIdentifier.setValue(rmIdentifier.id);
+      codexIdentifier = new Identifier()
+          .withType(codexType)
+          .withValue(rmIdentifier.id);
     } else {
       codexIdentifier = null;
     }
@@ -133,10 +148,9 @@ public final class RMAPIToCodex {
   }
 
   private static Contributor convertRMContributorToCodex(org.folio.rmapi.model.Contributor rmContributor) {
-    final Contributor codexContributor = new Contributor();
-    codexContributor.setName(rmContributor.titleContributor);
-    codexContributor.setType(rmContributor.type);
-    return codexContributor;
+    return new Contributor()
+        .withName(rmContributor.titleContributor)
+        .withType(rmContributor.type);
   }
 
   private static CompletableFuture<InstanceCollection> convertRMTitleListToCodex(List<CompletableFuture<Titles>> titleCfs, int index) {

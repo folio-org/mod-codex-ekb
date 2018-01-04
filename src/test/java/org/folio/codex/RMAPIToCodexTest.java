@@ -1,5 +1,7 @@
 package org.folio.codex;
 
+import static org.folio.utils.Utils.readMockFile;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
@@ -42,6 +44,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 @RunWith(VertxUnitRunner.class)
 public class RMAPIToCodexTest {
   private static final String MOCK_CONTENT_FILE = "RMAPIToCodex/mock_content.json";
+  private static final String MOCK_RMAPI_INSTANCE_TITLE_404_FILE = "RMAPIService/TitleNotFound.json";
 
   private final Logger logger = LoggerFactory.getLogger("okapi");
 
@@ -99,6 +102,8 @@ public class RMAPIToCodexTest {
         req.response().setStatusCode(200).end("{\"titleId\":4581057,\"titleName\":\"The World According to Philip K. Dick\",\"publisherName\":\"Palgrave Macmillan Ltd.\",\"identifiersList\":[{\"id\":\"3114209\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9},{\"id\":\"978-1-137-41458-8\",\"source\":\"ResourceIdentifier\",\"subtype\":9,\"type\":1},{\"id\":\"978-1-137-41459-5\",\"source\":\"ResourceIdentifier\",\"subtype\":2,\"type\":1},{\"id\":\"978-1-349-49032-5\",\"source\":\"ResourceIdentifier\",\"subtype\":1,\"type\":1},{\"id\":\"998217\",\"source\":\"ResourceIdentifier\",\"subtype\":0,\"type\":7}],\"subjectsList\":[{\"type\":\"BISAC\",\"subject\":\"LITERARY CRITICISM / Science Fiction & Fantasy\"}],\"isTitleCustom\":false,\"pubType\":\"Book\",\"customerResourcesList\":[{\"titleId\":4581052,\"packageId\":3814,\"packageName\":\"Palgrave Connect Literature & Performing Arts eBook Collection\",\"packageType\":\"Complete\",\"proxy\":{\"id\":\"<n>\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":262,\"vendorName\":\"Palgrave Macmillan Ltd\",\"locationId\":16869169,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"2015-01-01\",\"endCoverage\":\"2015-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://www.palgraveconnect.com/pc/doifinder/10.1057/9781137414595\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null},{\"titleId\":4581052,\"packageId\":3831,\"packageName\":\"Palgrave Connect Complete eBook Collection\",\"packageType\":\"Variable\",\"proxy\":{\"id\":\"<n>\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":262,\"vendorName\":\"Palgrave Macmillan Ltd\",\"locationId\":12282411,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"2015-01-01\",\"endCoverage\":\"2015-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://www.palgraveconnect.com/pc/doifinder/10.1057/9781137414595\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null},{\"titleId\":4581052,\"packageId\":5207,\"packageName\":\"EBSCO eBooks\",\"packageType\":\"Selectable\",\"proxy\":{\"id\":\"proxy-id-123\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":19,\"vendorName\":\"EBSCO\",\"locationId\":12699213,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"2015-01-01\",\"endCoverage\":\"2015-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://search.ebscohost.com/login.aspx?direct=true&scope=site&db=nlebk&db=nlabk&AN=998217\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null},{\"titleId\":4581052,\"packageId\":1244867,\"packageName\":\"Palgrave Connect Literature eBook Collection 2015\",\"packageType\":\"Complete\",\"proxy\":{\"id\":\"<n>\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":262,\"vendorName\":\"Palgrave Macmillan Ltd\",\"locationId\":16870606,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"2015-01-01\",\"endCoverage\":\"2015-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://www.palgraveconnect.com/pc/doifinder/10.1057/9781137414595\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}],\"description\":null,\"edition\":null,\"isPeerReviewed\":false,\"contributorsList\":[{\"type\":\"editor\",\"contributor\":\"Stefan Schlensag\"},{\"type\":\"editor\",\"contributor\":\"Alexander Dunst\"},{\"type\":\"author\",\"contributor\":\"Dunst, Alexander\"},{\"type\":\"author\",\"contributor\":\"Schlensag, Stefan\"}]}");
       } else if (req.path().equals("/rm/rmaccounts/test/titles/2619585")) {
         req.response().setStatusCode(200).end("{\"titleId\":2619585,\"titleName\":\"Tom, Dick and Harry\",\"publisherName\":\"Project Gutenberg Literary Archive Foundation\",\"identifiersList\":[],\"subjectsList\":[],\"isTitleCustom\":false,\"pubType\":\"Book\",\"customerResourcesList\":[{\"titleId\":1619585,\"packageId\":6750,\"packageName\":\"Project Gutenberg eBooks\",\"packageType\":\"Variable\",\"proxy\":{\"id\":\"<n>\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":953,\"vendorName\":\"Project Gutenberg\",\"locationId\":5137360,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://www.gutenberg.org/ebooks/20992\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null},{\"titleId\":1619585,\"packageId\":19153,\"packageName\":\"Project Gutenberg eBooks Archive Collection\",\"packageType\":\"Variable\",\"proxy\":{\"id\":\"<n>\",\"inherited\":true},\"isPackageCustom\":false,\"vendorId\":953,\"vendorName\":\"Project Gutenberg\",\"locationId\":7435416,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"https://archive.org/details/tomdickandharry20992gut\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}],\"description\":null,\"edition\":null,\"isPeerReviewed\":false,\"contributorsList\":[{\"type\":\"author\",\"contributor\":\"Reed, Talbot Baines\"}]}");
+      } else if (req.path().equals("/rm/rmaccounts/test/titles/1111111")) {
+        req.response().setStatusCode(404).end(readMockFile(MOCK_RMAPI_INSTANCE_TITLE_404_FILE));
       }
     });
     server.listen(serverPort, host, ar -> {
@@ -374,6 +379,56 @@ public class RMAPIToCodexTest {
     }).whenComplete((response, throwable) -> {
       context.assertEquals(524, response.getTotalRecords());
       context.assertEquals(5, response.getInstances().size());
+
+      async.complete();
+    }).exceptionally(throwable -> {
+      context.fail(throwable);
+      async.complete();
+      return null;
+    });
+  }
+
+  @Test
+  public void testGetInstancesIdSearch(TestContext context) {
+    Async async = context.async();
+
+    RMAPIConfiguration.getConfiguration(okapiHeaders).thenCompose(config -> {
+      final CQLParserForRMAPI cql;
+      try {
+        cql = new CQLParserForRMAPI("id=1619585", 0, 5);
+      } catch (UnsupportedEncodingException | QueryValidationException e) {
+        throw new CompletionException(e);
+      }
+
+      return RMAPIToCodex.getInstances(cql, vertx.getOrCreateContext(), config);
+    }).whenComplete((response, throwable) -> {
+      context.assertEquals(1, response.getTotalRecords());
+      context.assertEquals(1, response.getInstances().size());
+
+      async.complete();
+    }).exceptionally(throwable -> {
+      context.fail(throwable);
+      async.complete();
+      return null;
+    });
+  }
+
+  @Test
+  public void testGetInstancesIdSearchFail(TestContext context) {
+    Async async = context.async();
+
+    RMAPIConfiguration.getConfiguration(okapiHeaders).thenCompose(config -> {
+      final CQLParserForRMAPI cql;
+      try {
+        cql = new CQLParserForRMAPI("id=1111111", 0, 5);
+      } catch (UnsupportedEncodingException | QueryValidationException e) {
+        throw new CompletionException(e);
+      }
+
+      return RMAPIToCodex.getInstances(cql, vertx.getOrCreateContext(), config);
+    }).whenComplete((response, throwable) -> {
+      context.assertEquals(0, response.getTotalRecords());
+      context.assertEquals(0, response.getInstances().size());
 
       async.complete();
     }).exceptionally(throwable -> {
