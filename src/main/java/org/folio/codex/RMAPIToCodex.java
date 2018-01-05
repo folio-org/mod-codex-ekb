@@ -14,6 +14,7 @@ import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Identifier;
 import org.folio.rest.jaxrs.model.Instance;
 import org.folio.rest.jaxrs.model.InstanceCollection;
+import org.folio.rest.jaxrs.model.ResultInfo;
 import org.folio.rmapi.RMAPIResourceNotFoundException;
 import org.folio.rmapi.RMAPIService;
 import org.folio.rmapi.model.Title;
@@ -72,9 +73,9 @@ public final class RMAPIToCodex {
           .thenApply(instance ->
             new InstanceCollection()
               .withInstances(Collections.singletonList(instance))
-              .withTotalRecords(Integer.valueOf(1))
+              .withResultInfo(new ResultInfo().withTotalRecords(Integer.valueOf(1)))
           ).exceptionally(throwable ->
-            new InstanceCollection().withTotalRecords(Integer.valueOf(0))
+            new InstanceCollection().withResultInfo(new ResultInfo().withTotalRecords(Integer.valueOf(0)))
           );
     }
 
@@ -180,7 +181,7 @@ public final class RMAPIToCodex {
       }
 
       instanceCollection.setInstances(instances);
-      instanceCollection.setTotalRecords(totalResults);
+      instanceCollection.setResultInfo(new ResultInfo().withTotalRecords(totalResults));
 
       return instanceCollection;
     });
