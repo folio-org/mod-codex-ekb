@@ -1,13 +1,12 @@
 package org.folio.rest.impl;
 
+import static org.folio.utils.Utils.readMockFile;
 import static org.hamcrest.Matchers.containsString;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.tools.PomReader;
 import org.folio.rest.tools.client.test.HttpClientMock2;
@@ -83,14 +82,14 @@ public class CodexInstanceResourceImplTest {
     server.requestHandler(req -> {
       if (req.path().equals(String.format("/rm/rmaccounts/test/titles/%s", "99999"))) {
         req.response().setStatusCode(200).putHeader("content-type", "application/json")
-            .end(readMockJsonFile(MOCK_RMAPI_INSTANCE_TITLE_200_RESPONSE_WHEN_FOUND));
+            .end(readMockFile(MOCK_RMAPI_INSTANCE_TITLE_200_RESPONSE_WHEN_FOUND));
       } else if (req.path().equals(String.format("/rm/rmaccounts/test/titles/%s", "1"))) {
         req.response().setStatusCode(404).putHeader("content-type", "text/plain")
-            .end(readMockJsonFile(MOCK_RMAPI_INSTANCE_TITLE_404_RESPONSE_WHEN_NOT_FOUND));
+            .end(readMockFile(MOCK_RMAPI_INSTANCE_TITLE_404_RESPONSE_WHEN_NOT_FOUND));
       } else if (req.path().equals("/rm/rmaccounts/test/titles")) {
         if (req.uri().contains("search=Bridget+Jones&searchfield=titlename&orderby=titlename&count=10&offset=1")) {
           req.response().setStatusCode(200).putHeader("content-type", "application/json")
-          .end(readMockJsonFile(MOCK_CODEX_INSTANCE_TITLE_COLLECTION_200_RESPONSE_WHEN_FOUND));
+          .end(readMockFile(MOCK_CODEX_INSTANCE_TITLE_COLLECTION_200_RESPONSE_WHEN_FOUND));
         }
       }
     });
@@ -216,6 +215,66 @@ public class CodexInstanceResourceImplTest {
   }
 
   @Test
+  public void getCodexInstancesIdSearchSuccessTest(TestContext context) {
+    final Async asyncLocal = context.async();
+    logger.info("Testing for successful instance collection");
+
+    final Response r = RestAssured
+        .given()
+          .header(tenantHeader)
+          .header(urlHeader)
+          .header(contentTypeHeader)
+        .get(String.format("/codex-instances?query=id=%d", 99999))
+          .then()
+            .contentType(ContentType.JSON)
+            .log()
+            .ifValidationFails()
+            .statusCode(200).extract().response();
+
+    if(r != null) { //Ensure that the response is not null
+      final String body = r.getBody().asString();
+      final JsonObject json = new JsonObject(body);
+      //Ensure that total records and instances keys are present in response
+      context.assertEquals(json.getInteger("totalRecords"), Integer.valueOf(1));
+      context.assertTrue(json.containsKey("instances"));
+    }
+
+    // Test done
+    logger.info("Test done");
+    asyncLocal.complete();
+  }
+
+  @Test
+  public void getCodexInstancesIdSearchFailTest(TestContext context) {
+    final Async asyncLocal = context.async();
+    logger.info("Testing for successful instance collection");
+
+    final Response r = RestAssured
+        .given()
+          .header(tenantHeader)
+          .header(urlHeader)
+          .header(contentTypeHeader)
+        .get(String.format("/codex-instances?query=id=%d", 1))
+          .then()
+            .contentType(ContentType.JSON)
+            .log()
+            .ifValidationFails()
+            .statusCode(200).extract().response();
+
+    if(r != null) { //Ensure that the response is not null
+      final String body = r.getBody().asString();
+      final JsonObject json = new JsonObject(body);
+      //Ensure that total records and instances keys are present in response
+      context.assertEquals(json.getInteger("totalRecords"), Integer.valueOf(0));
+      context.assertTrue(json.containsKey("instances"));
+    }
+
+    // Test done
+    logger.info("Test done");
+    asyncLocal.complete();
+  }
+
+  @Test
   public void getCodexInstancesHandlesInvalidQueryTest(TestContext context) {
     final Async asyncLocal = context.async();
     logger.info("Test when query is invalid, exception is thrown");
@@ -255,19 +314,5 @@ public class CodexInstanceResourceImplTest {
     // Test done
     logger.info("Test done");
     asyncLocal.complete();
-  }
-
-  private String readMockJsonFile(String path) {
-    try {
-      final InputStream is = CodexInstanceResourceImplTest.class.getClassLoader().getResourceAsStream(path);
-      if (is != null) {
-        return IOUtils.toString(is, "UTF-8");
-      } else {
-        return "";
-      }
-    } catch (final Throwable e) {
-      logger.error(String.format("Unable to read mock configuration in %s file", path));
-    }
-    return "";
   }
 }

@@ -1,8 +1,7 @@
 package org.folio.rmapi;
 
-import java.io.InputStream;
+import static org.folio.utils.Utils.readMockFile;
 
-import org.apache.commons.io.IOUtils;
 import org.folio.rest.RestVerticle;
 import org.folio.utils.Utils;
 import org.junit.After;
@@ -16,8 +15,6 @@ import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
@@ -29,7 +26,6 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 @RunWith(VertxUnitRunner.class)
 public class RMAPIServiceTest {
 
-  private final Logger logger = LoggerFactory.getLogger("okapi");
   private final String testCustId = "TESTCUSTID";
   private final String testAPIKey = "TESTAPIKEY";
   private final String testRMAPIHOST = "localhost";
@@ -273,19 +269,4 @@ public class RMAPIServiceTest {
       async.complete();
     });
   }
-
-  private String readMockFile(String path) {
-    try {
-      InputStream is = RMAPIServiceTest.class.getClassLoader().getResourceAsStream(path);
-      if (is != null) {
-        return IOUtils.toString(is, "UTF-8");
-      } else {
-        return "";
-      }
-    } catch (Throwable e) {
-      logger.error(String.format("Unable to read mock configuration in %s file", path));
-    }
-    return "";
-  }
-
 }

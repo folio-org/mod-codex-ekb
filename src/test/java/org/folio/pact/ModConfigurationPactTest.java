@@ -42,7 +42,6 @@ public class ModConfigurationPactTest {
   public final PactProviderRuleMk2 mockProvider = new PactProviderRuleMk2("mod-configuration", this);
 
   private Field mock = null;
-  private Object previousMock = null;
 
   /**
    * @throws java.lang.Exception
@@ -55,7 +54,6 @@ public class ModConfigurationPactTest {
     // test.
     mock = HttpClientFactory.class.getDeclaredField("mock");
     mock.setAccessible(true);
-    previousMock = mock.get(null);
     mock.set(null, Boolean.FALSE);
 
     okapiHeaders.put("x-okapi-tenant", "rmapiconfigurationtest");
@@ -65,9 +63,10 @@ public class ModConfigurationPactTest {
   @After
   public void tearDown(TestContext context) throws Exception {
     if (mock != null) {
-      // Reset mock to the previous value...
+      // Set mock to TRUE, even if it hadn't been set to TRUE before so
+      // subsequent tests will use the mock...
       mock.setAccessible(true);
-      mock.set(null, previousMock);
+      mock.set(null, Boolean.TRUE);
     }
   }
 
