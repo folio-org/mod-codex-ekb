@@ -73,9 +73,9 @@ public final class RMAPIToCodex {
           .thenApply(instance ->
             new InstanceCollection()
               .withInstances(Collections.singletonList(instance))
-              .withTotalRecords(Integer.valueOf(1))
+              .withResultInfo(new ResultInfo().withTotalRecords(Integer.valueOf(1)))
           ).exceptionally(throwable ->
-            new InstanceCollection().withTotalRecords(Integer.valueOf(0))
+            new InstanceCollection().withResultInfo(new ResultInfo().withTotalRecords(Integer.valueOf(0)))
           );
     }
 
@@ -181,8 +181,7 @@ public final class RMAPIToCodex {
       }
 
       instanceCollection.setInstances(instances);
-      instanceCollection.setResultInfo(new ResultInfo());
-      instanceCollection.getResultInfo().setTotalRecords(totalResults);
+      instanceCollection.setResultInfo(new ResultInfo().withTotalRecords(totalResults));
 
       return instanceCollection;
     });
