@@ -1,5 +1,5 @@
 ## 0.0.4 2018-01-10
- * MODCXEKB-8: Added consumer PACT support for dependent APIs (mod-confguration and RM API).
+ * MODCXEKB-8: Added consumer Pact support for dependent APIs (mod-confguration and RM API).
 
 ## 0.0.3 2018-01-05
  * MODCXEKB-54: Change totalRecords to resultInfo.totalRecords

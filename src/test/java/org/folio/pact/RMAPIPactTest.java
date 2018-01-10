@@ -54,7 +54,7 @@ public class RMAPIPactTest {
     final Map<String, String> headers = new HashMap<>();
     headers.put("x-api-key", "123456789");
 
-    // List Titles PACT
+    // List Titles Pact
     final DslPart listTitlesBody = newJsonBody(o -> {
       o.array("titles", a -> {
         a.object(prop -> {
@@ -111,7 +111,7 @@ public class RMAPIPactTest {
       .numberValue("totalResults", 1);
     }).build();
 
-    // Get Title by ID PACT
+    // Get Title by ID Pact
     final DslPart getTitleByIdBbody = newJsonBody(o -> {
       o.stringType("description", "edition", "titleName", "publisherName", "pubType")
         .booleanType("isPeerReviewed", "isTitleCustom")
