@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-codex-ekb</artifactId>
-  <version>0.0.3-SNAPSHOT</version>
+  <version>0.0.4-SNAPSHOT</version>
 
   <name>EBSCO Knowledge Base Codex Module</name>
   <url>https://github.com/folio-org/mod-codex-ekb</url>
@@ -47,6 +47,7 @@
     <ramlfiles_path>${basedir}/ramls/raml-util/ramls/codex</ramlfiles_path>
     <ramlfiles_util_path>${basedir}/ramls/raml-util</ramlfiles_util_path>
     <dependency.locations.enabled>false</dependency.locations.enabled>
+    <pact.version>3.5.11</pact.version>
   </properties>
 
   <repositories>
@@ -127,13 +128,13 @@
     <dependency>
       <groupId>au.com.dius</groupId>
       <artifactId>pact-jvm-consumer-junit_2.12</artifactId>
-      <version>3.5.10</version>
+      <version>${pact.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>au.com.dius</groupId>
       <artifactId>pact-jvm-consumer-java8_2.12</artifactId>
-      <version>3.5.10</version>
+      <version>${pact.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
