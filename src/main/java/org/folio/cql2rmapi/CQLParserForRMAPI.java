@@ -44,6 +44,8 @@ public class CQLParserForRMAPI {
   private static final String ID = "id";
   private static final String CODEX_ID = "codex.id";
 
+  private static final String SELECTION_QUERY_PARAM = "&selection=";
+
   String searchField;
   String searchValue;
   String filterType;
@@ -278,20 +280,19 @@ public class CQLParserForRMAPI {
         builder.append("&resourcetype=" + filterValue);
       }
 
-      final String queryParam = "&selection=";
       if (selection != null) {
         // Map fields to RM API
         switch(selection.toLowerCase()) {
         case "all":
-          builder.append(queryParam);
+          builder.append(SELECTION_QUERY_PARAM);
           builder.append("all");
           break;
         case "true":
-          builder.append(queryParam);
+          builder.append(SELECTION_QUERY_PARAM);
           builder.append("selected");
           break;
         case "false":
-          builder.append(queryParam);
+          builder.append(SELECTION_QUERY_PARAM);
           builder.append("notselected");
           break;
         default:
@@ -305,7 +306,7 @@ public class CQLParserForRMAPI {
       } else {
         // Default "selection" to "selected" if the CQL did not contain the
         // "ext.selected" field.
-        builder.append(queryParam);
+        builder.append(SELECTION_QUERY_PARAM);
         builder.append("selected");
       }
 
