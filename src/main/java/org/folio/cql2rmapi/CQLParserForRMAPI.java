@@ -303,11 +303,6 @@ public class CQLParserForRMAPI {
           errorMsgBuilder.append(UNSUPPORTED);
           throw new QueryValidationException(errorMsgBuilder.toString());
         }
-      } else {
-        // Default "selection" to "selected" if the CQL did not contain the
-        // "ext.selected" field.
-        builder.append(SELECTION_QUERY_PARAM);
-        builder.append("selected");
       }
 
       builder.append("&orderby=" + sortType);

@@ -87,10 +87,14 @@ public class CodexInstanceResourceImplTest {
         req.response().setStatusCode(404).putHeader("content-type", "text/plain")
             .end(readMockFile(MOCK_RMAPI_INSTANCE_TITLE_404_RESPONSE_WHEN_NOT_FOUND));
       } else if (req.path().equals("/rm/rmaccounts/test/titles")) {
-        if (req.uri().contains("search=Bridget+Jones&searchfield=titlename&selection=selected&orderby=titlename&count=10&offset=1")) {
+        if (req.uri().contains("search=Bridget+Jones&searchfield=titlename&orderby=titlename&count=10&offset=1")) {
           req.response().setStatusCode(200).putHeader("content-type", "application/json")
           .end(readMockFile(MOCK_CODEX_INSTANCE_TITLE_COLLECTION_200_RESPONSE_WHEN_FOUND));
+        } else {
+          req.response().setStatusCode(500).end("Unexpected call: " + req.path());
         }
+      } else {
+        req.response().setStatusCode(500).end("Unexpected call: " + req.path());
       }
     });
 

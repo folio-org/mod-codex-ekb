@@ -1,3 +1,11 @@
+## 0.0.6 2018-03-05
+ * Remove the RM API query argument "selection=selected" as the default when
+   the "ext.selected" query argument is not passed to the codex API. The UI has
+   been updated to not pass "ext.selected" which will mean all, otherwise it
+   passes "ext.selected=true" or "ext.selected=false" to represent the RM API
+   query arguments "selection=selected" and "selection=notselected"
+   respectively. Passing "ext.selected=all" will explicitly pass "selction=all"
+   to the RM API and is the equivalent of not passing "ext.selected".
 ## 0.0.5 2018-02-01
  * MODCXEKB-56: Ignore unknown ext context set fields
  * If "ext.selected" is not passed in the request CQL, force
