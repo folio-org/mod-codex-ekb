@@ -141,7 +141,7 @@ public class CQLParserForRMAPI {
         // CQL fields that are in the ext context set should be ignored if they
         // are not recognized by the module.
         break;
-      } else if(!Stream.of(TITLE, CODEX_TITLE, IDENTIFIER, CODEX_IDENTIFIER, PUBLISHER, CODEX_PUBLISHER, ID, CODEX_ID).anyMatch(indexNode::equalsIgnoreCase)) {
+      } else if(Stream.of(TITLE, CODEX_TITLE, IDENTIFIER, CODEX_IDENTIFIER, PUBLISHER, CODEX_PUBLISHER, ID, CODEX_ID).noneMatch(indexNode::equalsIgnoreCase)) {
         // If search field is not supported, log and return an error response
         builder.append("Search field or filter value ");
         builder.append(indexNode);
@@ -303,11 +303,6 @@ public class CQLParserForRMAPI {
           errorMsgBuilder.append(UNSUPPORTED);
           throw new QueryValidationException(errorMsgBuilder.toString());
         }
-      } else {
-        // Default "selection" to "selected" if the CQL did not contain the
-        // "ext.selected" field.
-        builder.append(SELECTION_QUERY_PARAM);
-        builder.append("selected");
       }
 
       builder.append("&orderby=" + sortType);
