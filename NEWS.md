@@ -4,7 +4,7 @@
    been updated to not pass "ext.selected" which will mean all, otherwise it
    passes "ext.selected=true" or "ext.selected=false" to represent the RM API
    query arguments "selection=selected" and "selection=notselected"
-   respectively. Passing "ext.selected=all" will explicitly pass "selction=all"
+   respectively. Passing "ext.selected=all" will explicitly pass "selection=all"
    to the RM API and is the equivalent of not passing "ext.selected".
 ## 0.0.5 2018-02-01
  * MODCXEKB-56: Ignore unknown ext context set fields
