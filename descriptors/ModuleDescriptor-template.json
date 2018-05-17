@@ -10,13 +10,21 @@
         {
           "methods" : [ "GET" ],
           "pathPattern" : "/codex-instances",
-          "permissionsRequired" : [ "codex.collection.get" ]
+          "permissionsRequired" : [ "codex.collection.get" ],
+          "modulePermissions": ["configuration.entries.collection.get"]
         }, {
           "methods" : [ "GET" ],
           "pathPattern" : "/codex-instances/{id}",
-          "permissionsRequired" : [ "codex.item.get" ]
+          "permissionsRequired" : [ "codex.item.get" ],
+          "modulePermissions": ["configuration.entries.collection.get"]
         }
       ]
+    }
+  ],
+  "requires": [
+    {
+      "id": "configuration",
+      "version": "2.0"
     }
   ],
   "permissionSets" : [

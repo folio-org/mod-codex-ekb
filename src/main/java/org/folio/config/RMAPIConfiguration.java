@@ -77,7 +77,13 @@ public final class RMAPIConfiguration {
   public static CompletableFuture<RMAPIConfiguration> getConfiguration(final Map<String, String> okapiHeaders) {
     final Map<String, String> okapiHeadersLocal = new HashMap<>(okapiHeaders);
     final String tenantId = TenantTool.calculateTenantId(okapiHeadersLocal.get(RestVerticle.OKAPI_HEADER_TENANT));
-    final String okapiURL = okapiHeadersLocal.get("x-okapi-url") != null ? okapiHeadersLocal.get("x-okapi-url") : System.getProperty("okapi.url");
+
+    final String okapiURL;
+    if (okapiHeadersLocal.containsKey("x-okapi-url")) {
+      okapiURL = okapiHeadersLocal.get("x-okapi-url");
+    } else {
+      okapiURL = System.getProperty("okapi.url");
+    }
 
     // We need to remove this header before calling another module or okapi
     // will not be able to find the route. Since we don't own the headers map,
