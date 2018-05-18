@@ -25,6 +25,7 @@ import org.z3950.zing.cql.ModifierSet;
  */
 
 public class CQLParserForRMAPI {
+  private static final int RM_API_MAX_COUNT = 100;
 
   private static final String ERROR = "Unsupported Query Format : ";
   private static final String UNSUPPORTED = " is not supported.";
@@ -54,6 +55,7 @@ public class CQLParserForRMAPI {
   String selection;
   int countRMAPI;
   int instanceIndex;
+  int instanceLimit;
   private boolean idSearchField;
   private String idSearchFieldValue;
   List<String> queriesForRMAPI = new ArrayList<>();
@@ -69,11 +71,12 @@ public class CQLParserForRMAPI {
       checkNodeInstance(node);
       //If it is an id search field, we do not need to build the query since we can directly invoke RM API to look for that id
       if(!idSearchField) {
-        final int pageOffsetRMAPI = computePageOffsetForRMAPI(offset, limit);
+        instanceLimit = limit;
+        int pageOffsetRMAPI = computePageOffsetForRMAPI(offset, limit);
         queriesForRMAPI.add(buildRMAPIQuery(limit, pageOffsetRMAPI));
         instanceIndex = computeInstanceIndex(offset, limit);
-        if(checkIfSecondQueryIsNeeded(offset, limit, pageOffsetRMAPI)) {
-          queriesForRMAPI.add(buildRMAPIQuery(limit, pageOffsetRMAPI+1));
+        while (checkIfSecondQueryIsNeeded(offset, limit, pageOffsetRMAPI)) {
+          queriesForRMAPI.add(buildRMAPIQuery(limit, ++pageOffsetRMAPI));
         }
       }
     } else {
@@ -306,7 +309,7 @@ public class CQLParserForRMAPI {
       }
 
       builder.append("&orderby=" + sortType);
-      builder.append("&count=" + limit);
+      builder.append("&count=" + Math.min(limit, RM_API_MAX_COUNT));
       builder.append("&offset=" + pageOffsetRMAPI);
     }else {
       throw new QueryValidationException(ERROR + "Invalid query format, unsupported search parameters");
@@ -315,7 +318,7 @@ public class CQLParserForRMAPI {
   }
 
   private int computePageOffsetForRMAPI(int offset, int limit) {
-    final float value = offset/(float)limit;
+    final float value = offset/(float)Math.min(limit, RM_API_MAX_COUNT);
     final double floor = Math.floor(value);
     final double pageOffset = floor + 1;
     return (int) pageOffset;
@@ -323,14 +326,14 @@ public class CQLParserForRMAPI {
 
   private boolean checkIfSecondQueryIsNeeded(int offset, int limit, int pageOffsetRMAPI) {
     boolean secondQueryNeeded = false;
-    if((offset + limit) > (pageOffsetRMAPI * limit)) {
+    if((offset + limit) > (pageOffsetRMAPI * Math.min(limit, RM_API_MAX_COUNT))) {
       secondQueryNeeded = true;
     }
     return secondQueryNeeded;
   }
 
   public int computeInstanceIndex(int offset, int limit) {
-    return (offset%limit);
+    return (offset%Math.min(limit, RM_API_MAX_COUNT));
   }
 
   public List<String> getRMAPIQueries() {
@@ -339,6 +342,10 @@ public class CQLParserForRMAPI {
 
   public int getInstanceIndex() {
     return instanceIndex;
+  }
+
+  public int getInstanceLimit() {
+    return instanceLimit;
   }
 
   public boolean isIDSearchField() {

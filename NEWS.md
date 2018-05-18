@@ -1,3 +1,8 @@
+## 1.0.0 2018-05-17
+ * MODCXEKB-63: Higher API limits required changes to RM API paging.
+ * MODCXEKB-61: Updated the ModuleDescriptor to contain mod-configuration
+   permissions and dependencies.
+
 ## 0.0.6 2018-03-05
  * Remove the RM API query argument "selection=selected" as the default when
    the "ext.selected" query argument is not passed to the codex API. The UI has

@@ -86,7 +86,7 @@ public final class RMAPIToCodex {
           rmAPIConfig.getUrl(), vertxContext.owner()).getTitleList(query));
     }
 
-    return convertRMTitleListToCodex(titleCfs, cql.getInstanceIndex());
+    return convertRMTitleListToCodex(titleCfs, cql.getInstanceIndex(), cql.getInstanceLimit());
   }
 
   /**
@@ -154,7 +154,7 @@ public final class RMAPIToCodex {
         .withType(rmContributor.type);
   }
 
-  private static CompletableFuture<InstanceCollection> convertRMTitleListToCodex(List<CompletableFuture<Titles>> titleCfs, int index) {
+  private static CompletableFuture<InstanceCollection> convertRMTitleListToCodex(List<CompletableFuture<Titles>> titleCfs, int index, int limit) {
     return CompletableFuture.allOf(titleCfs.toArray(new CompletableFuture[titleCfs.size()]))
     .thenApply(result -> {
       final InstanceCollection instanceCollection = new InstanceCollection();
@@ -171,13 +171,11 @@ public final class RMAPIToCodex {
             .collect(Collectors.toList()));
       }
 
-      if (index > 0) {
-        if (instances.size() >= index) {
-          int end = Math.min(instances.size(), (page * (titleCfs.size() - 1)) + index);
-          instances = instances.subList(index, end);
-        } else {
-          instances.clear();
-        }
+      if (instances.size() >= index) {
+        int end = Math.min(instances.size(), limit);
+        instances = instances.subList(index, index + end);
+      } else {
+        instances.clear();
       }
 
       instanceCollection.setInstances(instances);
