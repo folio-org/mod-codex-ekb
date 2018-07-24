@@ -1,6 +1,6 @@
 buildMvn {
   publishModDescriptor = 'yes'
-  publishAPI = 'no'
+  publishAPI = 'yes'
   mvnDeploy = 'yes'
 
   doDocker = {
