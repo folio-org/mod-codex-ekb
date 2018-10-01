@@ -132,7 +132,7 @@ public class CQLParserForRMAPITest {
   public void CQLParserReturnsExpectedQueryStringIfValidQueryIsPassedTest()
       throws QueryValidationException, UnsupportedEncodingException {
     final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_QUERY, 10, 10);
-    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=10&offset=2", parser.getRMAPIQueries().get(0));
+    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=10&offset=2&searchtype=advanced", parser.getRMAPIQueries().get(0));
   }
 
   @Test(expected = QueryValidationException.class)
@@ -160,39 +160,39 @@ public class CQLParserForRMAPITest {
   @Test
   public void CQLParserMapsIdentifierToISXNTest() throws QueryValidationException, UnsupportedEncodingException {
     final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_ISBN_QUERY, 0, 10);
-    assertEquals("search=12345&searchfield=isxn&orderby=titlename&count=10&offset=1", parser.getRMAPIQueries().get(0));
+    assertEquals("search=12345&searchfield=isxn&orderby=titlename&count=10&offset=1&searchtype=advanced", parser.getRMAPIQueries().get(0));
   }
 
   @Test
   public void CQLParserPassesAlongOffsetIfNotEqualToZeroTest() throws QueryValidationException, UnsupportedEncodingException {
     final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_ISBN_QUERY, 10, 10);
-    assertEquals("search=12345&searchfield=isxn&orderby=titlename&count=10&offset=2", parser.getRMAPIQueries().get(0));
+    assertEquals("search=12345&searchfield=isxn&orderby=titlename&count=10&offset=2&searchtype=advanced", parser.getRMAPIQueries().get(0));
   }
 
   @Test
   public void CQLParserDoesNotAppendResourceTypeIfTypeNotPassedAlongTest() throws QueryValidationException, UnsupportedEncodingException {
     final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_ISBN_QUERY, 10, 10);
-    assertEquals("search=12345&searchfield=isxn&orderby=titlename&count=10&offset=2", parser.getRMAPIQueries().get(0));
+    assertEquals("search=12345&searchfield=isxn&orderby=titlename&count=10&offset=2&searchtype=advanced", parser.getRMAPIQueries().get(0));
   }
 
   @Test
   public void CQLParserDoesNotAppendResourceTypeIfFilterTypeIsNullTest() throws QueryValidationException, UnsupportedEncodingException {
     final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_FILTER_QUERY, 10, 10);
     parser.filterType = null;
-    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=10&offset=1", parser.buildRMAPIQuery(10, 1));
+    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=10&offset=1&searchtype=advanced", parser.buildRMAPIQuery(10, 1));
   }
 
   @Test
   public void CQLParserDoesNotAppendResourceTypeIfFilTerValueIsNullTest() throws QueryValidationException, UnsupportedEncodingException {
     final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_FILTER_QUERY, 10, 10);
     parser.filterValue = null;
-    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=10&offset=1", parser.buildRMAPIQuery(10, 1));
+    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=10&offset=1&searchtype=advanced", parser.buildRMAPIQuery(10, 1));
   }
 
   @Test
   public void CQLParserAppendsResourceTypeIfFilterTypeAndFilTerValueAreValidTest() throws QueryValidationException, UnsupportedEncodingException {
     final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_FILTER_QUERY, 10, 10);
-    assertEquals("search=bridget&searchfield=titlename&resourcetype=streamingvideo&orderby=titlename&count=10&offset=2",
+    assertEquals("search=bridget&searchfield=titlename&resourcetype=streamingvideo&orderby=titlename&count=10&offset=2&searchtype=advanced",
         parser.getRMAPIQueries().get(0));
   }
 
@@ -231,7 +231,7 @@ public class CQLParserForRMAPITest {
     assertEquals(1, queries.size());
     assertEquals(0, parser.getInstanceIndex());
     for (final String query: queries) {
-      assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=100&offset=10", query);
+      assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
   }
 
@@ -241,8 +241,8 @@ public class CQLParserForRMAPITest {
     final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
     assertEquals(2, queries.size());
     assertEquals(1, parser.getInstanceIndex());
-    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=15&offset=3", queries.get(0));
-    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=15&offset=4", queries.get(1));
+    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=15&offset=3&searchtype=advanced", queries.get(0));
+    assertEquals("search=bridget&searchfield=titlename&orderby=titlename&count=15&offset=4&searchtype=advanced", queries.get(1));
   }
 
   @Test(expected = QueryValidationException.class)
@@ -276,7 +276,7 @@ public class CQLParserForRMAPITest {
     assertEquals(1, queries.size());
     assertEquals(0, parser.getInstanceIndex());
     for (final String query: queries) {
-      assertEquals("search=bridget&searchfield=titlename&resourcetype=streamingvideo&selection=selected&orderby=titlename&count=100&offset=10", query);
+      assertEquals("search=bridget&searchfield=titlename&resourcetype=streamingvideo&selection=selected&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
   }
 
@@ -287,7 +287,7 @@ public class CQLParserForRMAPITest {
     assertEquals(1, queries.size());
     assertEquals(0, parser.getInstanceIndex());
     for (final String query: queries) {
-      assertEquals("search=bridget&searchfield=titlename&resourcetype=database&selection=all&orderby=titlename&count=100&offset=10", query);
+      assertEquals("search=bridget&searchfield=titlename&resourcetype=database&selection=all&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
   }
 
@@ -298,7 +298,7 @@ public class CQLParserForRMAPITest {
     assertEquals(1, queries.size());
     assertEquals(0, parser.getInstanceIndex());
     for (final String query: queries) {
-      assertEquals("search=bridget&searchfield=titlename&resourcetype=streamingvideo&selection=notselected&orderby=titlename&count=100&offset=10", query);
+      assertEquals("search=bridget&searchfield=titlename&resourcetype=streamingvideo&selection=notselected&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
   }
 
@@ -319,7 +319,7 @@ public class CQLParserForRMAPITest {
     assertEquals(1, queries.size());
     assertEquals(0, parser.getInstanceIndex());
     for (final String query: queries) {
-      assertEquals("search=bridget&searchfield=titlename&resourcetype=audiobook&selection=notselected&orderby=titlename&count=100&offset=10", query);
+      assertEquals("search=bridget&searchfield=titlename&resourcetype=audiobook&selection=notselected&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
   }
 
@@ -330,7 +330,7 @@ public class CQLParserForRMAPITest {
     assertEquals(1, queries.size());
     assertEquals(0, parser.getInstanceIndex());
     for (final String query: queries) {
-      assertEquals("search=12345&searchfield=isxn&resourcetype=database&selection=notselected&orderby=titlename&count=100&offset=10", query);
+      assertEquals("search=12345&searchfield=isxn&resourcetype=database&selection=notselected&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
   }
 
@@ -341,7 +341,7 @@ public class CQLParserForRMAPITest {
     assertEquals(1, queries.size());
     assertEquals(0, parser.getInstanceIndex());
     for (final String query: queries) {
-      assertEquals("search=ebsco&searchfield=publisher&resourcetype=database&selection=notselected&orderby=titlename&count=100&offset=10", query);
+      assertEquals("search=ebsco&searchfield=publisher&resourcetype=database&selection=notselected&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
   }
 
@@ -352,7 +352,7 @@ public class CQLParserForRMAPITest {
     assertEquals(1, queries.size());
     assertEquals(0, parser.getInstanceIndex());
     for (final String query: queries) {
-      assertEquals("search=ebsco&searchfield=publisher&resourcetype=streamingvideo&selection=notselected&orderby=titlename&count=100&offset=10", query);
+      assertEquals("search=ebsco&searchfield=publisher&resourcetype=streamingvideo&selection=notselected&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
   }
 

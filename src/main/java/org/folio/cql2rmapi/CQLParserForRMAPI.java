@@ -311,6 +311,7 @@ public class CQLParserForRMAPI {
       builder.append("&orderby=" + sortType);
       builder.append("&count=" + Math.min(limit, RM_API_MAX_COUNT));
       builder.append("&offset=" + pageOffsetRMAPI);
+      builder.append("&searchtype=advanced");
     }else {
       throw new QueryValidationException(ERROR + "Invalid query format, unsupported search parameters");
     }
