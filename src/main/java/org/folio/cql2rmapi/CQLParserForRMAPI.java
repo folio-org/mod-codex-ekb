@@ -40,6 +40,8 @@ public class CQLParserForRMAPI {
   private static final String CODEX_RESOURCE_TYPE = "codex.resourceType";
   private static final String IDENTIFIER = "identifier";
   private static final String CODEX_IDENTIFIER = "codex.identifier";
+  private static final String SUBJECT = "subject";
+  private static final String CODEX_SUBJECT = "codex.subject";
   private static final String PUBLISHER = "publisher";
   private static final String CODEX_PUBLISHER = "codex.publisher";
   private static final String ID = "id";
@@ -144,7 +146,7 @@ public class CQLParserForRMAPI {
         // CQL fields that are in the ext context set should be ignored if they
         // are not recognized by the module.
         break;
-      } else if(Stream.of(TITLE, CODEX_TITLE, IDENTIFIER, CODEX_IDENTIFIER, PUBLISHER, CODEX_PUBLISHER, ID, CODEX_ID).noneMatch(indexNode::equalsIgnoreCase)) {
+      } else if(Stream.of(TITLE, CODEX_TITLE, IDENTIFIER, CODEX_IDENTIFIER, PUBLISHER, CODEX_PUBLISHER, SUBJECT, CODEX_SUBJECT, ID, CODEX_ID).noneMatch(indexNode::equalsIgnoreCase)) {
         // If search field is not supported, log and return an error response
         builder.append("Search field or filter value ");
         builder.append(indexNode);
@@ -269,6 +271,8 @@ public class CQLParserForRMAPI {
         searchField = "isxn";
       } else if (searchField.equalsIgnoreCase(PUBLISHER) || searchField.equalsIgnoreCase(CODEX_PUBLISHER)) {
         searchField = PUBLISHER;
+      } else if (searchField.equalsIgnoreCase(SUBJECT) || searchField.equalsIgnoreCase(CODEX_SUBJECT)) {
+          searchField = SUBJECT;
       }
 
       if (sortType == null) {

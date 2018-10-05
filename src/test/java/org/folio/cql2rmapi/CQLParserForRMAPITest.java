@@ -356,6 +356,27 @@ public class CQLParserForRMAPITest {
     }
   }
 
+  @Test
+  public void CQLParserReturnsExpectedQueriesIfCodexSubjectIsPassedTest() throws QueryValidationException, UnsupportedEncodingException {
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI("codex.subject=history and resourceType = databases and ext.selected=false" , 900, 100);
+    final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
+    assertEquals(1, queries.size());
+    assertEquals(0, parser.getInstanceIndex());
+    for (final String query: queries) {
+      assertEquals("search=history&searchfield=subject&resourcetype=database&selection=notselected&orderby=titlename&count=100&offset=10", query);
+    }
+  }
+
+  @Test
+  public void CQLParserReturnsExpectedQueriesIfSubjectIsPassedTest() throws QueryValidationException, UnsupportedEncodingException {
+    final CQLParserForRMAPI parser = new CQLParserForRMAPI("subject=history and resourceType = video and ext.selected=false" , 900, 100);
+    final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
+    assertEquals(1, queries.size());
+    assertEquals(0, parser.getInstanceIndex());
+    for (final String query: queries) {
+      assertEquals("search=history&searchfield=subject&resourcetype=streamingvideo&selection=notselected&orderby=titlename&count=100&offset=10", query);
+    }
+  }
   @Test(expected = QueryValidationException.class)
   public void CQLParserThrowsExceptionIfInvalidSearchFieldWithPrefixIsPassedTest() throws QueryValidationException, UnsupportedEncodingException {
     new CQLParserForRMAPI("codex.resourceType=12345" , 900, 100);
