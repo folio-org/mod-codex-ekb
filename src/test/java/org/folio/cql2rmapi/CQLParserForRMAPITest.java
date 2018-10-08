@@ -33,6 +33,18 @@ public class CQLParserForRMAPITest {
     final String invalidQuery = "";
     new CQLParserForRMAPI(invalidQuery, 1, 10);
   }
+  
+  @Test(expected = QueryValidationException.class)
+  public void initCQLParserThrowsExceptionIfQueryIsInvalidTest() throws QueryValidationException, UnsupportedEncodingException {
+    final String invalidQuery = "offset=1&limit=10";
+    new CQLParserForRMAPI(invalidQuery, 1, 10);
+  }
+  
+  @Test(expected = QueryValidationException.class)
+  public void initCQLParserThrowsExceptionIfQueryIsNullTest() throws QueryValidationException, UnsupportedEncodingException {
+    final String invalidQuery = null;
+    new CQLParserForRMAPI(invalidQuery, 1, 10);
+  }
 
   @Test
   public void initCQLParserReturnsInstanceOfCQLNodeIfQueryValidTest() throws QueryValidationException, UnsupportedEncodingException {

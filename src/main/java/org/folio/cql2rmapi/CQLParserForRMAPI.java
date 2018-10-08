@@ -68,7 +68,7 @@ public class CQLParserForRMAPI {
   }
 
   public CQLParserForRMAPI(String query, int offset, int limit) throws QueryValidationException, UnsupportedEncodingException {
-    if(limit != 0) {
+    if(limit != 0 && query != null) {
       final CQLNode node = initCQLParser(query);
       checkNodeInstance(node);
       //If it is an id search field, we do not need to build the query since we can directly invoke RM API to look for that id
@@ -82,7 +82,7 @@ public class CQLParserForRMAPI {
         }
       }
     } else {
-      throw new QueryValidationException(ERROR + "Limit suggests that no results need to be returned.");
+      throw new QueryValidationException(ERROR + "Limit/Query suggests that no results need to be returned.");
     }
   }
 

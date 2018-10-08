@@ -292,7 +292,7 @@ public class CodexInstanceResourceImplTest {
         .then()
           .log()
           .ifValidationFails()
-          .statusCode(500);
+          .statusCode(400);
 
     // Test done
     logger.info("Test done");
