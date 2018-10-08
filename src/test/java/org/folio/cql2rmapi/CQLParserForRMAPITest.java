@@ -399,7 +399,7 @@ public class CQLParserForRMAPITest {
     assertEquals(1, queries.size());
     assertEquals(0, parser.getInstanceIndex());
     for (final String query: queries) {
-      assertEquals("search=history&searchfield=subject&resourcetype=database&selection=notselected&orderby=titlename&count=100&offset=10", query);
+      assertEquals("search=history&searchfield=subject&resourcetype=database&selection=notselected&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
   }
 
@@ -410,7 +410,7 @@ public class CQLParserForRMAPITest {
     assertEquals(1, queries.size());
     assertEquals(0, parser.getInstanceIndex());
     for (final String query: queries) {
-      assertEquals("search=history&searchfield=subject&resourcetype=streamingvideo&selection=notselected&orderby=titlename&count=100&offset=10", query);
+      assertEquals("search=history&searchfield=subject&resourcetype=streamingvideo&selection=notselected&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
   }
   @Test(expected = QueryValidationException.class)
