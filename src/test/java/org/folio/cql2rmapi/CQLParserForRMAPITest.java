@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.z3950.zing.cql.CQLNode;
 
@@ -28,7 +29,7 @@ public class CQLParserForRMAPITest {
   private static final String VALID_ISBN_QUERY = "identifier = 12345 sortby title";
   private static final String VALID_FILTER_QUERY = "title = bridget and resourceType = video sortby title";
   private static final String VALID_ADVANCED_BOOLEAN_QUERY = "(title = \"spring OR summer\") and (ext.selected = true) sortby title";
-  private static final String VALID_ADVANCED_PHRASE_QUERY = "(title = \"“moby dick”\") and (ext.selected = true) sortby title";
+  private static final String VALID_ADVANCED_PHRASE_QUERY = "(title = \"\"great gatsby\"\") and (ext.selected = true) sortby title";
   private static final String VALID_ADVANCED_WILDCARD_QUERY = "(title = comput*) and (ext.selected = true) sortby title";
   private static final String VALID_ADVANCED_NESTED_QUERY = "(title = \"(company AND business) NOT report*\") and (ext.selected = true) sortby title";
 
@@ -91,12 +92,13 @@ public class CQLParserForRMAPITest {
     assertEquals("search=spring+OR+summer&searchfield=titlename&selection=selected&orderby=titlename&count=10&offset=1&searchtype=advanced", parser.getRMAPIQueries().get(0));
   }
 
+  @Ignore("Test Pending - CQL parser handling of quoted query")
   @Test
-  public void CQLParserSetsExpectedValuesIfPhraseQueryIsPassedTest() throws QueryValidationException, UnsupportedEncodingException {
+  public void CQLParserSetsExpectedValuesIfPhraseQuery2IsPassedTest() throws QueryValidationException, UnsupportedEncodingException {
     final CQLParserForRMAPI parser = new CQLParserForRMAPI(VALID_ADVANCED_PHRASE_QUERY, 1, 10);
     assertEquals("titlename", parser.searchField);
-    assertEquals("“moby dick”", parser.searchValue);
-    assertEquals("search=%E2%80%9Cmoby+dick%E2%80%9D&searchfield=titlename&selection=selected&orderby=titlename&count=10&offset=1&searchtype=advanced", parser.getRMAPIQueries().get(0));
+    assertEquals("\"great gatsby\"", parser.searchValue);
+    assertEquals("search=%22great+gatsby%22&searchfield=titlename&selection=selected&orderby=titlename&count=10&offset=1&searchtype=advanced", parser.getRMAPIQueries().get(0));
    }
 
   @Test
