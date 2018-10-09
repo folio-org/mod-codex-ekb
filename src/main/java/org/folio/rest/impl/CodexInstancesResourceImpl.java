@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
 
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 
 import org.folio.codex.RMAPIToCodex;
@@ -56,6 +57,8 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
         log.error("getCodexInstances failed!", throwable);
         if (throwable.getCause() instanceof QueryValidationException) {
           asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainBadRequest(throwable.getCause().getMessage())));
+        } else if (throwable.getCause() instanceof NotAuthorizedException) {
+        	asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainUnauthorized(throwable.getCause().getMessage())));
         } else {
           asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainInternalServerError(throwable.getCause().getMessage())));
         }
@@ -83,8 +86,10 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
         if (throwable.getCause() instanceof RMAPIResourceNotFoundException) {
           asyncResultHandler.handle(
               Future.succeededFuture(CodexInstancesResource.GetCodexInstancesByIdResponse.withPlainNotFound(id)));
+        } else if (throwable.getCause() instanceof NotAuthorizedException) {
+        	asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainUnauthorized(throwable.getCause().getMessage())));
         } else {
-        asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesByIdResponse.withPlainInternalServerError(throwable.getCause().getMessage())));
+        	asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesByIdResponse.withPlainInternalServerError(throwable.getCause().getMessage())));
         }
         return null;
       });
