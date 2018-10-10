@@ -195,7 +195,7 @@ public class CodexInstanceResourceImplTest {
     logger.info("Testing for response when not authorized");
     
     try {
-        // Mocking the RM API Configuration response
+        // Override default Mocking of RM API Configuration response
         httpClientMock.setMockJsonContent(MOCK_RMAPI_CONFIG_401_RESPONSE_WHEN_NOT_AUTH);
       } catch (final IOException e) {
         context.fail("Cannot read mock file: " + MOCK_RMAPI_CONFIG_401_RESPONSE_WHEN_NOT_AUTH + " - reason: " + e.getMessage());
