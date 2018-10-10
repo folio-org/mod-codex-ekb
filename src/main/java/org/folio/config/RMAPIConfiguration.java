@@ -112,11 +112,10 @@ public final class RMAPIConfiguration {
 
               return mapResults(configs);
             }
-            else {
-            	LOG.error("Cannot get configuration data: " + response.getError().toString(), response.getException());
-            	if (response.getCode() == 401) {
-            		throw new NotAuthorizedException(response.getError().toString());
-            	}            	 
+            else if (response.getCode() == 401) {
+            	throw new NotAuthorizedException("Authorization failure getting configuration");  
+            } else {
+                LOG.error("Cannot get configuration data: " + response.getError().toString(), response.getException());
                  throw new IllegalStateException(response.getError().toString());
             }
           } finally {
