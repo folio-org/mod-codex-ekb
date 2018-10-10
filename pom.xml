@@ -46,6 +46,7 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <ramlfiles_path>${basedir}/ramls/raml-util/ramls/codex</ramlfiles_path>
     <ramlfiles_util_path>${basedir}/ramls/raml-util</ramlfiles_util_path>
+    <rmb.version>21.0.4</rmb.version>
     <dependency.locations.enabled>false</dependency.locations.enabled>
     <pact.version>3.5.11</pact.version>
   </properties>
@@ -106,7 +107,7 @@
     <dependency>
       <groupId>org.folio</groupId>
       <artifactId>domain-models-runtime</artifactId>
-      <version>15.0.2</version>
+      <version>${rmb.version}</version>
     </dependency>
     <!-- According to https://github.com/rest-assured/rest-assured/wiki/GettingStarted, rest assured should be placed before junit to ensure correct version of Hamcrest is used.-->
     <dependency>
