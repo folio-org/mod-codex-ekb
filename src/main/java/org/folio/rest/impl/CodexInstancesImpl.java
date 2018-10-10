@@ -55,6 +55,8 @@ public final class CodexInstancesImpl implements CodexInstances {
         log.error("getCodexInstances failed!", throwable);
         if (throwable.getCause() instanceof QueryValidationException) {
           asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond400WithTextPlain(throwable.getCause().getMessage())));
+        } else if (throwable.getCause() instanceof NotAuthorizedException) {
+          asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond401WithTextPlain(throwable.getCause().getMessage())));
         } else {
           asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
         }
@@ -81,8 +83,10 @@ public final class CodexInstancesImpl implements CodexInstances {
         if (throwable.getCause() instanceof RMAPIResourceNotFoundException) {
           asyncResultHandler.handle(
               Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond404WithTextPlain(id)));
+        } else if (throwable.getCause() instanceof NotAuthorizedException) {
+        	asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond401WithTextPlain(throwable.getCause().getMessage())));
         } else {
-        asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
+        	asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
         }
         return null;
       });
