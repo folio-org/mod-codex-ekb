@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
 
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 
 import org.folio.rest.annotations.Validate;

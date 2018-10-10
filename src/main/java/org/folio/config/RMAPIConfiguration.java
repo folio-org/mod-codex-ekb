@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import javax.ws.rs.NotAuthorizedException;
+
 import org.folio.rest.RestVerticle;
 import org.folio.rest.tools.client.HttpClientFactory;
 import org.folio.rest.tools.client.Response;
@@ -109,9 +111,13 @@ public final class RMAPIConfiguration {
               final JsonArray configs = responseBody.getJsonArray("configs");
 
               return mapResults(configs);
-            } else {
-              LOG.error("Cannot get configuration data: " + response.getError().toString(), response.getException());
-              throw new IllegalStateException(response.getError().toString());
+            }
+            else {
+            	LOG.error("Cannot get configuration data: " + response.getError().toString(), response.getException());
+            	if (response.getCode() == 401) {
+            		throw new NotAuthorizedException(response.getError().toString());
+            	}            	 
+                 throw new IllegalStateException(response.getError().toString());
             }
           } finally {
             httpClient.closeClient();
@@ -124,7 +130,6 @@ public final class RMAPIConfiguration {
 
     return future;
   }
-
   /**
    * Simple mapper for the results of mod-configuration to RMAPIConfiguration.
    *
