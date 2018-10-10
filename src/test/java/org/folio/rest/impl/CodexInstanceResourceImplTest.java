@@ -36,6 +36,7 @@ public class CodexInstanceResourceImplTest {
   private static final String MOCK_RMAPI_INSTANCE_TITLE_200_RESPONSE_WHEN_FOUND = "RMAPIService/SuccessGetTitleById.json";
   private static final String MOCK_RMAPI_INSTANCE_TITLE_404_RESPONSE_WHEN_NOT_FOUND = "RMAPIConfiguration/mock_content_fail_404.json";
   private static final String MOCK_CODEX_INSTANCE_TITLE_COLLECTION_200_RESPONSE_WHEN_FOUND = "RMAPIService/SuccessGetTitleList.json";
+  private static final String MOCK_RMAPI_CONFIG_401_RESPONSE_WHEN_NOT_AUTH = "RMAPIConfiguration/mock_content_fail_401.json";
 
   private static final String SEARCH_TITLE_COLLECTION_WHEN_SEARCH_FIELD_NOT_GIVEN_SUCCESS_QUERY = "Bridget Jones";
   private static final String SEARCH_TITLE_COLLECTION_FAILS_UNSUPPORTED_QUERY = "title = Bridget Jones or publisher = xyz";
@@ -182,6 +183,34 @@ public class CodexInstanceResourceImplTest {
         .log()
         .ifValidationFails()
         .statusCode(404);
+
+    // Test done
+    logger.info("Test done");
+    asyncLocal.complete();
+  }
+  
+  @Test
+  public void getCodexInstancesByIdTitleNotAuth(TestContext context) {
+    final Async asyncLocal = context.async();
+    logger.info("Testing for response when not authorized");
+    
+    try {
+        // Mocking the RM API Configuration response
+        httpClientMock.setMockJsonContent(MOCK_RMAPI_CONFIG_401_RESPONSE_WHEN_NOT_AUTH);
+      } catch (final IOException e) {
+        context.fail("Cannot read mock file: " + MOCK_RMAPI_CONFIG_401_RESPONSE_WHEN_NOT_AUTH + " - reason: " + e.getMessage());
+      }
+
+    RestAssured
+    .given()
+      .header(tenantHeader)
+      .header(urlHeader)
+      .header(contentTypeHeader)
+    .get("/codex-instances/99999")
+      .then()
+        .log()
+        .ifValidationFails()
+        .statusCode(401);
 
     // Test done
     logger.info("Test done");
