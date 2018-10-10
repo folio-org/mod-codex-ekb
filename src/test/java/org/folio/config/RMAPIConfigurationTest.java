@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import javax.ws.rs.NotAuthorizedException;
+
 import org.folio.rest.RestVerticle;
 import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.utils.Utils;
@@ -53,6 +55,7 @@ public class RMAPIConfigurationTest {
   private static final String MOCK_CONTENT_SUCCESS_MULTIPLE_FILE = "RMAPIConfiguration/mock_content_success_multiple.json";
   private static final String MOCK_CONTENT_SUCCESS_TO_STRING_FILE = "RMAPIConfiguration/mock_content_success_to_string.json";
   private static final String MOCK_CONTENT_FAIL_404_FILE = "RMAPIConfiguration/mock_content_fail_404.json";
+  private static final String MOCK_CONTENT_FAIL_401_FILE = "RMAPIConfiguration/mock_content_fail_401.json";
   private static final String MOCK_CONTENT_FAIL_INTERNAL_ERROR_FILE = "RMAPIConfiguration/mock_content_fail_internal_error.json";
 
   private final Logger logger = LoggerFactory.getLogger("okapi");
@@ -270,27 +273,43 @@ public class RMAPIConfigurationTest {
       return null;
     });
   }
-
+  
   @Test
   public void return404Test(TestContext context) {
-    Async async = context.async();
-
+	Async async = context.async();
+	
     try {
-      // HACK ALERT! See above for the reason this is here.
-      httpClientMock.setMockJsonContent(MOCK_CONTENT_FAIL_404_FILE);
+	  // HACK ALERT! See above for the reason this is here.
+	  httpClientMock.setMockJsonContent(MOCK_CONTENT_FAIL_404_FILE);
     } catch (IOException e) {
-      context.fail("Cannot read mock file: " +
-          MOCK_CONTENT_FAIL_404_FILE + " - reason: " + e.getMessage());
+	  context.fail("Cannot read mock file: " + MOCK_CONTENT_FAIL_404_FILE + " - reason: " + e.getMessage());
     }
-
     CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
     config.whenComplete((result, exception) -> {
-      context.assertNull(result);
-
+	  context.assertNull(result);
       async.complete();
-    });
+   });
   }
-
+  @Test
+  public void return401Test(TestContext context) {
+	Async async = context.async();
+	
+	try {
+	  // HACK ALERT! See above for the reason this is here.
+	  httpClientMock.setMockJsonContent(MOCK_CONTENT_FAIL_401_FILE);
+	} catch (IOException e) {
+	  context.fail("Cannot read mock file: " +
+	  MOCK_CONTENT_FAIL_401_FILE + " - reason: " + e.getMessage());
+	}
+	
+	CompletableFuture<RMAPIConfiguration> config = RMAPIConfiguration.getConfiguration(okapiHeaders);
+	config.whenComplete((result, exception) -> {
+	  context.assertNull(result);
+	  context.assertTrue(exception.getCause() instanceof NotAuthorizedException);
+	
+	  async.complete();
+	});
+  }
   @Test
   public void cannotGetConfigDataTest(TestContext context) {
     Async async = context.async();

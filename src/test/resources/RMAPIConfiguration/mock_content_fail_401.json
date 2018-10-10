@@ -1,0 +1,10 @@
+{
+  "mocks": [
+    {
+      "description": "UnAuthorized to access RM API Configuration",
+      "url": "/configurations/entries?query=%28module%3D%3DEKB%20AND%20configName%3D%3Dapi_access%29",
+      "method": "get",
+      "status": 401
+    }
+  ]
+}
