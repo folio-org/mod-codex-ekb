@@ -6,14 +6,13 @@ import java.util.concurrent.CompletionException;
 
 import javax.ws.rs.core.Response;
 
+import org.folio.rest.annotations.Validate;
 import org.folio.codex.RMAPIToCodex;
 import org.folio.config.RMAPIConfiguration;
 import org.folio.cql2rmapi.CQLParserForRMAPI;
 import org.folio.cql2rmapi.QueryValidationException;
-import org.folio.rest.annotations.Validate;
-import org.folio.rest.jaxrs.resource.CodexInstancesResource;
 import org.folio.rmapi.RMAPIResourceNotFoundException;
-
+import org.folio.rest.jaxrs.resource.CodexInstances;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -27,8 +26,8 @@ import io.vertx.core.logging.LoggerFactory;
  * @author mreno
  *
  */
-public final class CodexInstancesResourceImpl implements CodexInstancesResource {
-  private final Logger log = LoggerFactory.getLogger(CodexInstancesResourceImpl.class);
+public final class CodexInstancesImpl implements CodexInstances {
+  private final Logger log = LoggerFactory.getLogger(CodexInstancesImpl.class);
 
   /* (non-Javadoc)
    * @see org.folio.rest.jaxrs.resource.InstancesResource#getCodexInstances(java.lang.String, int, int, java.lang.String, java.util.Map, io.vertx.core.Handler, io.vertx.core.Context)
@@ -37,8 +36,7 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
   @Validate
   public void getCodexInstances(String query, int offset, int limit, String lang,
       Map<String, String> okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext)
-      throws Exception {
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     log.info("method call: getCodexInstances");
 
     RMAPIConfiguration.getConfiguration(okapiHeaders)
@@ -51,13 +49,13 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
         }
         return RMAPIToCodex.getInstances(parserForRMAPI, vertxContext, rmAPIConfig);
       }).thenAccept(instances ->
-         asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withJsonOK(instances)))
+         asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond200WithApplicationJson(instances)))
       ).exceptionally(throwable -> {
         log.error("getCodexInstances failed!", throwable);
         if (throwable.getCause() instanceof QueryValidationException) {
-          asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainBadRequest(throwable.getCause().getMessage())));
+          asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond400WithTextPlain(throwable.getCause().getMessage())));
         } else {
-          asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesResponse.withPlainInternalServerError(throwable.getCause().getMessage())));
+          asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
         }
         return null;
       });
@@ -67,8 +65,7 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
   @Validate
   public void getCodexInstancesById(String id, String lang,
       Map<String, String> okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext)
-      throws Exception {
+      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     log.info("method call: getCodexInstancesById");
 
     RMAPIConfiguration.getConfiguration(okapiHeaders)
@@ -76,15 +73,15 @@ public final class CodexInstancesResourceImpl implements CodexInstancesResource 
         RMAPIToCodex.getInstance(id, vertxContext, rmAPIConfig)
       ).thenApply(instance -> {
         asyncResultHandler.handle(
-            Future.succeededFuture(CodexInstancesResource.GetCodexInstancesByIdResponse.withJsonOK(instance)));
+            Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond200WithApplicationJson(instance)));
         return instance;
       }).exceptionally(throwable -> {
         log.error("getCodexInstancesById failed!", throwable);
         if (throwable.getCause() instanceof RMAPIResourceNotFoundException) {
           asyncResultHandler.handle(
-              Future.succeededFuture(CodexInstancesResource.GetCodexInstancesByIdResponse.withPlainNotFound(id)));
+              Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond404WithTextPlain(id)));
         } else {
-        asyncResultHandler.handle(Future.succeededFuture(CodexInstancesResource.GetCodexInstancesByIdResponse.withPlainInternalServerError(throwable.getCause().getMessage())));
+        asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
         }
         return null;
       });
