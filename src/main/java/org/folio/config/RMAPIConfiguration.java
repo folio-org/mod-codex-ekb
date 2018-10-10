@@ -113,6 +113,7 @@ public final class RMAPIConfiguration {
               return mapResults(configs);
             }
             else if (response.getCode() == 401) {
+                LOG.error("Authorization failure getting configuration:" + CONFIGURATIONS_ENTRIES_ENDPOINT_PATH);
             	throw new NotAuthorizedException("Authorization failure getting configuration");  
             } else {
                 LOG.error("Cannot get configuration data: " + response.getError().toString(), response.getException());
