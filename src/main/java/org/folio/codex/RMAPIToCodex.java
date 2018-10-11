@@ -15,6 +15,7 @@ import org.folio.rest.jaxrs.model.Identifier;
 import org.folio.rest.jaxrs.model.Instance;
 import org.folio.rest.jaxrs.model.InstanceCollection;
 import org.folio.rest.jaxrs.model.ResultInfo;
+import org.folio.rest.jaxrs.model.Subject;
 import org.folio.rmapi.RMAPIResourceNotFoundException;
 import org.folio.rmapi.RMAPIService;
 import org.folio.rmapi.model.Title;
@@ -122,7 +123,13 @@ public final class RMAPIToCodex {
           .map(RMAPIToCodex::convertRMContributorToCodex)
           .collect(Collectors.toSet()));
     }
-
+    
+    if ((svcTitle.subjectsList != null) && (!svcTitle.subjectsList.isEmpty())) {
+        codexInstance.setSubject(svcTitle.subjectsList.stream()
+            .map(RMAPIToCodex::convertRMSubjectToCodex)
+            .collect(Collectors.toSet()));
+      }
+    
     return codexInstance;
   }
 
@@ -152,6 +159,12 @@ public final class RMAPIToCodex {
     return new Contributor()
         .withName(rmContributor.titleContributor)
         .withType(rmContributor.type);
+  }
+  
+  private static Subject convertRMSubjectToCodex(org.folio.rmapi.model.Subject rmSubject) {
+    return new Subject()
+        .withName(rmSubject.titleSubject)
+        .withType(rmSubject.type);
   }
 
   private static CompletableFuture<InstanceCollection> convertRMTitleListToCodex(List<CompletableFuture<Titles>> titleCfs, int index, int limit) {
