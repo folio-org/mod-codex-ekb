@@ -16,6 +16,7 @@ import org.folio.cql2rmapi.CQLParserForRMAPI;
 import org.folio.cql2rmapi.QueryValidationException;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.jaxrs.model.Contributor;
+import org.folio.rest.jaxrs.model.Subject;
 import org.folio.rest.jaxrs.model.Identifier;
 import org.folio.rest.jaxrs.model.Instance;
 import org.folio.rest.tools.client.test.HttpClientMock2;
@@ -154,6 +155,7 @@ public class RMAPIToCodexTest {
       context.assertEquals(1, response.getContributor().size());
       context.assertEquals("author", response.getContributor().iterator().next().getType());
       context.assertEquals("Reed, Talbot Baines", response.getContributor().iterator().next().getName());
+      context.assertTrue(response.getSubject().isEmpty());
       context.assertEquals("Project Gutenberg Literary Archive Foundation", response.getPublisher());
       context.assertEquals(Instance.Type.EBOOKS, response.getType());
       context.assertEquals("Electronic Resource", response.getFormat());
@@ -200,6 +202,16 @@ public class RMAPIToCodexTest {
       context.assertTrue(foundAuthor2);
       context.assertTrue(foundEditor1);
       context.assertTrue(foundEditor2);
+      context.assertEquals(1, response.getSubject().size());
+      boolean foundSubject = false;
+      for (Subject s : response.getSubject()) {
+          if ("BISAC".equals(s.getType()) && "LITERARY CRITICISM / Science Fiction & Fantasy".equals(s.getName())) {
+        	  foundSubject = true;
+          } else {
+            context.fail("Unknown subject: " + s.getName() + ' ' + s.getType());
+          }
+        }
+      context.assertTrue(foundSubject);
       context.assertEquals("Palgrave Macmillan Ltd.", response.getPublisher());
       context.assertEquals(Instance.Type.EBOOKS, response.getType());
       context.assertEquals("Electronic Resource", response.getFormat());
@@ -284,6 +296,16 @@ public class RMAPIToCodexTest {
       context.assertTrue(foundIdentifier1);
       context.assertTrue(foundIdentifier2);
       context.assertTrue(foundIdentifier3);
+      context.assertEquals(1, response.getSubject().size());
+      boolean foundSubject = false;
+      for (Subject s : response.getSubject()) {
+          if ("BISAC".equals(s.getType()) && "LITERARY CRITICISM / Science Fiction & Fantasy".equals(s.getName())) {
+        	  foundSubject = true;
+          } else {
+            context.fail("Unknown subject: " + s.getName() + ' ' + s.getType());
+          }
+        }
+      context.assertTrue(foundSubject);
       context.assertEquals("kb", response.getSource());
       context.assertTrue(response.getLanguage().isEmpty());
 
@@ -307,6 +329,7 @@ public class RMAPIToCodexTest {
       context.assertEquals(1, response.getContributor().size());
       context.assertEquals("author", response.getContributor().iterator().next().getType());
       context.assertEquals("Reed, Talbot Baines", response.getContributor().iterator().next().getName());
+      context.assertTrue(response.getSubject().isEmpty());
       context.assertEquals("Project Gutenberg Literary Archive Foundation", response.getPublisher());
       context.assertEquals(Instance.Type.EBOOKS, response.getType());
       context.assertEquals("Electronic Resource", response.getFormat());
@@ -363,6 +386,32 @@ public class RMAPIToCodexTest {
       return null;
     });
   }
+  
+  @Test
+  public void testGetInstanceEmptySubjectList(TestContext context) {
+    Async async = context.async();
+
+    RMAPIConfiguration.getConfiguration(okapiHeaders).thenCompose(config -> {
+      return RMAPIToCodex.getInstance("1619586", vertx.getOrCreateContext(), config);
+    }).whenComplete((response, throwable) -> {
+      context.assertEquals("1619586", response.getId());
+      context.assertEquals("Tom, Dick and Harry", response.getTitle());
+      context.assertTrue(response.getSubject().isEmpty());
+      context.assertEquals("Project Gutenberg Literary Archive Foundation", response.getPublisher());
+      context.assertEquals(Instance.Type.EBOOKS, response.getType());
+      context.assertEquals("Electronic Resource", response.getFormat());
+      context.assertTrue(response.getIdentifier().isEmpty());
+      context.assertEquals("kb", response.getSource());
+      context.assertTrue(response.getLanguage().isEmpty());
+
+      async.complete();
+    }).exceptionally(throwable -> {
+      context.fail(throwable);
+      async.complete();
+      return null;
+    });
+  }
+
 
   /**
    * Test method for {@link org.folio.codex.RMAPIToCodex#getInstances(org.folio.cql2rmapi.CQLParserForRMAPI, io.vertx.core.Context, org.folio.config.RMAPIConfiguration)}.

@@ -149,6 +149,10 @@ public class RMAPIServiceTest {
       context.assertEquals(1, rmapiResult.contributorsList.size());
       context.assertEquals("Quinn, Harper", rmapiResult.contributorsList.get(0).titleContributor);
       context.assertEquals("author", rmapiResult.contributorsList.get(0).type);
+      context.assertNotNull(rmapiResult.subjectsList);
+      context.assertEquals(1, rmapiResult.subjectsList.size());
+      context.assertEquals("MEDICAL / Physician & Patient", rmapiResult.subjectsList.get(0).titleSubject);
+      context.assertEquals("BISAC", rmapiResult.subjectsList.get(0).type);
       async.complete();
     }).exceptionally(throwable -> {
       context.fail(throwable);
