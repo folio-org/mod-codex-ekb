@@ -1,3 +1,10 @@
+## 1.1.0 2018-12-04
+ * [MODCXEKB-64] - Update mod-codex-ekb to support Boolean/Exact Phrase/Wildcard/Nested Searches
+ * [MODCXEKB-67] - Upgrade mod-codex-ekb to RAML 1.0
+ * [MODCXEKB-68] - Return Subjects in mod-codex-ekb response
+ * [MODCXEKB-69] - Support search by subject
+
+
 ## 1.0.0 2018-05-17
  * MODCXEKB-63: Higher API limits required changes to RM API paging.
  * MODCXEKB-61: Updated the ModuleDescriptor to contain mod-configuration

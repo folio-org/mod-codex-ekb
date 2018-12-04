@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-codex-ekb</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.1.0</version>
 
   <name>EBSCO Knowledge Base Codex Module</name>
   <url>https://github.com/folio-org/mod-codex-ekb</url>
