@@ -55,7 +55,6 @@ public class CQLParserForRMAPI {
   String filterValue;
   String sortType;
   String selection;
-  int countRMAPI;
   int instanceIndex;
   int instanceLimit;
   private boolean idSearchField;
@@ -74,11 +73,12 @@ public class CQLParserForRMAPI {
       //If it is an id search field, we do not need to build the query since we can directly invoke RM API to look for that id
       if(!idSearchField) {
         instanceLimit = limit;
-        int pageOffsetRMAPI = computePageOffsetForRMAPI(offset, limit);
-        queriesForRMAPI.add(buildRMAPIQuery(limit, pageOffsetRMAPI));
-        instanceIndex = computeInstanceIndex(offset, limit);
-        while (checkIfSecondQueryIsNeeded(offset, limit, pageOffsetRMAPI)) {
-          queriesForRMAPI.add(buildRMAPIQuery(limit, ++pageOffsetRMAPI));
+        int rmAPILimit = Math.min(limit, RM_API_MAX_COUNT);
+        int pageOffsetRMAPI = computePageOffsetForRMAPI(offset, rmAPILimit);
+        queriesForRMAPI.add(buildRMAPIQuery(rmAPILimit, pageOffsetRMAPI));
+        instanceIndex = offset % rmAPILimit;
+        while (checkIfSecondQueryIsNeeded(offset, rmAPILimit, pageOffsetRMAPI)) {
+          queriesForRMAPI.add(buildRMAPIQuery(rmAPILimit, ++pageOffsetRMAPI));
         }
       }
     } else {
@@ -313,7 +313,7 @@ public class CQLParserForRMAPI {
       }
 
       builder.append("&orderby=" + sortType);
-      builder.append("&count=" + Math.min(limit, RM_API_MAX_COUNT));
+      builder.append("&count=" + limit);
       builder.append("&offset=" + pageOffsetRMAPI);
       builder.append("&searchtype=advanced");
     }else {
@@ -323,22 +323,14 @@ public class CQLParserForRMAPI {
   }
 
   private int computePageOffsetForRMAPI(int offset, int limit) {
-    final float value = offset/(float)Math.min(limit, RM_API_MAX_COUNT);
+    final float value = offset/(float)limit;
     final double floor = Math.floor(value);
     final double pageOffset = floor + 1;
     return (int) pageOffset;
   }
 
   private boolean checkIfSecondQueryIsNeeded(int offset, int limit, int pageOffsetRMAPI) {
-    boolean secondQueryNeeded = false;
-    if((offset + limit) > (pageOffsetRMAPI * Math.min(limit, RM_API_MAX_COUNT))) {
-      secondQueryNeeded = true;
-    }
-    return secondQueryNeeded;
-  }
-
-  public int computeInstanceIndex(int offset, int limit) {
-    return (offset%Math.min(limit, RM_API_MAX_COUNT));
+    return (offset + limit) > (pageOffsetRMAPI * limit);
   }
 
   public List<String> getRMAPIQueries() {

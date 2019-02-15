@@ -123,13 +123,13 @@ public final class RMAPIToCodex {
           .map(RMAPIToCodex::convertRMContributorToCodex)
           .collect(Collectors.toSet()));
     }
-    
+
     if ((svcTitle.subjectsList != null) && (!svcTitle.subjectsList.isEmpty())) {
         codexInstance.setSubject(svcTitle.subjectsList.stream()
             .map(RMAPIToCodex::convertRMSubjectToCodex)
             .collect(Collectors.toSet()));
       }
-    
+
     return codexInstance;
   }
 
@@ -160,7 +160,7 @@ public final class RMAPIToCodex {
         .withName(rmContributor.titleContributor)
         .withType(rmContributor.type);
   }
-  
+
   private static Subject convertRMSubjectToCodex(org.folio.rmapi.model.Subject rmSubject) {
     return new Subject()
         .withName(rmSubject.titleSubject)
@@ -173,23 +173,18 @@ public final class RMAPIToCodex {
       final InstanceCollection instanceCollection = new InstanceCollection();
       List<Instance> instances = new ArrayList<>();
       int totalResults = 0;
-      int page = 0;
 
       for (CompletableFuture<Titles> titleCf : titleCfs) {
         final Titles titles = titleCf.join();
         totalResults = Math.max(totalResults, titles.totalResults);
-        page = Math.max(page, titles.titleList.size());
         instances.addAll(titles.titleList.stream()
             .map(RMAPIToCodex::convertRMAPITitleToCodex)
             .collect(Collectors.toList()));
       }
 
-      if (instances.size() >= index) {
-        int end = Math.min(instances.size(), limit);
-        instances = instances.subList(index, index + end);
-      } else {
-        instances.clear();
-      }
+      int start = Math.min(index, instances.size());
+      int end = Math.min(index + limit, instances.size());
+      instances = instances.subList(start, end);
 
       instanceCollection.setInstances(instances);
       instanceCollection.setResultInfo(new ResultInfo().withTotalRecords(totalResults));
