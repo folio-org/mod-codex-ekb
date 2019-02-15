@@ -35,6 +35,9 @@
           "pathPattern" : "/codex-packages/{id}",
           "permissionsRequired" : [ "codex.packages.item.get" ],
           "modulePermissions": ["configuration.entries.collection.get"]
+        }, {
+          "methods" : [ "GET" ],
+          "pathPattern" : "/codex-packages-sources"
         }
       ]
     }
