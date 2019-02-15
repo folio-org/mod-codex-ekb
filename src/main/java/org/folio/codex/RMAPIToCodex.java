@@ -3,28 +3,28 @@ package org.folio.codex;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
+import io.vertx.core.Context;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import org.springframework.core.convert.converter.Converter;
+
 import org.folio.config.RMAPIConfiguration;
+import org.folio.converter.hld2cdx.ContributorConverter;
+import org.folio.converter.hld2cdx.IdentifierConverter;
+import org.folio.converter.hld2cdx.SubjectConverter;
+import org.folio.converter.hld2cdx.TitleConverter;
 import org.folio.cql2rmapi.query.RMAPIQueries;
-import org.folio.rest.jaxrs.model.Contributor;
-import org.folio.rest.jaxrs.model.Identifier;
 import org.folio.rest.jaxrs.model.Instance;
 import org.folio.rest.jaxrs.model.InstanceCollection;
 import org.folio.rest.jaxrs.model.ResultInfo;
-import org.folio.rest.jaxrs.model.Subject;
 import org.folio.rmapi.RMAPIResourceNotFoundException;
 import org.folio.rmapi.RMAPIService;
 import org.folio.rmapi.model.Title;
 import org.folio.rmapi.model.Titles;
-
-import io.vertx.core.Context;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 
 /**
  * @author mreno
@@ -33,8 +33,8 @@ import io.vertx.core.logging.LoggerFactory;
 public final class RMAPIToCodex {
   private static final Logger log = LoggerFactory.getLogger(RMAPIToCodex.class);
 
-  private static final String E_RESOURCE_FORMAT = "Electronic Resource";
-  private static final String E_RESOURCE_SOURCE = "kb";
+  private static final Converter<Title, Instance> TITLE_CONVERTER = new TitleConverter(new IdentifierConverter(),
+    new ContributorConverter(), new SubjectConverter());
 
   private RMAPIToCodex() {
     super();
@@ -58,7 +58,7 @@ public final class RMAPIToCodex {
         rmAPIConfig.getUrl(), vertxContext.owner());
 
     return rmAPIService.getTitleById(titleId)
-        .thenApply(RMAPIToCodex::convertRMAPITitleToCodex);
+        .thenApply(TITLE_CONVERTER::convert);
   }
 
   public static CompletableFuture<InstanceCollection> getInstances(RMAPIQueries cql, Context vertxContext,
@@ -88,83 +88,6 @@ public final class RMAPIToCodex {
       );
   }
 
-  /**
-   * Converts RMAPI Title to Codex instance
-   *
-   * @param svcTitle
-   * @return
-   */
-  private static Instance convertRMAPITitleToCodex(final Title svcTitle) {
-    final Instance codexInstance = new Instance();
-
-    codexInstance.setId(Integer.toString(svcTitle.titleId));
-    codexInstance.setTitle(svcTitle.titleName);
-    codexInstance.setPublisher(svcTitle.publisherName);
-    codexInstance.setType(PubType.fromRMAPI(svcTitle.pubType).getCodex());
-    codexInstance.setFormat(E_RESOURCE_FORMAT);
-    codexInstance.setSource(E_RESOURCE_SOURCE);
-    codexInstance.setVersion(svcTitle.edition);
-
-    if ((svcTitle.identifiersList != null) && (!svcTitle.identifiersList.isEmpty())) {
-      final Set<Identifier> identifiers = svcTitle.identifiersList.stream()
-          .map(RMAPIToCodex::convertRMIdentifierToCodex)
-          .filter(Objects::nonNull)
-          .collect(Collectors.toSet());
-
-      if (!identifiers.isEmpty()) {
-        codexInstance.setIdentifier(identifiers);
-      }
-    }
-
-    if ((svcTitle.contributorsList != null) && (!svcTitle.contributorsList.isEmpty())) {
-      codexInstance.setContributor(svcTitle.contributorsList.stream()
-          .map(RMAPIToCodex::convertRMContributorToCodex)
-          .collect(Collectors.toSet()));
-    }
-
-    if ((svcTitle.subjectsList != null) && (!svcTitle.subjectsList.isEmpty())) {
-        codexInstance.setSubject(svcTitle.subjectsList.stream()
-            .map(RMAPIToCodex::convertRMSubjectToCodex)
-            .collect(Collectors.toSet()));
-      }
-
-    return codexInstance;
-  }
-
-  private static Identifier convertRMIdentifierToCodex(org.folio.rmapi.model.Identifier rmIdentifier) {
-    final Type type = Type.valueOf(rmIdentifier.type);
-    final SubType subType = SubType.valueOf(rmIdentifier.subtype);
-
-    final Identifier codexIdentifier;
-    if (type != Type.UNKNOWN) {
-      String codexType = type.getDisplayName();
-
-      if (subType != SubType.UNKNOWN) {
-        codexType += '(' + subType.getDisplayName() + ')';
-      }
-
-      codexIdentifier = new Identifier()
-          .withType(codexType)
-          .withValue(rmIdentifier.id);
-    } else {
-      codexIdentifier = null;
-    }
-
-    return codexIdentifier;
-  }
-
-  private static Contributor convertRMContributorToCodex(org.folio.rmapi.model.Contributor rmContributor) {
-    return new Contributor()
-        .withName(rmContributor.titleContributor)
-        .withType(rmContributor.type);
-  }
-
-  private static Subject convertRMSubjectToCodex(org.folio.rmapi.model.Subject rmSubject) {
-    return new Subject()
-        .withName(rmSubject.titleSubject)
-        .withType(rmSubject.type);
-  }
-
   private static CompletableFuture<InstanceCollection> convertRMTitleListToCodex(List<CompletableFuture<Titles>> titleCfs, int index, int limit) {
     return CompletableFuture.allOf(titleCfs.toArray(new CompletableFuture[titleCfs.size()]))
     .thenApply(result -> {
@@ -176,7 +99,7 @@ public final class RMAPIToCodex {
         final Titles titles = titleCf.join();
         totalResults = Math.max(totalResults, titles.totalResults);
         instances.addAll(titles.titleList.stream()
-            .map(RMAPIToCodex::convertRMAPITitleToCodex)
+            .map(TITLE_CONVERTER::convert)
             .collect(Collectors.toList()));
       }
 

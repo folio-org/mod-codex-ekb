@@ -2,15 +2,15 @@ package org.folio.rmapi;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.folio.rmapi.model.Title;
-import org.folio.rmapi.model.Titles;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+
+import org.folio.rmapi.model.Title;
+import org.folio.rmapi.model.Titles;
 
 /**
  * @author cgodfrey
@@ -79,7 +79,7 @@ public class RMAPIService {
           future.complete((T) results);
         } catch (Exception e) {
           LOG.error(
-              String.format("%s - Response = [%s] Target Type = [%s]", JSON_RESPONSE_ERROR, body.toString(), clazz));
+              String.format("%s - Response = [%s] Target IdentifierType = [%s]", JSON_RESPONSE_ERROR, body.toString(), clazz));
           future.completeExceptionally(
               new RMAPIResultsProcessingException(String.format("%s for query = %s", JSON_RESPONSE_ERROR, query), e));
         } finally {
