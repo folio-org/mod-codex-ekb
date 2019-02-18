@@ -14,7 +14,6 @@ import java.util.List;
 public class CQLParserForRMAPI {
   private static final int RM_API_MAX_COUNT = 100;
   private static final String ERROR = "Unsupported Query Format : ";
-  private static final String UNSUPPORTED = " is not supported.";
   private static final String SELECTION_QUERY_PARAM = "&selection=";
 
   int instanceIndex;
