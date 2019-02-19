@@ -13,41 +13,24 @@ import java.util.List;
 
 public class CQLParserForRMAPI {
   private static final int RM_API_MAX_COUNT = 100;
-  private static final String ERROR = "Unsupported Query Format : ";
   private static final String SELECTION_QUERY_PARAM = "&selection=";
 
-  int instanceIndex;
-  int instanceLimit;
-  List<String> queriesForRMAPI = new ArrayList<>();
-  private boolean idSearchField;
-  private String idSearchFieldValue;
+  private int instanceIndex;
+  private int instanceLimit;
+  private List<String> queriesForRMAPI = new ArrayList<>();
 
-
-  public CQLParserForRMAPI(String query, int offset, int limit) throws QueryValidationException, UnsupportedEncodingException {
-    if (limit != 0 && query != null) {
-      CQLParameters parameters = new CQLParameters(query);
-      idSearchField = parameters.isIdSearch();
-      idSearchFieldValue = parameters.getIdSearchValue();
-
-      //If it is an id search field, we do not need to build the query since we can directly invoke RM API to look for that id
-      if (!parameters.isIdSearch()) {
-        TitleParameters titleParameters = new TitleParameters(parameters);
-        instanceLimit = limit;
-        int rmAPILimit = Math.min(limit, RM_API_MAX_COUNT);
-        int pageOffsetRMAPI = computePageOffsetForRMAPI(offset, rmAPILimit);
-        queriesForRMAPI.add(buildRMAPIQuery(rmAPILimit, pageOffsetRMAPI, titleParameters));
-        instanceIndex = offset % rmAPILimit;
-        while (checkIfSecondQueryIsNeeded(offset, rmAPILimit, pageOffsetRMAPI)) {
-          queriesForRMAPI.add(buildRMAPIQuery(rmAPILimit, ++pageOffsetRMAPI, titleParameters));
-        }
-      }
-    } else {
-      throw new QueryValidationException(ERROR + "Limit/Query suggests that no results need to be returned.");
+  public CQLParserForRMAPI(TitleParameters titleParameters, int offset, int limit) throws UnsupportedEncodingException {
+    instanceLimit = limit;
+    int rmAPILimit = Math.min(limit, RM_API_MAX_COUNT);
+    int pageOffsetRMAPI = computePageOffsetForRMAPI(offset, rmAPILimit);
+    queriesForRMAPI.add(buildRMAPIQuery(rmAPILimit, pageOffsetRMAPI, titleParameters));
+    instanceIndex = offset % rmAPILimit;
+    while (checkIfSecondQueryIsNeeded(offset, rmAPILimit, pageOffsetRMAPI)) {
+      queriesForRMAPI.add(buildRMAPIQuery(rmAPILimit, ++pageOffsetRMAPI, titleParameters));
     }
   }
 
   String buildRMAPIQuery(int limit, int pageOffsetRMAPI, TitleParameters parameters) throws UnsupportedEncodingException {
-
     final StringBuilder builder = new StringBuilder();
     builder.append("search=");
     builder.append(URLEncoder.encode(parameters.getSearchValue(), "UTF-8"));
@@ -91,13 +74,5 @@ public class CQLParserForRMAPI {
 
   public int getInstanceLimit() {
     return instanceLimit;
-  }
-
-  public boolean isIDSearchField() {
-    return idSearchField;
-  }
-
-  public String getID() {
-    return idSearchFieldValue;
   }
 }

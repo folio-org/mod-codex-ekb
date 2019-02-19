@@ -12,8 +12,10 @@ import java.util.Map;
 import java.util.concurrent.CompletionException;
 
 import org.folio.config.RMAPIConfiguration;
+import org.folio.cql2rmapi.CQLParameters;
 import org.folio.cql2rmapi.CQLParserForRMAPI;
 import org.folio.cql2rmapi.QueryValidationException;
+import org.folio.cql2rmapi.TitleParameters;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Subject;
@@ -56,11 +58,8 @@ public class RMAPIToCodexTest {
   // object as a side effect.
   private HttpClientMock2 httpClientMock;
 
-  /**
-   * @throws java.lang.Exception
-   */
   @Before
-  public void setUp(TestContext context) throws Exception {
+  public void setUp(TestContext context) {
     final int port = Utils.getRandomPort();
 
     vertx = Vertx.vertx();
@@ -131,11 +130,8 @@ public class RMAPIToCodexTest {
     }
   }
 
-  /**
-   * @throws java.lang.Exception
-   */
   @After
-  public void tearDown(TestContext context) throws Exception {
+  public void tearDown(TestContext context) {
     logger.info("Test complete, cleaning up...");
     vertx.close(context.asyncAssertSuccess());
   }
@@ -386,7 +382,7 @@ public class RMAPIToCodexTest {
       return null;
     });
   }
-  
+
   @Test
   public void testGetInstanceEmptySubjectList(TestContext context) {
     Async async = context.async();
@@ -423,7 +419,7 @@ public class RMAPIToCodexTest {
     RMAPIConfiguration.getConfiguration(okapiHeaders).thenCompose(config -> {
       final CQLParserForRMAPI cql;
       try {
-        cql = new CQLParserForRMAPI("title=moby%20dick", 0, 5);
+        cql = new CQLParserForRMAPI(new TitleParameters(new CQLParameters("title=moby%20dick")), 0, 5);
       } catch (UnsupportedEncodingException | QueryValidationException e) {
         throw new CompletionException(e);
       }
@@ -446,14 +442,14 @@ public class RMAPIToCodexTest {
     Async async = context.async();
 
     RMAPIConfiguration.getConfiguration(okapiHeaders).thenCompose(config -> {
-      final CQLParserForRMAPI cql;
+      final CQLParameters cql;
       try {
-        cql = new CQLParserForRMAPI("id=1619585", 0, 5);
-      } catch (UnsupportedEncodingException | QueryValidationException e) {
+        cql = new CQLParameters("id=1619585");
+      } catch (QueryValidationException e) {
         throw new CompletionException(e);
       }
 
-      return RMAPIToCodex.getInstances(cql, vertx.getOrCreateContext(), config);
+      return RMAPIToCodex.getInstanceById(vertx.getOrCreateContext(), config, cql.getIdSearchValue());
     }).whenComplete((response, throwable) -> {
       context.assertEquals(1, response.getResultInfo().getTotalRecords());
       context.assertEquals(1, response.getInstances().size());
@@ -471,14 +467,14 @@ public class RMAPIToCodexTest {
     Async async = context.async();
 
     RMAPIConfiguration.getConfiguration(okapiHeaders).thenCompose(config -> {
-      final CQLParserForRMAPI cql;
+      final CQLParameters cql;
       try {
-        cql = new CQLParserForRMAPI("id=1111111", 0, 5);
-      } catch (UnsupportedEncodingException | QueryValidationException e) {
+        cql = new CQLParameters("id=1111111");
+      } catch (QueryValidationException e) {
         throw new CompletionException(e);
       }
 
-      return RMAPIToCodex.getInstances(cql, vertx.getOrCreateContext(), config);
+      return RMAPIToCodex.getInstanceById(vertx.getOrCreateContext(), config, cql.getIdSearchValue());
     }).whenComplete((response, throwable) -> {
       context.assertEquals(0, response.getResultInfo().getTotalRecords());
       context.assertEquals(0, response.getInstances().size());
@@ -498,7 +494,7 @@ public class RMAPIToCodexTest {
     RMAPIConfiguration.getConfiguration(okapiHeaders).thenCompose(config -> {
       final CQLParserForRMAPI cql;
       try {
-        cql = new CQLParserForRMAPI("title=moby%20dick", 2, 5);
+        cql = new CQLParserForRMAPI(new TitleParameters(new CQLParameters("title=moby%20dick")), 2, 5);
       } catch (UnsupportedEncodingException | QueryValidationException e) {
         throw new CompletionException(e);
       }
@@ -524,7 +520,7 @@ public class RMAPIToCodexTest {
     RMAPIConfiguration.getConfiguration(okapiHeaders).thenCompose(config -> {
       final CQLParserForRMAPI cql;
       try {
-        cql = new CQLParserForRMAPI("title=moby%20dick", 7, 10);
+        cql = new CQLParserForRMAPI(new TitleParameters(new CQLParameters("title=moby%20dick")), 7, 10);
       } catch (UnsupportedEncodingException | QueryValidationException e) {
         throw new CompletionException(e);
       }

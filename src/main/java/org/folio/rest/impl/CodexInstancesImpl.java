@@ -3,17 +3,22 @@ package org.folio.rest.impl;
 import java.io.UnsupportedEncodingException;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 
 import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 
-import org.folio.rest.annotations.Validate;
 import org.folio.codex.RMAPIToCodex;
 import org.folio.config.RMAPIConfiguration;
+import org.folio.cql2rmapi.CQLParameters;
 import org.folio.cql2rmapi.CQLParserForRMAPI;
 import org.folio.cql2rmapi.QueryValidationException;
-import org.folio.rmapi.RMAPIResourceNotFoundException;
+import org.folio.cql2rmapi.TitleParameters;
+import org.folio.rest.annotations.Validate;
+import org.folio.rest.jaxrs.model.InstanceCollection;
 import org.folio.rest.jaxrs.resource.CodexInstances;
+import org.folio.rmapi.RMAPIResourceNotFoundException;
+
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
@@ -41,15 +46,7 @@ public final class CodexInstancesImpl implements CodexInstances {
     log.info("method call: getCodexInstances");
 
     RMAPIConfiguration.getConfiguration(okapiHeaders)
-      .thenCompose(rmAPIConfig -> {
-        final CQLParserForRMAPI parserForRMAPI;
-        try {
-          parserForRMAPI = new CQLParserForRMAPI(query, offset, limit);
-        } catch (UnsupportedEncodingException | QueryValidationException e) {
-          throw new CompletionException(e);
-        }
-        return RMAPIToCodex.getInstances(parserForRMAPI, vertxContext, rmAPIConfig);
-      }).thenAccept(instances ->
+      .thenCompose(rmAPIConfig -> getCodexInstances(query, offset, limit, vertxContext, rmAPIConfig)).thenAccept(instances ->
          asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond200WithApplicationJson(instances)))
       ).exceptionally(throwable -> {
         log.error("getCodexInstances failed!", throwable);
@@ -90,5 +87,23 @@ public final class CodexInstancesImpl implements CodexInstances {
         }
         return null;
       });
+  }
+
+  private CompletionStage<InstanceCollection> getCodexInstances(String query, int offset, int limit, Context vertxContext, RMAPIConfiguration rmAPIConfig){
+    try {
+      if (limit == 0 || query == null) {
+        throw new QueryValidationException("Unsupported Query Format : Limit/Query suggests that no results need to be returned.");
+      }
+      final CQLParserForRMAPI parserForRMAPI;
+
+      CQLParameters cqlParameters = new CQLParameters(query);
+      if (cqlParameters.isIdSearch()) {
+        return RMAPIToCodex.getInstanceById(vertxContext, rmAPIConfig, cqlParameters.getIdSearchValue());
+      }
+      parserForRMAPI = new CQLParserForRMAPI(new TitleParameters(cqlParameters), offset, limit);
+      return RMAPIToCodex.getInstances(parserForRMAPI, vertxContext, rmAPIConfig);
+    } catch (UnsupportedEncodingException | QueryValidationException e) {
+      throw new CompletionException(e);
+    }
   }
 }

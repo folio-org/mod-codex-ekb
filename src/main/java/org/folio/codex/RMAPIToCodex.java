@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 import org.folio.config.RMAPIConfiguration;
@@ -66,20 +67,6 @@ public final class RMAPIToCodex {
 
     final List<CompletableFuture<Titles>> titleCfs = new ArrayList<>();
 
-    // If the client is searching by ID we need to do an ID lookup using the
-    // getInstance() method. We still need to return the it, if found or not,
-    // in an InstanceCollection.
-    if (cql.isIDSearchField()) {
-      return getInstance(cql.getID(), vertxContext, rmAPIConfig)
-          .thenApply(instance ->
-            new InstanceCollection()
-              .withInstances(Collections.singletonList(instance))
-              .withResultInfo(new ResultInfo().withTotalRecords(Integer.valueOf(1)))
-          ).exceptionally(throwable ->
-            new InstanceCollection().withResultInfo(new ResultInfo().withTotalRecords(Integer.valueOf(0)))
-          );
-    }
-
     // We need to create a new RMAPIService for each call so that we don't close
     // the HTTP client connection.
     for (String query : cql.getRMAPIQueries()) {
@@ -88,6 +75,17 @@ public final class RMAPIToCodex {
     }
 
     return convertRMTitleListToCodex(titleCfs, cql.getInstanceIndex(), cql.getInstanceLimit());
+  }
+
+  public static CompletionStage<InstanceCollection> getInstanceById(Context vertxContext, RMAPIConfiguration rmAPIConfig, String id) {
+    return RMAPIToCodex.getInstance(id, vertxContext, rmAPIConfig)
+      .thenApply(instance ->
+        new InstanceCollection()
+          .withInstances(Collections.singletonList(instance))
+          .withResultInfo(new ResultInfo().withTotalRecords(1))
+      ).exceptionally(throwable ->
+        new InstanceCollection().withResultInfo(new ResultInfo().withTotalRecords(0))
+      );
   }
 
   /**
