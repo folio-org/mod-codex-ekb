@@ -11,9 +11,6 @@ import org.folio.codex.PubType;
 import com.google.common.collect.ImmutableMap;
 
 public class TitleParameters extends CommonParameters {
-  private static final String SOURCE = "source";
-  private static final String CODEX_SOURCE = "codex.source";
-  private static final String SELECTED = "ext.selected";
   private static final String RESOURCE_TYPE = "resourceType";
   private static final String CODEX_RESOURCE_TYPE = "codex.resourceType";
   private static final String CQL_SERVER_CHOICE = "cql.serverChoice";
@@ -46,12 +43,6 @@ public class TitleParameters extends CommonParameters {
     .put(CODEX_TITLE, RM_API_TITLE)
     // Search defaults to title. This is the default search supported by RMAPI
     .put(CQL_SERVER_CHOICE, RM_API_TITLE).build();
-  private static final Map<String, String> FILTER_SELECTED_MAPPING =
-    ImmutableMap.of(
-      "all", "all",
-      "true", "selected",
-      "false", "notselected"
-    );
   private String searchField;
   private String filterValue;
   private String selection;
@@ -117,17 +108,9 @@ public class TitleParameters extends CommonParameters {
       filterValue = getFilterValuesByType(parameters.get(filterTypes.get(0)));
     }
 
-    List<String> sourceParameters = intersection(parameters.keySet(), Arrays.asList(CODEX_SOURCE, SOURCE));
-    if (!sourceParameters.isEmpty()) {
-      checkSource(parameters.get(sourceParameters.get(0)));
-    }
+    selection = parseSelection(parameters);
 
-    if (parameters.get(SELECTED) != null) {
-      selection = FILTER_SELECTED_MAPPING.get(parameters.get(SELECTED).toLowerCase());
-      if (selection == null) {
-        throw new QueryValidationException(ERROR + "Selected value " + parameters.get(SELECTED) + UNSUPPORTED);
-      }
-    }
+    checkSourceParameters(parameters);
   }
 
   private String getFilterValuesByType(String termNode) throws QueryValidationException {

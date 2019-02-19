@@ -8,36 +8,18 @@ import java.util.Optional;
 
 import org.folio.codex.ContentType;
 
-import com.google.common.collect.ImmutableMap;
-
 public class PackageParameters extends CommonParameters {
   private static final String NAME = "name";
   private static final String CODEX_NAME = "codex.name";
   private static final String TYPE = "type";
   private static final String CODEX_TYPE = "codex.type";
-  private static final String SOURCE = "source";
-  private static final String CODEX_SOURCE = "codex.source";
   private static final String CQL_SERVER_CHOICE = "cql.serverChoice";
   private static final String RM_API_PACKAGE = "packagename";
-  private static final String SELECTED = "ext.selected";
-  private static final Map<String, String> FILTER_SELECTED_MAPPING =
-    ImmutableMap.of(
-      "all", "all",
-      "true", "selected",
-      "false", "notselected"
-    );
   private static final Collection<String> ALLOWED_PARAMETERS =
     Arrays.asList(CODEX_NAME, NAME, TYPE, CODEX_TYPE, CQL_SERVER_CHOICE, SELECTED, SOURCE, CODEX_SOURCE);
 
   private String filterValue;
   private String selection;
-
-  public PackageParameters(String searchValue, String filterValue, String sortType, String selection) {
-    this.searchValue = searchValue;
-    this.filterValue = filterValue;
-    this.sortType = sortType;
-    this.selection = selection;
-  }
 
   public PackageParameters(CQLParameters cqlParameters) throws QueryValidationException {
     parseCqlParameters(cqlParameters);
@@ -86,17 +68,9 @@ public class PackageParameters extends CommonParameters {
       filterValue = getFilterValuesByType(parameters.get(filterTypes.get(0)));
     }
 
-    List<String> sourceParameters = intersection(parameters.keySet(), Arrays.asList(CODEX_SOURCE, SOURCE));
-    if (!sourceParameters.isEmpty()) {
-      checkSource(parameters.get(sourceParameters.get(0)));
-    }
+    checkSourceParameters(parameters);
 
-    if (parameters.get(SELECTED) != null) {
-      selection = FILTER_SELECTED_MAPPING.get(parameters.get(SELECTED).toLowerCase());
-      if (selection == null) {
-        throw new QueryValidationException(ERROR + "Selected value " + parameters.get(SELECTED) + UNSUPPORTED);
-      }
-    }
+    selection = parseSelection(parameters);
   }
 
   private String getFilterValuesByType(String termNode) throws QueryValidationException {
