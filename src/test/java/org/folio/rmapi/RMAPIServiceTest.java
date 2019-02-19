@@ -32,10 +32,10 @@ public class RMAPIServiceTest {
   private final int SuccessTitleId = 99999;
   private final int TitleNotFoundTitleId = 1;
   private final int BadJSONTitleId = 88888;
-  private final String SuccessTitleListQuery = "search=autism&searchfield=titlename&selection=0&orderby=titlename&count=5&offset=1";
-  private final String GatewayTimeoutTitleListQuery = "search=muslim%journal&searchfield=relevance&selection=0&orderby=titlename&count=5&offset=1";
-  private final String NoResultsTitleListQuery = "search=nnnnnnn&searchfield=relevance&selection=0&orderby=titlename&count=5&offset=1";
-  private final String ForbiddenTitleListQuery = "search=moby%20dick&searchfield=relevance&selection=0&orderby=titlename&count=5&offset=1";
+  private final String SuccessTitleListQuery = "searchfield=titlename&selection=0&search=autism&orderby=titlename&count=5&offset=1";
+  private final String GatewayTimeoutTitleListQuery = "searchfield=relevance&selection=0&search=muslim%journal&orderby=titlename&count=5&offset=1";
+  private final String NoResultsTitleListQuery = "searchfield=relevance&selection=0&search=nnnnnnn&orderby=titlename&count=5&offset=1";
+  private final String ForbiddenTitleListQuery = "searchfield=relevance&selection=0&search=moby%20dick&orderby=titlename&count=5&offset=1";
   private final int UnAuthorizedTitleId = 77777;
 
   private Vertx vertx;

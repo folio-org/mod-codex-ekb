@@ -30,13 +30,22 @@ public class CQLParserForRMAPI {
     }
   }
 
+  public CQLParserForRMAPI(PackageParameters packageParameters, int offset, int limit) throws UnsupportedEncodingException {
+    instanceLimit = limit;
+    int rmAPILimit = Math.min(limit, RM_API_MAX_COUNT);
+    int pageOffsetRMAPI = computePageOffsetForRMAPI(offset, rmAPILimit);
+    queriesForRMAPI.add(buildRMAPIQuery(rmAPILimit, pageOffsetRMAPI, packageParameters));
+    instanceIndex = offset % rmAPILimit;
+    while (checkIfSecondQueryIsNeeded(offset, rmAPILimit, pageOffsetRMAPI)) {
+      queriesForRMAPI.add(buildRMAPIQuery(rmAPILimit, ++pageOffsetRMAPI, packageParameters));
+    }
+  }
+
   String buildRMAPIQuery(int limit, int pageOffsetRMAPI, TitleParameters parameters) throws UnsupportedEncodingException {
     final StringBuilder builder = new StringBuilder();
-    builder.append("search=");
-    builder.append(URLEncoder.encode(parameters.getSearchValue(), "UTF-8"));
-    builder.append("&searchfield=" + parameters.getSearchField());
+    builder.append("searchfield=" + parameters.getSearchField());
 
-    if ((parameters.getFilterType() != null) && (parameters.getFilterValue() != null)) {
+    if (parameters.getFilterValue() != null) {
       // Map fields to RM API
       builder.append("&resourcetype=" + parameters.getFilterValue());
     }
@@ -46,11 +55,33 @@ public class CQLParserForRMAPI {
       builder.append(parameters.getSelection());
     }
 
-    builder.append("&orderby=" + parameters.getSortType());
-    builder.append("&count=" + limit);
-    builder.append("&offset=" + pageOffsetRMAPI);
-    builder.append("&searchtype=advanced");
+    builder.append("&")
+      .append(buildRMAPIQueryForCommonParameters(limit, pageOffsetRMAPI, parameters))
+      .append("&searchtype=advanced");
     return builder.toString();
+  }
+
+  String buildRMAPIQuery(int limit, int pageOffsetRMAPI, PackageParameters parameters) throws UnsupportedEncodingException {
+    final StringBuilder builder = new StringBuilder();
+    if (parameters.getFilterValue() != null) {
+      // Map fields to RM API
+      builder.append("&contenttype=" + parameters.getFilterValue());
+    }
+
+    if (parameters.getSelection() != null) {
+      builder.append(SELECTION_QUERY_PARAM);
+      builder.append(parameters.getSelection());
+    }
+    builder.append("&")
+      .append(buildRMAPIQueryForCommonParameters(limit, pageOffsetRMAPI, parameters));
+    return builder.toString();
+  }
+
+  private String buildRMAPIQueryForCommonParameters(int limit, int pageOffsetRMAPI, CommonParameters parameters) throws UnsupportedEncodingException {
+    return "search=" + URLEncoder.encode(parameters.getSearchValue(), "UTF-8") +
+      "&orderby=" + parameters.getSortType() +
+      "&count=" + limit +
+      "&offset=" + pageOffsetRMAPI;
   }
 
   private int computePageOffsetForRMAPI(int offset, int limit) {

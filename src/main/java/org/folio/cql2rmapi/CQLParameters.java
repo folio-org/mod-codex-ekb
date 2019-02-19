@@ -76,6 +76,9 @@ public class CQLParameters {
       idSearch = true;
       idSearchValue = termNode;
     }
+    if(parameters.get(indexNode) !=null){
+      throw new QueryValidationException(ERROR + "Duplicated field " + indexNode + UNSUPPORTED);
+    }
     parameters.put(indexNode, termNode);
   }
 
@@ -109,7 +112,7 @@ public class CQLParameters {
       parseNode(leftNode);
       parseNode(rightNode);
     } else {
-      throw new QueryUnsupportedFeatureException(ERROR + "Boo1lean operators OR, NOT and PROX are unsupported.");
+      throw new QueryUnsupportedFeatureException(ERROR + "Boolean operators OR, NOT and PROX are unsupported.");
     }
   }
 
