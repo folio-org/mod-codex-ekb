@@ -10,7 +10,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 import org.folio.config.RMAPIConfiguration;
-import org.folio.cql2rmapi.CQLParserForRMAPI;
+import org.folio.cql2rmapi.query.RMAPIQueries;
 import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Identifier;
 import org.folio.rest.jaxrs.model.Instance;
@@ -61,8 +61,8 @@ public final class RMAPIToCodex {
         .thenApply(RMAPIToCodex::convertRMAPITitleToCodex);
   }
 
-  public static CompletableFuture<InstanceCollection> getInstances(CQLParserForRMAPI cql, Context vertxContext,
-      RMAPIConfiguration rmAPIConfig) {
+  public static CompletableFuture<InstanceCollection> getInstances(RMAPIQueries cql, Context vertxContext,
+                                                                   RMAPIConfiguration rmAPIConfig) {
     log.info("Calling getInstances");
 
     final List<CompletableFuture<Titles>> titleCfs = new ArrayList<>();
@@ -74,7 +74,7 @@ public final class RMAPIToCodex {
           rmAPIConfig.getUrl(), vertxContext.owner()).getTitleList(query));
     }
 
-    return convertRMTitleListToCodex(titleCfs, cql.getInstanceIndex(), cql.getInstanceLimit());
+    return convertRMTitleListToCodex(titleCfs, cql.getFirstObjectIndex(), cql.getLimit());
   }
 
   public static CompletionStage<InstanceCollection> getInstanceById(Context vertxContext, RMAPIConfiguration rmAPIConfig, String id) {

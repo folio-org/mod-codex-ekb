@@ -11,9 +11,10 @@ import javax.ws.rs.core.Response;
 import org.folio.codex.RMAPIToCodex;
 import org.folio.config.RMAPIConfiguration;
 import org.folio.cql2rmapi.CQLParameters;
-import org.folio.cql2rmapi.CQLParserForRMAPI;
 import org.folio.cql2rmapi.QueryValidationException;
 import org.folio.cql2rmapi.TitleParameters;
+import org.folio.cql2rmapi.query.RMAPIQueries;
+import org.folio.cql2rmapi.query.TitlesQueryBuilder;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.InstanceCollection;
 import org.folio.rest.jaxrs.resource.CodexInstances;
@@ -94,14 +95,12 @@ public final class CodexInstancesImpl implements CodexInstances {
       if (limit == 0 || query == null) {
         throw new QueryValidationException("Unsupported Query Format : Limit/Query suggests that no results need to be returned.");
       }
-      final CQLParserForRMAPI parserForRMAPI;
-
       CQLParameters cqlParameters = new CQLParameters(query);
       if (cqlParameters.isIdSearch()) {
         return RMAPIToCodex.getInstanceById(vertxContext, rmAPIConfig, cqlParameters.getIdSearchValue());
       }
-      parserForRMAPI = new CQLParserForRMAPI(new TitleParameters(cqlParameters), offset, limit);
-      return RMAPIToCodex.getInstances(parserForRMAPI, vertxContext, rmAPIConfig);
+      RMAPIQueries queries = new TitlesQueryBuilder().build(new TitleParameters(cqlParameters), offset, limit);
+      return RMAPIToCodex.getInstances(queries, vertxContext, rmAPIConfig);
     } catch (UnsupportedEncodingException | QueryValidationException e) {
       throw new CompletionException(e);
     }

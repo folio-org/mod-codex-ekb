@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.stringContainsInOrder;
 import static org.hamcrest.core.IsNot.not;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -14,6 +15,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.folio.cql2rmapi.query.RMAPIQueries;
+import org.folio.cql2rmapi.query.TitlesQueryBuilder;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -21,7 +24,7 @@ import org.junit.Test;
  * Unit tests for CQLParserForRMAPI class.
  */
 
-public class CQLParserForRMAPITest {
+public class TitleQueryBuilderTest {
 
   private static final String VALID_QUERY = "title=bridget";
   private static final String VALID_ISBN_QUERY = "identifier = 12345 sortby title";
@@ -48,7 +51,8 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void cqlParametersParsesQueryIfQueryValidTest() throws QueryValidationException {
-    new CQLParameters(VALID_QUERY);
+    CQLParameters parameters = new CQLParameters(VALID_QUERY);
+    assertFalse(parameters.getParameters().isEmpty());
   }
 
   @Test(expected = QueryValidationException.class)
@@ -93,8 +97,9 @@ public class CQLParserForRMAPITest {
     assertEquals(SEARCH_FIELD, parameters.getSearchField());
     assertEquals("spring OR summer", parameters.getSearchValue());
 
-    CQLParserForRMAPI parser = new CQLParserForRMAPI(parameters, 1, 10);
-    assertEquals("searchfield=titlename&selection=selected&search=spring+OR+summer&orderby=titlename&count=10&offset=1&searchtype=advanced", parser.getRMAPIQueries().get(0));
+
+    RMAPIQueries queries = new TitlesQueryBuilder().build(parameters, 1, 10);
+    assertEquals("searchfield=titlename&selection=selected&search=spring+OR+summer&orderby=titlename&count=10&offset=1&searchtype=advanced", queries.getRMAPIQueries().get(0));
   }
 
   @Ignore("Test Pending - CQL parser handling of quoted query")
@@ -104,8 +109,8 @@ public class CQLParserForRMAPITest {
     assertEquals(SEARCH_FIELD, parameters.getSearchField());
     assertEquals("\"great gatsby\"", parameters.getSearchValue());
 
-    CQLParserForRMAPI parser = new CQLParserForRMAPI(parameters, 1, 10);
-    assertEquals("searchfield=titlename&selection=selected&search=%22great+gatsby%22&orderby=titlename&count=10&offset=1&searchtype=advanced", parser.getRMAPIQueries().get(0));
+    RMAPIQueries queries = new TitlesQueryBuilder().build(parameters, 1, 10);
+    assertEquals("searchfield=titlename&selection=selected&search=%22great+gatsby%22&orderby=titlename&count=10&offset=1&searchtype=advanced", queries.getRMAPIQueries().get(0));
    }
 
   @Test
@@ -114,8 +119,8 @@ public class CQLParserForRMAPITest {
     assertEquals(SEARCH_FIELD, parameters.getSearchField());
     assertEquals("comput*", parameters.getSearchValue());
 
-    CQLParserForRMAPI parser = new CQLParserForRMAPI(parameters, 1, 10);
-    assertEquals("searchfield=titlename&selection=selected&search=comput*&orderby=titlename&count=10&offset=1&searchtype=advanced", parser.getRMAPIQueries().get(0));
+    RMAPIQueries queries = new TitlesQueryBuilder().build(parameters, 1, 10);
+    assertEquals("searchfield=titlename&selection=selected&search=comput*&orderby=titlename&count=10&offset=1&searchtype=advanced", queries.getRMAPIQueries().get(0));
   }
 
   @Test
@@ -124,8 +129,8 @@ public class CQLParserForRMAPITest {
     assertEquals(SEARCH_FIELD, parameters.getSearchField());
     assertEquals("(company AND business) NOT report*", parameters.getSearchValue());
 
-    CQLParserForRMAPI parser = new CQLParserForRMAPI(parameters, 1, 10);
-    assertEquals("searchfield=titlename&selection=selected&search=%28company+AND+business%29+NOT+report*&orderby=titlename&count=10&offset=1&searchtype=advanced", parser.getRMAPIQueries().get(0));
+    RMAPIQueries queries = new TitlesQueryBuilder().build(parameters, 1, 10);
+    assertEquals("searchfield=titlename&selection=selected&search=%28company+AND+business%29+NOT+report*&orderby=titlename&count=10&offset=1&searchtype=advanced", queries.getRMAPIQueries().get(0));
   }
 
   @Test(expected = QueryValidationException.class)
@@ -171,8 +176,8 @@ public class CQLParserForRMAPITest {
   @Test
   public void cqlParserReturnsExpectedQueryStringIfValidQueryIsPassedTest()
       throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters(VALID_QUERY)), 10, 10);
-    assertEquals("searchfield=titlename&search=bridget&orderby=titlename&count=10&offset=2&searchtype=advanced", parser.getRMAPIQueries().get(0));
+    RMAPIQueries queries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters(VALID_QUERY)), 10, 10);
+    assertEquals("searchfield=titlename&search=bridget&orderby=titlename&count=10&offset=2&searchtype=advanced", queries.getRMAPIQueries().get(0));
   }
 
   @Test(expected = QueryValidationException.class)
@@ -182,28 +187,28 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void cqlParserMapsIdentifierToISXNTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters(VALID_ISBN_QUERY)), 0, 10);
-    assertEquals("searchfield=isxn&search=12345&orderby=titlename&count=10&offset=1&searchtype=advanced", parser.getRMAPIQueries().get(0));
+    RMAPIQueries queries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters(VALID_ISBN_QUERY)), 0, 10);
+    assertEquals("searchfield=isxn&search=12345&orderby=titlename&count=10&offset=1&searchtype=advanced", queries.getRMAPIQueries().get(0));
   }
 
   @Test
   public void cqlParserPassesAlongOffsetIfNotEqualToZeroTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters(VALID_ISBN_QUERY)), 10, 10);
-    assertEquals("searchfield=isxn&search=12345&orderby=titlename&count=10&offset=2&searchtype=advanced", parser.getRMAPIQueries().get(0));
+    RMAPIQueries queries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters(VALID_ISBN_QUERY)), 10, 10);
+    assertEquals("searchfield=isxn&search=12345&orderby=titlename&count=10&offset=2&searchtype=advanced", queries.getRMAPIQueries().get(0));
   }
 
   @Test
-  public void cqlParserDoesNotAppendResourceTypeIfFilterValueIsNullTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters(VALID_FILTER_QUERY)), 10, 10);
-    assertEquals("searchfield=titlename&search=bridget&orderby=titlename&count=10&offset=1&searchtype=advanced", parser.buildRMAPIQuery(10, 1,
-      new TitleParameters(SEARCH_FIELD, SEARCH_VALUE, null, SEARCH_FIELD, null )));
+  public void cqlParserDoesNotAppendResourceTypeIfFilterValueIsNullTest() throws UnsupportedEncodingException {
+    TitlesQueryBuilder builder = new TitlesQueryBuilder();
+    assertEquals("searchfield=titlename&search=bridget&orderby=titlename&count=10&offset=1&searchtype=advanced",
+      builder.build(new TitleParameters(SEARCH_FIELD, SEARCH_VALUE, null, SEARCH_FIELD, null), 1, 10).getRMAPIQueries().get(0));
   }
 
   @Test
   public void cqlParserAppendsResourceTypeIfFilterTypeAndFilterValueAreValidTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters(VALID_FILTER_QUERY)), 10, 10);
+    RMAPIQueries queries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters(VALID_FILTER_QUERY)), 10, 10);
     assertEquals("searchfield=titlename&resourcetype=streamingvideo&search=bridget&orderby=titlename&count=10&offset=2&searchtype=advanced",
-        parser.getRMAPIQueries().get(0));
+        queries.getRMAPIQueries().get(0));
   }
 
   @Test(expected = QueryValidationException.class)
@@ -229,10 +234,10 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void cqlParserComputesQueriesAndIndexForRMAPICorrectlyTest() throws UnsupportedEncodingException, QueryValidationException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters(VALID_QUERY)) , 900, 100);
-    final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
+    RMAPIQueries rmApiQueries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters(VALID_QUERY)) , 900, 100);
+    final ArrayList<String> queries = (ArrayList<String>) rmApiQueries.getRMAPIQueries();
     assertEquals(1, queries.size());
-    assertEquals(0, parser.getInstanceIndex());
+    assertEquals(0, rmApiQueries.getFirstObjectIndex());
     for (final String query: queries) {
       assertEquals("searchfield=titlename&search=bridget&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
@@ -240,17 +245,17 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void cqlParserComputesMultipleQueriesAndIndexForRMAPICorrectlyTest() throws UnsupportedEncodingException, QueryValidationException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters(VALID_QUERY)) , 31, 15);
-    final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
+    RMAPIQueries rmapiQueries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters(VALID_QUERY)) , 31, 15);
+    final ArrayList<String> queries = (ArrayList<String>) rmapiQueries.getRMAPIQueries();
     assertEquals(2, queries.size());
-    assertEquals(1, parser.getInstanceIndex());
+    assertEquals(1, rmapiQueries.getFirstObjectIndex());
     assertEquals("searchfield=titlename&search=bridget&orderby=titlename&count=15&offset=3&searchtype=advanced", queries.get(0));
     assertEquals("searchfield=titlename&search=bridget&orderby=titlename&count=15&offset=4&searchtype=advanced", queries.get(1));
   }
 
   @Test(expected = QueryValidationException.class)
   public void cqlParserThrowsExceptionIfsourceIsNotSupportedTest() throws QueryValidationException, UnsupportedEncodingException {
-    new CQLParserForRMAPI(new TitleParameters(new CQLParameters("title=bridget and source=local")), 0, 1);
+    new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("title=bridget and source=local")), 0, 1);
   }
 
   @Test
@@ -269,15 +274,15 @@ public class CQLParserForRMAPITest {
 
   @Test(expected = QueryValidationException.class)
   public void cqlParserThrowsExceptionIfselectionIsNotSupportedTest() throws QueryValidationException, UnsupportedEncodingException {
-    new CQLParserForRMAPI(new TitleParameters(new CQLParameters("title=bridget and ext.selected=yes")), 0, 1);
+    new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("title=bridget and ext.selected=yes")), 0, 1);
   }
 
   @Test
   public void cqlParserReturnsExpectedQueriesIfSelectionIsSetToTrueTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters("title=bridget and resourceType = video and ext.selected=true")) , 900, 100);
-    final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
+    RMAPIQueries rmapiQueries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("title=bridget and resourceType = video and ext.selected=true")) , 900, 100);
+    final ArrayList<String> queries = (ArrayList<String>) rmapiQueries.getRMAPIQueries();
     assertEquals(1, queries.size());
-    assertEquals(0, parser.getInstanceIndex());
+    assertEquals(0, rmapiQueries.getFirstObjectIndex());
     for (final String query: queries) {
       assertEquals("searchfield=titlename&resourcetype=streamingvideo&selection=selected&search=bridget&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
@@ -285,10 +290,10 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void cqlParserReturnsExpectedQueriesIfSelectionIsSetToAllTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters("title=bridget and resourceType = databases and ext.selected=all")) , 900, 100);
-    final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
+    RMAPIQueries rmapiQueries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("title=bridget and resourceType = databases and ext.selected=all")) , 900, 100);
+    final ArrayList<String> queries = (ArrayList<String>) rmapiQueries.getRMAPIQueries();
     assertEquals(1, queries.size());
-    assertEquals(0, parser.getInstanceIndex());
+    assertEquals(0, rmapiQueries.getFirstObjectIndex());
     for (final String query: queries) {
       assertEquals("searchfield=titlename&resourcetype=database&selection=all&search=bridget&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
@@ -296,10 +301,10 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void cqlParserReturnsExpectedQueriesIfSelectionIsSetToFalseTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters("title=bridget and resourceType = video and ext.selected=false")) , 900, 100);
-    final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
+    RMAPIQueries rmapiQueries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("title=bridget and resourceType = video and ext.selected=false")) , 900, 100);
+    final ArrayList<String> queries = (ArrayList<String>) rmapiQueries.getRMAPIQueries();
     assertEquals(1, queries.size());
-    assertEquals(0, parser.getInstanceIndex());
+    assertEquals(0, rmapiQueries.getFirstObjectIndex());
     for (final String query: queries) {
       assertEquals("searchfield=titlename&resourcetype=streamingvideo&selection=notselected&search=bridget&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
@@ -307,20 +312,20 @@ public class CQLParserForRMAPITest {
 
   @Test(expected = QueryValidationException.class)
   public void cqlParserThrowsExceptionIfSelectionIsInvalidTest() throws QueryValidationException, UnsupportedEncodingException {
-    new CQLParserForRMAPI(new TitleParameters(new CQLParameters("title=bridget and resourceType = databases and ext.selected=yes")) , 900, 100);
+    new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("title=bridget and resourceType = databases and ext.selected=yes")) , 900, 100);
   }
 
   @Test(expected = QueryValidationException.class)
   public void cqlParserThrowsExceptionIfAllRecordsAreRequestedTest() throws QueryValidationException, UnsupportedEncodingException {
-    new CQLParserForRMAPI(new TitleParameters(new CQLParameters("cql.allRecords=all")) , 900, 100);
+    new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("cql.allRecords=all")) , 900, 100);
   }
 
   @Test
   public void cqlParserReturnsExpectedQueriesIfCodexTitleIsPassedTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters("codex.title=bridget and resourceType = audiobooks and ext.selected=false")) , 900, 100);
-    final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
+    RMAPIQueries rmapiQueries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("codex.title=bridget and resourceType = audiobooks and ext.selected=false")), 900, 100);
+    final ArrayList<String> queries = (ArrayList<String>) rmapiQueries.getRMAPIQueries();
     assertEquals(1, queries.size());
-    assertEquals(0, parser.getInstanceIndex());
+    assertEquals(0, rmapiQueries.getFirstObjectIndex());
     for (final String query: queries) {
       assertEquals("searchfield=titlename&resourcetype=audiobook&selection=notselected&search=bridget&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
@@ -328,10 +333,10 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void cqlParserReturnsExpectedQueriesIfCodexIdentifierIsPassedTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters("codex.identifier=12345 and resourceType = databases and ext.selected=false")) , 900, 100);
-    final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
+    RMAPIQueries rmapiQueries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("codex.identifier=12345 and resourceType = databases and ext.selected=false")) , 900, 100);
+    final ArrayList<String> queries = (ArrayList<String>) rmapiQueries.getRMAPIQueries();
     assertEquals(1, queries.size());
-    assertEquals(0, parser.getInstanceIndex());
+    assertEquals(0, rmapiQueries.getFirstObjectIndex());
     for (final String query: queries) {
       assertEquals("searchfield=isxn&resourcetype=database&selection=notselected&search=12345&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
@@ -339,10 +344,10 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void cqlParserReturnsExpectedQueriesIfCodexPublisherIsPassedTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters("codex.publisher=ebsco and resourceType = databases and ext.selected=false")) , 900, 100);
-    final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
+    RMAPIQueries rmapiQueries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("codex.publisher=ebsco and resourceType = databases and ext.selected=false")) , 900, 100);
+    final ArrayList<String> queries = (ArrayList<String>) rmapiQueries.getRMAPIQueries();
     assertEquals(1, queries.size());
-    assertEquals(0, parser.getInstanceIndex());
+    assertEquals(0, rmapiQueries.getFirstObjectIndex());
     for (final String query: queries) {
       assertEquals("searchfield=publisher&resourcetype=database&selection=notselected&search=ebsco&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
@@ -350,10 +355,10 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void cqlParserReturnsExpectedQueriesIfPublisherIsPassedTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters("publisher=ebsco and resourceType = video and ext.selected=false")) , 900, 100);
-    final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
+    RMAPIQueries rmapiQueries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("publisher=ebsco and resourceType = video and ext.selected=false")) , 900, 100);
+    final ArrayList<String> queries = (ArrayList<String>) rmapiQueries.getRMAPIQueries();
     assertEquals(1, queries.size());
-    assertEquals(0, parser.getInstanceIndex());
+    assertEquals(0, rmapiQueries.getFirstObjectIndex());
     for (final String query: queries) {
       assertEquals("searchfield=publisher&resourcetype=streamingvideo&selection=notselected&search=ebsco&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
@@ -361,10 +366,10 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void cqlParserReturnsExpectedQueriesIfCodexSubjectIsPassedTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters("codex.subject=history and resourceType = databases and ext.selected=false")) , 900, 100);
-    final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
+    RMAPIQueries rmapiQueries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("codex.subject=history and resourceType = databases and ext.selected=false")) , 900, 100);
+    final ArrayList<String> queries = (ArrayList<String>) rmapiQueries.getRMAPIQueries();
     assertEquals(1, queries.size());
-    assertEquals(0, parser.getInstanceIndex());
+    assertEquals(0, rmapiQueries.getFirstObjectIndex());
     for (final String query: queries) {
       assertEquals("searchfield=subject&resourcetype=database&selection=notselected&search=history&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
@@ -372,17 +377,17 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void cqlParserReturnsExpectedQueriesIfSubjectIsPassedTest() throws QueryValidationException, UnsupportedEncodingException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters("subject=history and resourceType = video and ext.selected=false")) , 900, 100);
-    final ArrayList<String> queries = (ArrayList<String>) parser.getRMAPIQueries();
+    RMAPIQueries rmapiQueries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("subject=history and resourceType = video and ext.selected=false")) , 900, 100);
+    final ArrayList<String> queries = (ArrayList<String>) rmapiQueries.getRMAPIQueries();
     assertEquals(1, queries.size());
-    assertEquals(0, parser.getInstanceIndex());
+    assertEquals(0, rmapiQueries.getFirstObjectIndex());
     for (final String query: queries) {
       assertEquals("searchfield=subject&resourcetype=streamingvideo&selection=notselected&search=history&orderby=titlename&count=100&offset=10&searchtype=advanced", query);
     }
   }
   @Test(expected = QueryValidationException.class)
   public void cqlParserThrowsExceptionIfInvalidSearchFieldWithPrefixIsPassedTest() throws QueryValidationException, UnsupportedEncodingException {
-    new CQLParserForRMAPI(new TitleParameters(new CQLParameters("codex.resourceType=12345")) , 900, 100);
+    new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("codex.resourceType=12345")) , 900, 100);
   }
 
   @Test
@@ -394,8 +399,8 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void cqlParserUnknownExt() throws UnsupportedEncodingException, QueryValidationException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters("title=xyzzy and ext.available=all")), 0, 10);
-    final List<String> queries = parser.getRMAPIQueries();
+    RMAPIQueries rmapiQueries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("title=xyzzy and ext.available=all")), 0, 10);
+    final List<String> queries = rmapiQueries.getRMAPIQueries();
     assertEquals(1, queries.size());
     String query = queries.get(0);
     assertNotNull(query);
@@ -404,8 +409,8 @@ public class CQLParserForRMAPITest {
 
   @Test
   public void cqlParserSelectedNotPresent() throws UnsupportedEncodingException, QueryValidationException {
-    final CQLParserForRMAPI parser = new CQLParserForRMAPI(new TitleParameters(new CQLParameters("title=xyzzy")), 0, 10);
-    final List<String> queries = parser.getRMAPIQueries();
+    RMAPIQueries rmapiQueries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("title=xyzzy")), 0, 10);
+    final List<String> queries = rmapiQueries.getRMAPIQueries();
     assertEquals(1, queries.size());
     String query = queries.get(0);
     assertNotNull(query);
