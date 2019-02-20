@@ -48,7 +48,7 @@ public class CodexInstanceResourceImplTest {
 
   private final Header tenantHeader = new Header("X-Okapi-Tenant", "codexinstancesresourceimpltest");
   private final Header urlHeader = new Header("X-Okapi-Url", "https://localhost:" + okapiPort);
-  private final Header contentTypeHeader = new Header("Content-IdentifierType", "application/json");
+  private final Header contentTypeHeader = new Header("Content-Type", "application/json");
 
   private String moduleName;
   private String moduleVersion;
