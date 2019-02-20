@@ -6,10 +6,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 import org.folio.config.RMAPIConfiguration;
-import org.folio.cql2rmapi.CQLParserForRMAPI;
+import org.folio.cql2rmapi.query.RMAPIQueries;
 import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Identifier;
 import org.folio.rest.jaxrs.model.Instance;
@@ -60,25 +61,11 @@ public final class RMAPIToCodex {
         .thenApply(RMAPIToCodex::convertRMAPITitleToCodex);
   }
 
-  public static CompletableFuture<InstanceCollection> getInstances(CQLParserForRMAPI cql, Context vertxContext,
-      RMAPIConfiguration rmAPIConfig) {
+  public static CompletableFuture<InstanceCollection> getInstances(RMAPIQueries cql, Context vertxContext,
+                                                                   RMAPIConfiguration rmAPIConfig) {
     log.info("Calling getInstances");
 
     final List<CompletableFuture<Titles>> titleCfs = new ArrayList<>();
-
-    // If the client is searching by ID we need to do an ID lookup using the
-    // getInstance() method. We still need to return the it, if found or not,
-    // in an InstanceCollection.
-    if (cql.isIDSearchField()) {
-      return getInstance(cql.getID(), vertxContext, rmAPIConfig)
-          .thenApply(instance ->
-            new InstanceCollection()
-              .withInstances(Collections.singletonList(instance))
-              .withResultInfo(new ResultInfo().withTotalRecords(Integer.valueOf(1)))
-          ).exceptionally(throwable ->
-            new InstanceCollection().withResultInfo(new ResultInfo().withTotalRecords(Integer.valueOf(0)))
-          );
-    }
 
     // We need to create a new RMAPIService for each call so that we don't close
     // the HTTP client connection.
@@ -87,7 +74,18 @@ public final class RMAPIToCodex {
           rmAPIConfig.getUrl(), vertxContext.owner()).getTitleList(query));
     }
 
-    return convertRMTitleListToCodex(titleCfs, cql.getInstanceIndex(), cql.getInstanceLimit());
+    return convertRMTitleListToCodex(titleCfs, cql.getFirstObjectIndex(), cql.getLimit());
+  }
+
+  public static CompletionStage<InstanceCollection> getInstanceById(Context vertxContext, RMAPIConfiguration rmAPIConfig, String id) {
+    return RMAPIToCodex.getInstance(id, vertxContext, rmAPIConfig)
+      .thenApply(instance ->
+        new InstanceCollection()
+          .withInstances(Collections.singletonList(instance))
+          .withResultInfo(new ResultInfo().withTotalRecords(1))
+      ).exceptionally(throwable ->
+        new InstanceCollection().withResultInfo(new ResultInfo().withTotalRecords(0))
+      );
   }
 
   /**
@@ -123,13 +121,13 @@ public final class RMAPIToCodex {
           .map(RMAPIToCodex::convertRMContributorToCodex)
           .collect(Collectors.toSet()));
     }
-    
+
     if ((svcTitle.subjectsList != null) && (!svcTitle.subjectsList.isEmpty())) {
         codexInstance.setSubject(svcTitle.subjectsList.stream()
             .map(RMAPIToCodex::convertRMSubjectToCodex)
             .collect(Collectors.toSet()));
       }
-    
+
     return codexInstance;
   }
 
@@ -160,7 +158,7 @@ public final class RMAPIToCodex {
         .withName(rmContributor.titleContributor)
         .withType(rmContributor.type);
   }
-  
+
   private static Subject convertRMSubjectToCodex(org.folio.rmapi.model.Subject rmSubject) {
     return new Subject()
         .withName(rmSubject.titleSubject)
@@ -173,23 +171,18 @@ public final class RMAPIToCodex {
       final InstanceCollection instanceCollection = new InstanceCollection();
       List<Instance> instances = new ArrayList<>();
       int totalResults = 0;
-      int page = 0;
 
       for (CompletableFuture<Titles> titleCf : titleCfs) {
         final Titles titles = titleCf.join();
         totalResults = Math.max(totalResults, titles.totalResults);
-        page = Math.max(page, titles.titleList.size());
         instances.addAll(titles.titleList.stream()
             .map(RMAPIToCodex::convertRMAPITitleToCodex)
             .collect(Collectors.toList()));
       }
 
-      if (instances.size() >= index) {
-        int end = Math.min(instances.size(), limit);
-        instances = instances.subList(index, index + end);
-      } else {
-        instances.clear();
-      }
+      int start = Math.min(index, instances.size());
+      int end = Math.min(index + limit, instances.size());
+      instances = instances.subList(start, end);
 
       instanceCollection.setInstances(instances);
       instanceCollection.setResultInfo(new ResultInfo().withTotalRecords(totalResults));

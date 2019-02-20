@@ -170,7 +170,7 @@ public class RMAPIPactTest {
         .given("List Titles")
         .uponReceiving("a request for titles with moby dick")
           .path("/rm/rmaccounts/testcust/titles")
-          .query("search=moby dick&searchfield=titlename&orderby=titlename&count=10&offset=1")
+          .query("searchfield=titlename&search=moby dick&orderby=titlename&count=10&offset=1")
           .headers(headers)
           .method("GET")
         .willRespondWith()
@@ -195,7 +195,7 @@ public class RMAPIPactTest {
 
     final RMAPIService rmapiService = new RMAPIService("testcust", "123456789", mockRMAPIProvider.getUrl(), vertx);
 
-    rmapiService.getTitleList("search=moby%20dick&searchfield=titlename&orderby=titlename&count=10&offset=1")
+    rmapiService.getTitleList("searchfield=titlename&search=moby%20dick&orderby=titlename&count=10&offset=1")
       .whenComplete((titles, throwable) -> {
         context.assertNotNull(titles, "titles is null");
         context.assertEquals(1, titles.totalResults);

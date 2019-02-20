@@ -88,7 +88,7 @@ public class CodexInstanceResourceImplTest {
         req.response().setStatusCode(404).putHeader("content-type", "text/plain")
             .end(readMockFile(MOCK_RMAPI_INSTANCE_TITLE_404_RESPONSE_WHEN_NOT_FOUND));
       } else if (req.path().equals("/rm/rmaccounts/test/titles")) {
-        if (req.uri().contains("search=Bridget+Jones&searchfield=titlename&orderby=titlename&count=10&offset=1")) {
+        if (req.uri().contains("searchfield=titlename&search=Bridget+Jones&orderby=titlename&count=10&offset=1")) {
           req.response().setStatusCode(200).putHeader("content-type", "application/json")
           .end(readMockFile(MOCK_CODEX_INSTANCE_TITLE_COLLECTION_200_RESPONSE_WHEN_FOUND));
         } else {
@@ -188,12 +188,12 @@ public class CodexInstanceResourceImplTest {
     logger.info("Test done");
     asyncLocal.complete();
   }
-  
+
   @Test
   public void getCodexInstancesByIdTitleNotAuth(TestContext context) {
     final Async asyncLocal = context.async();
     logger.info("Testing for response when not authorized");
-    
+
     try {
         // Override default Mocking of RM API Configuration response
         httpClientMock.setMockJsonContent(MOCK_RMAPI_CONFIG_401_RESPONSE_WHEN_NOT_AUTH);
