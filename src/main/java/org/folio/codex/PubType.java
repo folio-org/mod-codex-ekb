@@ -51,7 +51,7 @@ public enum PubType {
     final PubType result = map.get(value);
 
     if (result == null) {
-      throw new IllegalArgumentException("Unknown Resource IdentifierType: " + value);
+      throw new IllegalArgumentException("Unknown publication type: " + value);
     }
 
     return result;
