@@ -79,7 +79,7 @@ public class RMAPIService {
           future.complete((T) results);
         } catch (Exception e) {
           LOG.error(
-              String.format("%s - Response = [%s] Target IdentifierType = [%s]", JSON_RESPONSE_ERROR, body.toString(), clazz));
+              String.format("%s - Response = [%s] Target Type = [%s]", JSON_RESPONSE_ERROR, body.toString(), clazz));
           future.completeExceptionally(
               new RMAPIResultsProcessingException(String.format("%s for query = %s", JSON_RESPONSE_ERROR, query), e));
         } finally {
