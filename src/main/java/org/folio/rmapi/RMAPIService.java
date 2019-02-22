@@ -2,15 +2,15 @@ package org.folio.rmapi;
 
 import java.util.concurrent.CompletableFuture;
 
-import org.folio.rmapi.model.Title;
-import org.folio.rmapi.model.Titles;
-
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpClient;
 import io.vertx.core.http.HttpClientRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+
+import org.folio.rmapi.model.Title;
+import org.folio.rmapi.model.Titles;
 
 /**
  * @author cgodfrey

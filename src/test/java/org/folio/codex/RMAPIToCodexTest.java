@@ -11,25 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
 
-import org.folio.config.RMAPIConfiguration;
-import org.folio.cql2rmapi.CQLParameters;
-import org.folio.cql2rmapi.QueryValidationException;
-import org.folio.cql2rmapi.TitleParameters;
-import org.folio.cql2rmapi.query.RMAPIQueries;
-import org.folio.cql2rmapi.query.TitlesQueryBuilder;
-import org.folio.rest.RestVerticle;
-import org.folio.rest.jaxrs.model.Contributor;
-import org.folio.rest.jaxrs.model.Subject;
-import org.folio.rest.jaxrs.model.Identifier;
-import org.folio.rest.jaxrs.model.Instance;
-import org.folio.rest.tools.client.test.HttpClientMock2;
-import org.folio.rmapi.RMAPIResourceNotFoundException;
-import org.folio.utils.Utils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.http.HttpServer;
@@ -40,6 +21,25 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import org.folio.config.RMAPIConfiguration;
+import org.folio.cql2rmapi.CQLParameters;
+import org.folio.cql2rmapi.QueryValidationException;
+import org.folio.cql2rmapi.TitleParameters;
+import org.folio.cql2rmapi.query.RMAPIQueries;
+import org.folio.cql2rmapi.query.TitlesQueryBuilder;
+import org.folio.rest.RestVerticle;
+import org.folio.rest.jaxrs.model.Contributor;
+import org.folio.rest.jaxrs.model.Identifier;
+import org.folio.rest.jaxrs.model.Instance;
+import org.folio.rest.jaxrs.model.Subject;
+import org.folio.rest.tools.client.test.HttpClientMock2;
+import org.folio.rmapi.RMAPIResourceNotFoundException;
+import org.folio.utils.Utils;
 
 /**
  * @author mreno
@@ -549,11 +549,11 @@ public class RMAPIToCodexTest {
 
   @Test
   public void typeAndSubTypeTest(TestContext context) {
-    context.assertEquals("ISSN", Type.ISSN.getDisplayName());
-    context.assertEquals(0, Type.ISSN.getCode());
+    context.assertEquals("ISSN", IdentifierType.ISSN.getDisplayName());
+    context.assertEquals(0, IdentifierType.ISSN.getCode());
 
-    context.assertEquals("Print", SubType.PRINT.getDisplayName());
-    context.assertEquals(1, SubType.PRINT.getCode());
+    context.assertEquals("Print", IdentifierSubType.PRINT.getDisplayName());
+    context.assertEquals(1, IdentifierSubType.PRINT.getCode());
   }
 
   @Test
