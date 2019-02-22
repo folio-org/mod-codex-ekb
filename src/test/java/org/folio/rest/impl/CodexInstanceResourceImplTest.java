@@ -1,20 +1,12 @@
 package org.folio.rest.impl;
 
-import static org.folio.utils.Utils.readMockFile;
 import static org.hamcrest.Matchers.containsString;
+
+import static org.folio.utils.Utils.readMockFile;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.folio.rest.RestVerticle;
-import org.folio.rest.tools.PomReader;
-import org.folio.rest.tools.client.test.HttpClientMock2;
-import org.folio.utils.Utils;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -29,6 +21,15 @@ import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
+import org.folio.rest.RestVerticle;
+import org.folio.rest.tools.PomReader;
+import org.folio.rest.tools.client.test.HttpClientMock2;
+import org.folio.utils.Utils;
 
 @RunWith(VertxUnitRunner.class)
 public class CodexInstanceResourceImplTest {

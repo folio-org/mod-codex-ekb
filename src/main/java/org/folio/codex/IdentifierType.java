@@ -7,27 +7,28 @@ import java.util.Map;
  * @author mreno
  *
  */
-enum SubType {
+public enum IdentifierType {
   UNKNOWN(-1, ""),
-  PRINT(1, "Print"),
-  ONLINE(2, "Online");
+  ISSN(0, "ISSN"),
+  ISBN(1, "ISBN"),
+  ZDBID(6, "ZDBID");
 
-  private static final Map<Integer, SubType> MAP = new HashMap<>();
+  private static final Map<Integer, IdentifierType> MAP = new HashMap<>();
 
   static {
-    for (SubType id : SubType.values()) {
+    for (IdentifierType id : IdentifierType.values()) {
       MAP.put(id.code, id);
     }
   }
 
-  static SubType valueOf(Integer i) {
+  public static IdentifierType valueOf(Integer i) {
     return MAP.getOrDefault(i, UNKNOWN);
   }
 
   private final int code;
   private final String displayName;
 
-  SubType(int code, String displayName) {
+  IdentifierType(int code, String displayName) {
     this.code = code;
     this.displayName = displayName;
   }
