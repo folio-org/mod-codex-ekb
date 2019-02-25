@@ -8,13 +8,13 @@ import org.folio.rest.jaxrs.model.Package;
 
 public enum ContentType {
 
-  AGGREGATED_FULL_TEXT(Package.Type.AGGREGATED_FULL_TEXT, "aggregatedfulltext"),
-  ABSTRACT_AND_INDEX(Package.Type.ABSTRACT_AND_INDEX, "abstractandindex"),
-  E_BOOK(Package.Type.E_BOOK, "ebook"),
-  E_JOURNAL(Package.Type.E_JOURNAL, "ejournal"),
+  AGGREGATED_FULL_TEXT(Package.Type.AGGREGATEDFULLTEXT, "aggregatedfulltext"),
+  ABSTRACT_AND_INDEX(Package.Type.ABSTRACTANDINDEX, "abstractandindex"),
+  E_BOOK(Package.Type.EBOOK, "ebook"),
+  E_JOURNAL(Package.Type.EJOURNAL, "ejournal"),
   PRINT(Package.Type.PRINT, "print"),
   UNKNOWN(Package.Type.UNKNOWN, "unknown"),
-  ONLINE_REFERENCE(Package.Type.ONLINE_REFERENCE, "onlinereference");
+  ONLINE_REFERENCE(Package.Type.ONLINEREFERENCE, "onlinereference");
 
   private final Package.Type codex;
   private final String rmAPI;

@@ -55,7 +55,7 @@ public class PackageConverterTest {
     assertEquals(VENDOR_NAME, converted.getProvider());
     assertEquals(VENDOR_ID.toString(), converted.getProviderId());
     assertEquals(SOURCE, converted.getSource());
-    assertEquals(Package.Type.E_BOOK, converted.getType());
+    assertEquals(Package.Type.EBOOK, converted.getType());
     assertSame(COVERAGE, converted.getCoverage());
   }
 

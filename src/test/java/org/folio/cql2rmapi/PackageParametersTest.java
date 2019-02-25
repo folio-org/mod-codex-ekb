@@ -7,7 +7,7 @@ import org.junit.Test;
 public class PackageParametersTest {
   private static final String SEARCH_VALUE = "bridget";
   private static final String VALID_NAME_QUERY = "name = bridget sortby name";
-  private static final String VALID_FILTER_QUERY = "name = bridget and type = Aggregated Full Text sortby name";
+  private static final String VALID_FILTER_QUERY = "name = bridget and type = aggregatedfulltext sortby name";
   private static final String VALID_SELECTED_QUERY = "(name = \"bridget\") and (ext.selected = true) sortby name";
 
   @Test(expected = QueryValidationException.class)
