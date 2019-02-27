@@ -148,6 +148,11 @@
       <version>2.24.5</version>
       <scope>test</scope>
     </dependency>
+  <!--<dependency>-->
+  <!--<groupId>org.folio</groupId>-->
+  <!--<artifactId>folio-holdingsiq-client</artifactId>-->
+  <!--<version>1.0.0</version>-->
+  <!--</dependency>-->
   </dependencies>
 
   <build>

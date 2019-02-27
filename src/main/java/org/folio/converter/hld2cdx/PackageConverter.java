@@ -1,14 +1,14 @@
 package org.folio.converter.hld2cdx;
 
 import org.apache.commons.lang3.StringUtils;
+import org.folio.holdingsiq.model.CoverageDates;
+import org.folio.holdingsiq.model.PackageData;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.NonNull;
 
 import org.folio.codex.ContentType;
 import org.folio.rest.jaxrs.model.Coverage;
 import org.folio.rest.jaxrs.model.Package;
-import org.folio.rmapi.model.CoverageDates;
-import org.folio.rmapi.model.PackageData;
 
 public class PackageConverter implements Converter<PackageData, Package> {
 
@@ -23,25 +23,25 @@ public class PackageConverter implements Converter<PackageData, Package> {
   public Package convert(@NonNull PackageData source) {
     Package result = new Package();
 
-    if (source.vendorId == null) {
+    if (source.getVendorId() == null) {
       throw new IllegalArgumentException("Vendor id cannot be null");
     }
-    if (source.packageId == null) {
+    if (source.getPackageId() == null) {
       throw new IllegalArgumentException("Package id cannot be null");
     }
 
-    result.setId(source.vendorId + "-" + source.packageId);
+    result.setId(source.getVendorId() + "-" + source.getPackageId());
 
-    result.setIsSelected(convertSelected(source.isSelected));
-    if (source.customCoverage != null) {
-      result.setCoverage(coverageConverter.convert(source.customCoverage));
+    result.setIsSelected(convertSelected(source.getIsSelected()));
+    if (source.getCustomCoverage() != null) {
+      result.setCoverage(coverageConverter.convert(source.getCustomCoverage()));
     }
-    result.setItemCount(source.titleCount);
-    result.setName(source.packageName);
-    result.setProvider(source.vendorName);
-    result.setProviderId(Integer.toString(source.vendorId));
+    result.setItemCount(source.getTitleCount());
+    result.setName(source.getPackageName());
+    result.setProvider(source.getVendorName());
+    result.setProviderId(Integer.toString(source.getVendorId()));
     result.setSource("kb");
-    result.setType(ContentType.fromRMAPI(StringUtils.defaultString(source.contentType)).getCodex());
+    result.setType(ContentType.fromRMAPI(StringUtils.defaultString(source.getContentType())).getCodex());
 
     return result;
   }

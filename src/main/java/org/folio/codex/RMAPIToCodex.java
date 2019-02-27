@@ -1,18 +1,20 @@
 package org.folio.codex;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 import io.vertx.core.Context;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.folio.holdingsiq.model.Configuration;
+import org.folio.holdingsiq.model.Title;
+import org.folio.holdingsiq.model.Titles;
+import org.folio.holdingsiq.service.HoldingsIQService;
+import org.folio.holdingsiq.service.impl.HoldingsIQServiceImpl;
 import org.springframework.core.convert.converter.Converter;
 
-import org.folio.config.RMAPIConfiguration;
 import org.folio.converter.hld2cdx.ContributorConverter;
 import org.folio.converter.hld2cdx.IdentifierConverter;
 import org.folio.converter.hld2cdx.SubjectConverter;
@@ -21,10 +23,6 @@ import org.folio.cql2rmapi.query.RMAPIQueries;
 import org.folio.rest.jaxrs.model.Instance;
 import org.folio.rest.jaxrs.model.InstanceCollection;
 import org.folio.rest.jaxrs.model.ResultInfo;
-import org.folio.rmapi.RMAPIResourceNotFoundException;
-import org.folio.rmapi.RMAPIService;
-import org.folio.rmapi.model.Title;
-import org.folio.rmapi.model.Titles;
 
 /**
  * @author mreno
@@ -38,31 +36,21 @@ public final class RMAPIToCodex {
 
   private RMAPIToCodex() {
     super();
+
   }
 
-  public static CompletableFuture<Instance> getInstance(String id, Context vertxContext,
-      RMAPIConfiguration rmAPIConfig) {
+  public static CompletableFuture<Instance> getInstance(Context vertxContext, Configuration rmAPIConfig, long id) {
     log.info("Calling getInstance");
 
-    final int titleId;
-    try {
-      titleId = Integer.parseInt(id);
-    } catch (NumberFormatException e) {
-      log.error("getInstance() called with an invalid id: " + id, e);
-      final CompletableFuture<Instance> failed = new CompletableFuture<>();
-      failed.completeExceptionally(new RMAPIResourceNotFoundException("Requested resource " + id + " not found"));
-      return failed;
-    }
-
-    final RMAPIService rmAPIService = new RMAPIService(rmAPIConfig.getCustomerId(), rmAPIConfig.getAPIKey(),
+    final HoldingsIQService rmAPIService = new HoldingsIQServiceImpl(rmAPIConfig.getCustomerId(), rmAPIConfig.getApiKey(),
         rmAPIConfig.getUrl(), vertxContext.owner());
 
-    return rmAPIService.getTitleById(titleId)
+    return rmAPIService.retrieveTitle(id)
         .thenApply(TITLE_CONVERTER::convert);
   }
 
   public static CompletableFuture<InstanceCollection> getInstances(RMAPIQueries cql, Context vertxContext,
-                                                                   RMAPIConfiguration rmAPIConfig) {
+                                                                   Configuration rmAPIConfig) {
     log.info("Calling getInstances");
 
     final List<CompletableFuture<Titles>> titleCfs = new ArrayList<>();
@@ -70,35 +58,29 @@ public final class RMAPIToCodex {
     // We need to create a new RMAPIService for each call so that we don't close
     // the HTTP client connection.
     for (String query : cql.getRMAPIQueries()) {
-      titleCfs.add(new RMAPIService(rmAPIConfig.getCustomerId(), rmAPIConfig.getAPIKey(),
-          rmAPIConfig.getUrl(), vertxContext.owner()).getTitleList(query));
+      titleCfs.add(new HoldingsIQServiceImpl(rmAPIConfig.getCustomerId(), rmAPIConfig.getApiKey(),
+          rmAPIConfig.getUrl(), vertxContext.owner()).retrieveTitles(query));
     }
 
-    return convertRMTitleListToCodex(titleCfs, cql.getFirstObjectIndex(), cql.getLimit());
+
+    return CompletableFuture
+      .allOf(titleCfs.toArray(new CompletableFuture[0]))
+      .thenCompose(aVoid ->  {
+        final List<Titles> collect = titleCfs.stream().map(CompletableFuture::join).collect(Collectors.toList());
+        return convertRMTitleListToCodex(collect, cql.getFirstObjectIndex(), cql.getLimit());
+      });
   }
 
-  public static CompletionStage<InstanceCollection> getInstanceById(Context vertxContext, RMAPIConfiguration rmAPIConfig, String id) {
-    return RMAPIToCodex.getInstance(id, vertxContext, rmAPIConfig)
-      .thenApply(instance ->
-        new InstanceCollection()
-          .withInstances(Collections.singletonList(instance))
-          .withResultInfo(new ResultInfo().withTotalRecords(1))
-      ).exceptionally(throwable ->
-        new InstanceCollection().withResultInfo(new ResultInfo().withTotalRecords(0))
-      );
-  }
 
-  private static CompletableFuture<InstanceCollection> convertRMTitleListToCodex(List<CompletableFuture<Titles>> titleCfs, int index, int limit) {
-    return CompletableFuture.allOf(titleCfs.toArray(new CompletableFuture[titleCfs.size()]))
-    .thenApply(result -> {
-      final InstanceCollection instanceCollection = new InstanceCollection();
+  private static CompletableFuture<InstanceCollection> convertRMTitleListToCodex(List<Titles> titleCfs, int index, int limit) {
+
+    final InstanceCollection instanceCollection = new InstanceCollection();
       List<Instance> instances = new ArrayList<>();
       int totalResults = 0;
 
-      for (CompletableFuture<Titles> titleCf : titleCfs) {
-        final Titles titles = titleCf.join();
-        totalResults = Math.max(totalResults, titles.totalResults);
-        instances.addAll(titles.titleList.stream()
+      for (Titles titleCf : titleCfs) {
+        totalResults = Math.max(totalResults, titleCf.getTotalResults());
+        instances.addAll(titleCf.getTitleList().stream()
             .map(TITLE_CONVERTER::convert)
             .collect(Collectors.toList()));
       }
@@ -110,7 +92,6 @@ public final class RMAPIToCodex {
       instanceCollection.setInstances(instances);
       instanceCollection.setResultInfo(new ResultInfo().withTotalRecords(totalResults));
 
-      return instanceCollection;
-    });
+      return CompletableFuture.completedFuture(instanceCollection);
   }
 }

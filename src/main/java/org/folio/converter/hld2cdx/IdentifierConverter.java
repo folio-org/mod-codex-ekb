@@ -7,10 +7,10 @@ import org.springframework.lang.NonNull;
 
 import org.folio.rest.jaxrs.model.Identifier;
 
-public class IdentifierConverter implements Converter<org.folio.rmapi.model.Identifier, Identifier> {
+public class IdentifierConverter implements Converter<org.folio.holdingsiq.model.Identifier, Identifier> {
 
   @Override
-  public Identifier convert(@NonNull org.folio.rmapi.model.Identifier source) {
+  public Identifier convert(@NonNull org.folio.holdingsiq.model.Identifier source) {
     final IdentifierType type = IdentifierType.valueOf(source.type);
     final IdentifierSubType subType = IdentifierSubType.valueOf(source.subtype);
 

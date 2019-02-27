@@ -1,6 +1,8 @@
 package org.folio.rest.impl;
 
+import io.vertx.core.Vertx;
 import java.io.UnsupportedEncodingException;
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
@@ -9,16 +11,20 @@ import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 
 import org.folio.codex.RMAPIToCodex;
-import org.folio.config.RMAPIConfiguration;
 import org.folio.cql2rmapi.CQLParameters;
 import org.folio.cql2rmapi.QueryValidationException;
 import org.folio.cql2rmapi.TitleParameters;
 import org.folio.cql2rmapi.query.RMAPIQueries;
 import org.folio.cql2rmapi.query.TitlesQueryBuilder;
+import org.folio.holdingsiq.model.Configuration;
+import org.folio.holdingsiq.model.OkapiData;
+import org.folio.holdingsiq.service.ConfigurationService;
+import org.folio.holdingsiq.service.exception.ResourceNotFoundException;
+import org.folio.parser.IdParser;
 import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.InstanceCollection;
+import org.folio.rest.jaxrs.model.ResultInfo;
 import org.folio.rest.jaxrs.resource.CodexInstances;
-import org.folio.rmapi.RMAPIResourceNotFoundException;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
@@ -26,6 +32,9 @@ import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.folio.spring.SpringContextUtil;
+import org.folio.validator.InstancesQueryValidator;
+import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Instance related codex APIs.
@@ -36,20 +45,34 @@ import io.vertx.core.logging.LoggerFactory;
 public final class CodexInstancesImpl implements CodexInstances {
   private final Logger log = LoggerFactory.getLogger(CodexInstancesImpl.class);
 
+  @Autowired
+  private ConfigurationService configurationService;
+  @Autowired
+  private InstancesQueryValidator instancesQueryValidator;
+  @Autowired
+  private IdParser idParser;
+
+  public CodexInstancesImpl() {
+    SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
+  }
+
+
   /* (non-Javadoc)
    * @see org.folio.rest.jaxrs.resource.InstancesResource#getCodexInstances(java.lang.String, int, int, java.lang.String, java.util.Map, io.vertx.core.Handler, io.vertx.core.Context)
    */
   @Override
   @Validate
-  public void getCodexInstances(String query, int offset, int limit, String lang,
-      Map<String, String> okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getCodexInstances(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders,
+                                Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     log.info("method call: getCodexInstances");
 
-    RMAPIConfiguration.getConfiguration(okapiHeaders)
-      .thenCompose(rmAPIConfig -> getCodexInstances(query, offset, limit, vertxContext, rmAPIConfig)).thenAccept(instances ->
-         asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond200WithApplicationJson(instances)))
-      ).exceptionally(throwable -> {
+    instancesQueryValidator.validate(query, limit);
+
+    configurationService.retrieveConfiguration(new OkapiData(okapiHeaders))
+      .thenCompose(rmAPIConfig -> getCodexInstances(query, offset, limit, vertxContext, rmAPIConfig))
+      .thenAccept(instances ->
+         asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond200WithApplicationJson(instances))))
+      .exceptionally(throwable -> {
         log.error("getCodexInstances failed!", throwable);
         if (throwable.getCause() instanceof QueryValidationException) {
           asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond400WithTextPlain(throwable.getCause().getMessage())));
@@ -64,21 +87,21 @@ public final class CodexInstancesImpl implements CodexInstances {
 
   @Override
   @Validate
-  public void getCodexInstancesById(String id, String lang,
-      Map<String, String> okapiHeaders,
-      Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+  public void getCodexInstancesById(String id, String lang, Map<String, String> okapiHeaders,
+                                    Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+
     log.info("method call: getCodexInstancesById");
 
-    RMAPIConfiguration.getConfiguration(okapiHeaders)
+    configurationService.retrieveConfiguration(new OkapiData(okapiHeaders))
       .thenCompose(rmAPIConfig ->
-        RMAPIToCodex.getInstance(id, vertxContext, rmAPIConfig)
+        RMAPIToCodex.getInstance(vertxContext, rmAPIConfig, idParser.parseTitleId(id))
       ).thenApply(instance -> {
         asyncResultHandler.handle(
             Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond200WithApplicationJson(instance)));
         return instance;
       }).exceptionally(throwable -> {
         log.error("getCodexInstancesById failed!", throwable);
-        if (throwable.getCause() instanceof RMAPIResourceNotFoundException) {
+        if (throwable.getCause() instanceof ResourceNotFoundException) {
           asyncResultHandler.handle(
               Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond404WithTextPlain(id)));
         } else if (throwable.getCause() instanceof NotAuthorizedException) {
@@ -90,14 +113,19 @@ public final class CodexInstancesImpl implements CodexInstances {
       });
   }
 
-  private CompletionStage<InstanceCollection> getCodexInstances(String query, int offset, int limit, Context vertxContext, RMAPIConfiguration rmAPIConfig){
+  private CompletionStage<InstanceCollection> getCodexInstances(String query, int offset, int limit,
+                                                                Context vertxContext, Configuration rmAPIConfig){
     try {
-      if (limit == 0 || query == null) {
-        throw new QueryValidationException("Unsupported Query Format : Limit/Query suggests that no results need to be returned.");
-      }
       CQLParameters cqlParameters = new CQLParameters(query);
       if (cqlParameters.isIdSearch()) {
-        return RMAPIToCodex.getInstanceById(vertxContext, rmAPIConfig, cqlParameters.getIdSearchValue());
+        return RMAPIToCodex.getInstance(vertxContext, rmAPIConfig, idParser.parseTitleId(cqlParameters.getIdSearchValue()))
+          .thenApply(instance ->
+            new InstanceCollection()
+              .withInstances(Collections.singletonList(instance))
+              .withResultInfo(new ResultInfo().withTotalRecords(1))
+          ).exceptionally(throwable ->
+          new InstanceCollection().withResultInfo(new ResultInfo().withTotalRecords(0))
+        );
       }
       RMAPIQueries queries = new TitlesQueryBuilder().build(new TitleParameters(cqlParameters), offset, limit);
       return RMAPIToCodex.getInstances(queries, vertxContext, rmAPIConfig);
