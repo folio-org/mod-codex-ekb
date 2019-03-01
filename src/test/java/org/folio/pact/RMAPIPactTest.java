@@ -2,10 +2,11 @@ package org.folio.pact;
 
 import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.folio.holdingsiq.service.TitlesHoldingsIQService;
+import org.folio.holdingsiq.service.impl.TitlesHoldingsIQServiceImpl;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -35,11 +36,8 @@ public class RMAPIPactTest {
 
   private Vertx vertx;
 
-  /**
-   * @throws java.lang.Exception
-   */
   @Before
-  public void setUp(TestContext context) throws Exception {
+  public void setUp() {
     vertx = Vertx.vertx();
   }
 
@@ -49,7 +47,7 @@ public class RMAPIPactTest {
   }
 
   @Pact(provider="rm-api", consumer="mod-codex-ekb")
-  public RequestResponsePact createPact(PactDslWithProvider builder) throws IOException {
+  public RequestResponsePact createPact(PactDslWithProvider builder) {
     final Map<String, String> headers = new HashMap<>();
     headers.put("x-api-key", "123456789");
 
@@ -186,34 +184,34 @@ public class RMAPIPactTest {
         .toPact();
   }
 
-//  @Test
-//  @PactVerification("rm-api")
-//  public void pactTest(TestContext context) {
-//    final Async listTitlesAsync = context.async();
-//    final Async getTitleByIdAsync = context.async();
-//
-//    final RMAPIService rmapiService = new RMAPIService("testcust", "123456789", mockRMAPIProvider.getUrl(), vertx);
-//
-//    rmapiService.getTitleList("searchfield=titlename&search=moby%20dick&orderby=titlename&count=10&offset=1")
-//      .whenComplete((titles, throwable) -> {
-//        context.assertNotNull(titles, "titles is null");
-//        context.assertEquals(1, titles.totalResults);
-//        listTitlesAsync.complete();
-//      }).exceptionally(throwable -> {
-//        context.fail(throwable);
-//        listTitlesAsync.complete();
-//        return null;
-//      });
-//
-//    rmapiService.getTitleById(1234567)
-//      .whenComplete((title, throwable) -> {
-//        context.assertNotNull(title, "title is null");
-//        context.assertEquals(1234567, title.titleId);
-//        getTitleByIdAsync.complete();
-//      }).exceptionally(throwable -> {
-//        context.fail(throwable);
-//        getTitleByIdAsync.complete();
-//        return null;
-//      });
-//  }
+  @Test
+  @PactVerification("rm-api")
+  public void pactTest(TestContext context) {
+    final Async listTitlesAsync = context.async();
+    final Async getTitleByIdAsync = context.async();
+
+    final TitlesHoldingsIQService titlesService = new TitlesHoldingsIQServiceImpl("testcust", "123456789", mockRMAPIProvider.getUrl(), vertx);
+
+    titlesService.retrieveTitles("searchfield=titlename&search=moby%20dick&orderby=titlename&count=10&offset=1")
+      .whenComplete((titles, throwable) -> {
+        context.assertNotNull(titles, "titles is null");
+        context.assertEquals(1, titles.getTotalResults());
+        listTitlesAsync.complete();
+      }).exceptionally(throwable -> {
+        context.fail(throwable);
+        listTitlesAsync.complete();
+        return null;
+      });
+
+    titlesService.retrieveTitle(1234567)
+      .whenComplete((title, throwable) -> {
+        context.assertNotNull(title, "title is null");
+        context.assertEquals(1234567, title.getTitleId());
+        getTitleByIdAsync.complete();
+      }).exceptionally(throwable -> {
+        context.fail(throwable);
+        getTitleByIdAsync.complete();
+        return null;
+      });
+  }
 }

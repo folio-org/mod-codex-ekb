@@ -8,9 +8,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import javax.security.auth.login.Configuration;
+
+import org.folio.holdingsiq.model.Configuration;
 import org.folio.holdingsiq.model.OkapiData;
-import org.folio.holdingsiq.service.impl.ConfigurationServiceCache;
+import org.folio.holdingsiq.service.impl.ConfigurationClientProvider;
 import org.folio.holdingsiq.service.impl.ConfigurationServiceImpl;
 import org.folio.rest.tools.client.HttpClientFactory;
 import org.junit.After;
@@ -61,6 +62,7 @@ public class ModConfigurationPactTest {
 
     okapiHeaders.put("x-okapi-tenant", "rmapiconfigurationtest");
     okapiHeaders.put("x-okapi-url", mockProvider.getUrl());
+    okapiHeaders.put("x-okapi-token", "testToken");
   }
 
   @After
@@ -74,7 +76,7 @@ public class ModConfigurationPactTest {
   }
 
   @Pact(provider="mod-configuration", consumer="mod-codex-ekb")
-  public RequestResponsePact createPact(PactDslWithProvider builder) throws IOException {
+  public RequestResponsePact createPact(PactDslWithProvider builder) {
     final String dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ";
 
     // Build the excepted JSON, this gives us much more flexibility when
@@ -143,7 +145,7 @@ public class ModConfigurationPactTest {
         .given("mod-codex-ekb configuration needed")
         .uponReceiving("RM API Configuration")
           .path("/configurations/entries")
-          .query("query=(module==EKB AND configName==api_access)")
+          .query("query=module=EKB&offset=0&limit=100")
           .method("GET")
         .willRespondWith()
           .status(200)
@@ -151,23 +153,24 @@ public class ModConfigurationPactTest {
         .toPact();
   }
 
-//  @Test
-//  @PactVerification("mod-configuration")
-//  public void test(TestContext context) {
-//    final Async async = context.async();
-//    CompletableFuture<RMAPIConfiguration> cf = RMAPIConfiguration.getConfiguration(okapiHeaders);
-//
-//    cf.whenComplete((config, throwable) -> {
-//      // We don't care about the values, as long as the RMAPIConfiguration
-//      // has values for all the below properties, the contract terms are met.
-//      context.assertNotNull(config.getAPIKey(), "API key is null");
-//      context.assertNotNull(config.getCustomerId(), "Customer ID is null");
-//      context.assertNotNull(config.getUrl(), "RM API URL is null");
-//      async.complete();
-//    }).exceptionally(throwable -> {
-//      context.fail(throwable);
-//      async.complete();
-//      return null;
-//    });
-//  }
+  @Test
+  @PactVerification("mod-configuration")
+  public void test(TestContext context) {
+    final Async async = context.async();
+
+    CompletableFuture<Configuration> future = new ConfigurationServiceImpl(new ConfigurationClientProvider()).retrieveConfiguration(new OkapiData(okapiHeaders));
+
+    future.whenComplete((config, throwable) -> {
+      // We don't care about the values, as long as the RMAPIConfiguration
+      // has values for all the below properties, the contract terms are met.
+      context.assertNotNull(config.getApiKey(), "API key is null");
+      context.assertNotNull(config.getCustomerId(), "Customer ID is null");
+      context.assertNotNull(config.getUrl(), "RM API URL is null");
+      async.complete();
+    }).exceptionally(throwable -> {
+      context.fail(throwable);
+      async.complete();
+      return null;
+    });
+  }
 }

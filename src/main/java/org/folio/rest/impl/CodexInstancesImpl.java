@@ -4,10 +4,11 @@ import io.vertx.core.Vertx;
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 
-import javax.ws.rs.NotAuthorizedException;
+import javax.validation.ValidationException;
 import javax.ws.rs.core.Response;
 
 import org.folio.codex.RMAPIToCodex;
@@ -19,6 +20,7 @@ import org.folio.cql2rmapi.query.TitlesQueryBuilder;
 import org.folio.holdingsiq.model.Configuration;
 import org.folio.holdingsiq.model.OkapiData;
 import org.folio.holdingsiq.service.ConfigurationService;
+import org.folio.holdingsiq.service.exception.ConfigurationServiceException;
 import org.folio.holdingsiq.service.exception.ResourceNotFoundException;
 import org.folio.parser.IdParser;
 import org.folio.rest.annotations.Validate;
@@ -66,17 +68,19 @@ public final class CodexInstancesImpl implements CodexInstances {
                                 Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     log.info("method call: getCodexInstances");
 
-    instancesQueryValidator.validate(query, limit);
-
-    configurationService.retrieveConfiguration(new OkapiData(okapiHeaders))
+    CompletableFuture.completedFuture(null)
+      .thenCompose(o -> {
+        instancesQueryValidator.validate(query, limit);
+        return configurationService.retrieveConfiguration(new OkapiData(okapiHeaders));
+      })
       .thenCompose(rmAPIConfig -> getCodexInstances(query, offset, limit, vertxContext, rmAPIConfig))
       .thenAccept(instances ->
          asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond200WithApplicationJson(instances))))
       .exceptionally(throwable -> {
         log.error("getCodexInstances failed!", throwable);
-        if (throwable.getCause() instanceof QueryValidationException) {
+        if (throwable.getCause() instanceof ValidationException || throwable.getCause() instanceof QueryValidationException) {
           asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond400WithTextPlain(throwable.getCause().getMessage())));
-        } else if (throwable.getCause() instanceof NotAuthorizedException) {
+        } else if (throwable.getCause() instanceof ConfigurationServiceException && ((ConfigurationServiceException)throwable.getCause()).getStatusCode() == 401) {
           asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond401WithTextPlain(throwable.getCause().getMessage())));
         } else {
           asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
@@ -101,10 +105,11 @@ public final class CodexInstancesImpl implements CodexInstances {
         return instance;
       }).exceptionally(throwable -> {
         log.error("getCodexInstancesById failed!", throwable);
-        if (throwable.getCause() instanceof ResourceNotFoundException) {
+        if (throwable.getCause() instanceof ResourceNotFoundException
+          || throwable.getCause() instanceof ValidationException) {
           asyncResultHandler.handle(
               Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond404WithTextPlain(id)));
-        } else if (throwable.getCause() instanceof NotAuthorizedException) {
+        } else if (throwable.getCause() instanceof ConfigurationServiceException && ((ConfigurationServiceException)throwable.getCause()).getStatusCode() == 401) {
         	asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond401WithTextPlain(throwable.getCause().getMessage())));
         } else {
         	asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
