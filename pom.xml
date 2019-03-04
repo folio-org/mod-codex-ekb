@@ -88,7 +88,7 @@
       <dependency>
         <groupId>io.vertx</groupId>
         <artifactId>vertx-stack-depchain</artifactId>
-        <version>3.4.1</version>
+        <version>3.5.4</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -148,6 +148,11 @@
       <version>2.24.5</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>folio-holdingsiq-client</artifactId>
+      <version>1.0.0</version>
+    </dependency>
   </dependencies>
 
   <build>
@@ -169,7 +174,7 @@
           <encoding>UTF-8</encoding>
         </configuration>
       </plugin>
-	  
+
 	  <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>build-helper-maven-plugin</artifactId>
@@ -234,7 +239,7 @@
           </execution>
         </executions>
       </plugin>
-      
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>aspectj-maven-plugin</artifactId>

@@ -2,12 +2,19 @@ package org.folio.rest.impl;
 
 import static org.folio.utils.Utils.readMockFile;
 import static org.hamcrest.Matchers.containsString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doReturn;
 
-import java.io.IOException;
+import java.util.concurrent.CompletableFuture;
 
+import org.folio.holdingsiq.model.Configuration;
+import org.folio.holdingsiq.service.ConfigurationService;
+import org.folio.holdingsiq.service.exception.ConfigurationServiceException;
+import org.folio.spring.SpringContextUtil;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -24,10 +31,12 @@ public class CodexInstanceResourceImplTest extends VertxTestBase {
   private static final String MOCK_RMAPI_INSTANCE_TITLE_200_RESPONSE_WHEN_FOUND = "RMAPIService/SuccessGetTitleById.json";
   private static final String MOCK_RMAPI_INSTANCE_TITLE_404_RESPONSE_WHEN_NOT_FOUND = "RMAPIConfiguration/mock_content_fail_404.json";
   private static final String MOCK_CODEX_INSTANCE_TITLE_COLLECTION_200_RESPONSE_WHEN_FOUND = "RMAPIService/SuccessGetTitleList.json";
-  private static final String MOCK_RMAPI_CONFIG_401_RESPONSE_WHEN_NOT_AUTH = "RMAPIConfiguration/mock_content_fail_401.json";
 
   private static final String SEARCH_TITLE_COLLECTION_WHEN_SEARCH_FIELD_NOT_GIVEN_SUCCESS_QUERY = "Bridget Jones";
   private static final String SEARCH_TITLE_COLLECTION_FAILS_UNSUPPORTED_QUERY = "title = Bridget Jones or publisher = xyz";
+
+  @Autowired
+  private ConfigurationService configurationService;
 
   @Before
   public void setUp(TestContext context) {
@@ -54,9 +63,17 @@ public class CodexInstanceResourceImplTest extends VertxTestBase {
         req.response().setStatusCode(500).end("Unexpected call: " + req.path());
       }
     });
-    server.listen(serverPort, host, ar -> {
-      async.complete();
-    });
+    server.listen(serverPort, host, ar -> async.complete());
+
+
+    SpringContextUtil.autowireDependenciesFromFirstContext(this, vertx);
+    doReturn(CompletableFuture.completedFuture(
+      Configuration.builder()
+        .customerId("test")
+        .apiKey("8675309")
+        .url("http://localhost:" + serverPort)
+        .configValid(true).build()))
+      .when(configurationService).retrieveConfiguration(any());
   }
 
   @Test
@@ -67,6 +84,7 @@ public class CodexInstanceResourceImplTest extends VertxTestBase {
         .given()
           .header(tenantHeader)
           .header(urlHeader)
+          .header(tokenHeader)
           .header(contentTypeHeader)
         .get("/codex-instances/99999")
           .then()
@@ -91,12 +109,13 @@ public class CodexInstanceResourceImplTest extends VertxTestBase {
     RestAssured
       .given()
         .header(tenantHeader)
+        .header(tokenHeader)
         .header(contentTypeHeader)
       .get("/codex-instances/396805")
         .then()
           .log()
           .ifValidationFails()
-          .statusCode(500).body(containsString("Okapi URL cannot be null"));
+          .statusCode(400).body(containsString("Okapi url header does not contain valid url"));
 
     // Test done
     logger.info("Test done");
@@ -110,6 +129,7 @@ public class CodexInstanceResourceImplTest extends VertxTestBase {
     .given()
       .header(tenantHeader)
       .header(urlHeader)
+      .header(tokenHeader)
       .header(contentTypeHeader)
     .get("/codex-instances/1")
       .then()
@@ -125,17 +145,14 @@ public class CodexInstanceResourceImplTest extends VertxTestBase {
   public void getCodexInstancesByIdTitleNotAuth(TestContext context) {
     logger.info("Testing for response when not authorized");
 
-    try {
-        // Override default Mocking of RM API Configuration response
-        httpClientMock.setMockJsonContent(MOCK_RMAPI_CONFIG_401_RESPONSE_WHEN_NOT_AUTH);
-      } catch (final IOException e) {
-        context.fail("Cannot read mock file: " + MOCK_RMAPI_CONFIG_401_RESPONSE_WHEN_NOT_AUTH + " - reason: " + e.getMessage());
-      }
-
+    CompletableFuture<Object> future = new CompletableFuture<>();
+    future.completeExceptionally(new ConfigurationServiceException("UnAuthorized to access RM API Configuration", 401));
+    doReturn(future).when(configurationService).retrieveConfiguration(any());
     RestAssured
     .given()
       .header(tenantHeader)
       .header(urlHeader)
+      .header(tokenHeader)
       .header(contentTypeHeader)
     .get("/codex-instances/99999")
       .then()
@@ -155,6 +172,7 @@ public class CodexInstanceResourceImplTest extends VertxTestBase {
         .given()
           .header(tenantHeader)
           .header(urlHeader)
+          .header(tokenHeader)
           .header(contentTypeHeader)
         .get(String.format("/codex-instances?query=%s", SEARCH_TITLE_COLLECTION_WHEN_SEARCH_FIELD_NOT_GIVEN_SUCCESS_QUERY))
           .then()
@@ -183,6 +201,7 @@ public class CodexInstanceResourceImplTest extends VertxTestBase {
         .given()
           .header(tenantHeader)
           .header(urlHeader)
+          .header(tokenHeader)
           .header(contentTypeHeader)
         .get(String.format("/codex-instances?query=id=%d", 99999))
           .then()
@@ -195,7 +214,7 @@ public class CodexInstanceResourceImplTest extends VertxTestBase {
       final String body = r.getBody().asString();
       final JsonObject json = new JsonObject(body);
       //Ensure that total records and instances keys are present in response
-      context.assertEquals(json.getJsonObject("resultInfo").getInteger("totalRecords"), Integer.valueOf(1));
+      context.assertEquals(json.getJsonObject("resultInfo").getInteger("totalRecords"), 1);
       context.assertTrue(json.containsKey("instances"));
     }
 
@@ -211,6 +230,7 @@ public class CodexInstanceResourceImplTest extends VertxTestBase {
         .given()
           .header(tenantHeader)
           .header(urlHeader)
+          .header(tokenHeader)
           .header(contentTypeHeader)
         .get(String.format("/codex-instances?query=id=%d", 1))
           .then()
@@ -223,7 +243,7 @@ public class CodexInstanceResourceImplTest extends VertxTestBase {
       final String body = r.getBody().asString();
       final JsonObject json = new JsonObject(body);
       //Ensure that total records and instances keys are present in response
-      context.assertEquals(json.getJsonObject("resultInfo").getInteger("totalRecords"), Integer.valueOf(0));
+      context.assertEquals(json.getJsonObject("resultInfo").getInteger("totalRecords"), 0);
       context.assertTrue(json.containsKey("instances"));
     }
 
@@ -240,6 +260,7 @@ public class CodexInstanceResourceImplTest extends VertxTestBase {
         .header(tenantHeader)
         .header(contentTypeHeader)
         .header(urlHeader)
+        .header(tokenHeader)
       .get(String.format("/codex-instances?%s", SEARCH_TITLE_COLLECTION_WHEN_SEARCH_FIELD_NOT_GIVEN_SUCCESS_QUERY))
         .then()
           .log()
@@ -259,6 +280,7 @@ public class CodexInstanceResourceImplTest extends VertxTestBase {
         .header(tenantHeader)
         .header(contentTypeHeader)
         .header(urlHeader)
+        .header(tokenHeader)
       .get(String.format("/codex-instances?query=%s", SEARCH_TITLE_COLLECTION_FAILS_UNSUPPORTED_QUERY))
         .then()
           .log()

@@ -4,11 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 
+import org.folio.holdingsiq.model.CoverageDates;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.folio.rest.jaxrs.model.Coverage;
-import org.folio.rmapi.model.CoverageDates;
 
 public class CoverageConverterTest {
 
@@ -46,9 +46,8 @@ public class CoverageConverterTest {
   }
 
   private CoverageDates coverage(String begin, String end) {
-    CoverageDates input = new CoverageDates();
-    input.beginCoverage = begin;
-    input.endCoverage = end;
-    return input;
+    return CoverageDates.builder()
+      .beginCoverage(begin)
+      .endCoverage(end).build();
   }
 }

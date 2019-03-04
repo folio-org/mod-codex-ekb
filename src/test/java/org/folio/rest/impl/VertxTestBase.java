@@ -1,12 +1,10 @@
 package org.folio.rest.impl;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.folio.rest.RestVerticle;
 import org.folio.rest.tools.PomReader;
-import org.folio.rest.tools.client.test.HttpClientMock2;
 import org.folio.utils.Utils;
 import org.junit.After;
 import org.junit.Before;
@@ -18,25 +16,22 @@ import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 
 public class VertxTestBase {
-
-  private static final String MOCK_RMAPI_CONFIG_SUCCESS_FILE = "RMAPIToCodex/mock_content.json";
-
-
   protected final Logger logger = LoggerFactory.getLogger("CodexInstancesResourceImplTest");
   protected final int okapiPort = Utils.getRandomPort();
-  protected final Header tenantHeader = new Header("X-Okapi-Tenant", "codexinstancesresourceimpltest");
-  protected final Header urlHeader = new Header("X-Okapi-Url", "https://localhost:" + okapiPort);
+  protected final Header tenantHeader = new Header("x-okapi-tenant", "codexinstancesresourceimpltest");
+  protected final Header tokenHeader = new Header("x-okapi-token", "codexinstancesresourceimpltest");
+  protected final String url = "https://localhost:" + okapiPort;
+  protected final Header urlHeader = new Header("x-okapi-url", url);
   protected final Header contentTypeHeader = new Header("Content-Type", "application/json");
   protected Vertx vertx;
-  // This object is needed to modify RMAPIConfiguration's local
-  // object as a side effect.
-  protected HttpClientMock2 httpClientMock;
 
   @Before
   public void setUp(TestContext context) {
+    Async async = context.async();
     vertx = Vertx.vertx();
 
     String moduleName = PomReader.INSTANCE.getModuleName().replaceAll("_", "-");
@@ -46,23 +41,20 @@ public class VertxTestBase {
 
     final JsonObject conf = new JsonObject();
     conf.put("http.port", okapiPort);
-    conf.put(HttpClientMock2.MOCK_MODE, "true");
+    conf.put("spring.configuration", "org.folio.spring.TestConfig");
 
     final DeploymentOptions opt = new DeploymentOptions().setConfig(conf);
-    vertx.deployVerticle(RestVerticle.class.getName(), opt, context.asyncAssertSuccess());
+    vertx.deployVerticle(RestVerticle.class.getName(), opt, event -> {
+      context.assertTrue(event.succeeded());
+      async.complete();
+    });
     RestAssured.port = okapiPort;
     logger.info("Codex Instances Resource Test Setup Done using port " + okapiPort);
 
     final Map<String, String> okapiHeaders = new HashMap<>();
     okapiHeaders.put("X-Okapi-Tenant", "codexinstancesresourceimpltest");
     okapiHeaders.put("X-Okapi-Url", "https://localhost:" + Integer.toString(okapiPort));
-    httpClientMock = new HttpClientMock2(okapiHeaders.get("X-Okapi-Tenant"), okapiHeaders.get("X-Okapi-Url"));
-    try {
-      // Mocking the RM API Configuration response
-      httpClientMock.setMockJsonContent(MOCK_RMAPI_CONFIG_SUCCESS_FILE);
-    } catch (final IOException e) {
-      context.fail("Cannot read mock file: " + MOCK_RMAPI_CONFIG_SUCCESS_FILE + " - reason: " + e.getMessage());
-    }
+    async.awaitSuccess();
   }
 
   @After

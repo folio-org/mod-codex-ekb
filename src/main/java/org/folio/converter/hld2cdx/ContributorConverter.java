@@ -5,13 +5,13 @@ import org.springframework.lang.NonNull;
 
 import org.folio.rest.jaxrs.model.Contributor;
 
-public class ContributorConverter implements Converter<org.folio.rmapi.model.Contributor, Contributor> {
+public class ContributorConverter implements Converter<org.folio.holdingsiq.model.Contributor, Contributor> {
 
   @Override
-  public Contributor convert(@NonNull org.folio.rmapi.model.Contributor source) {
+  public Contributor convert(@NonNull org.folio.holdingsiq.model.Contributor source) {
     return new Contributor()
-      .withName(source.titleContributor)
-      .withType(source.type);
+      .withName(source.getTitleContributor())
+      .withType(source.getType());
   }
 
 }

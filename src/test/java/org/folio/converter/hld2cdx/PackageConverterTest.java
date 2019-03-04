@@ -6,6 +6,8 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.when;
 
+import org.folio.holdingsiq.model.CoverageDates;
+import org.folio.holdingsiq.model.PackageData;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -15,8 +17,6 @@ import org.springframework.core.convert.converter.Converter;
 
 import org.folio.rest.jaxrs.model.Coverage;
 import org.folio.rest.jaxrs.model.Package;
-import org.folio.rmapi.model.CoverageDates;
-import org.folio.rmapi.model.PackageData;
 
 @RunWith(MockitoJUnitRunner.StrictStubs.class)
 public class PackageConverterTest {
@@ -27,7 +27,7 @@ public class PackageConverterTest {
   private static final String PACKAGE_TYPE_EBOOK = "EBook";
   private static final Integer TITLE_COUNT = 100;
   private static final String VENDOR_NAME = "Vendor";
-  private static final CoverageDates COVERAGE_DATES = new CoverageDates();
+  private static final CoverageDates COVERAGE_DATES = CoverageDates.builder().build();
   private static final Coverage COVERAGE = new Coverage();
 
   private static final String PACKAGE_UUID = VENDOR_ID + "-" + PACKAGE_ID;
@@ -43,7 +43,7 @@ public class PackageConverterTest {
   public void shouldConvertPackageData() {
     when(coverageConverter.convert(COVERAGE_DATES)).thenReturn(COVERAGE);
 
-    PackageData input = createBasePackageData();
+    PackageData input = createBasePackageData().build();
 
     Package converted = converter.convert(input);
 
@@ -61,8 +61,7 @@ public class PackageConverterTest {
 
   @Test
   public void shouldIgnoreEmptyCoverage() {
-    PackageData input = createBasePackageData();
-    input.customCoverage = null;
+    PackageData input = createBasePackageData().customCoverage(null).build();
 
     Package converted = converter.convert(input);
 
@@ -72,8 +71,7 @@ public class PackageConverterTest {
 
   @Test
   public void shouldSetSelectedToNotSpecifiedIfNull() {
-    PackageData input = createBasePackageData();
-    input.isSelected = null;
+    PackageData input = createBasePackageData().isSelected(null).build();
 
     Package converted = converter.convert(input);
 
@@ -83,8 +81,7 @@ public class PackageConverterTest {
 
   @Test
   public void shouldSetSelectedToYesIfTrue() {
-    PackageData input = createBasePackageData();
-    input.isSelected = true;
+    PackageData input = createBasePackageData().isSelected(true).build();
 
     Package converted = converter.convert(input);
 
@@ -99,48 +96,43 @@ public class PackageConverterTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldThrowIllegalArgExcIfVendorIdIsNull() {
-    PackageData input = createBasePackageData();
-    input.vendorId = null;
+    PackageData input = createBasePackageData().vendorId(null).build();
 
     converter.convert(input);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldThrowIllegalArgExcIfPackageIdIsNull() {
-    PackageData input = createBasePackageData();
-    input.packageId = null;
+    PackageData input = createBasePackageData().packageId(null).build();
 
     converter.convert(input);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldThrowIllegalArgExcIfContentTypeInvalid() {
-    PackageData input = createBasePackageData();
-    input.contentType = "ABCD";
+    PackageData input = createBasePackageData().contentType("ABCD").build();
 
     converter.convert(input);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void shouldThrowIllegalArgExcIfContentTypeNull() {
-    PackageData input = createBasePackageData();
-    input.contentType = null;
+    PackageData input = createBasePackageData()
+      .contentType(null).build();
 
     converter.convert(input);
   }
 
-  private PackageData createBasePackageData() {
-    PackageData result = new PackageData();
+  private PackageData.PackageDataBuilder createBasePackageData() {
 
-    result.packageId = PACKAGE_ID;
-    result.vendorId = VENDOR_ID;
-    result.vendorName = VENDOR_NAME;
-    result.isSelected = false;
-    result.packageName = PACKAGE_NAME;
-    result.contentType = PACKAGE_TYPE_EBOOK;
-    result.titleCount = TITLE_COUNT;
-    result.customCoverage = COVERAGE_DATES;
-
-    return result;
+    return PackageData.builder()
+      .packageId(PACKAGE_ID)
+      .vendorId(VENDOR_ID)
+      .vendorName(VENDOR_NAME)
+      .isSelected(false)
+      .packageName(PACKAGE_NAME)
+      .contentType(PACKAGE_TYPE_EBOOK)
+      .titleCount(TITLE_COUNT)
+      .customCoverage(COVERAGE_DATES);
   }
 }
