@@ -134,7 +134,7 @@ public class CodexPackagesImplTest extends VertxTestBase {
   }
 
   @Test
-  public void getCodexPackagesByIdTitleNotFoundTest() {
+  public void getCodexPackagesByIdPackageNotFoundTest() {
     logger.info("Testing for response when package not found");
 
     RestAssured
@@ -154,7 +154,7 @@ public class CodexPackagesImplTest extends VertxTestBase {
   }
 
   @Test
-  public void getCodexPackagesByIdTitleNotAuth() {
+  public void getCodexPackagesByIdPackageNotAuth() {
     logger.info("Testing for response when not authorized");
 
     CompletableFuture<Object> future = new CompletableFuture<>();
