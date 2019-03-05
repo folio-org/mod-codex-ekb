@@ -35,9 +35,17 @@
           "pathPattern" : "/codex-packages/{id}",
           "permissionsRequired" : [ "codex.packages.item.get" ],
           "modulePermissions": ["configuration.entries.collection.get"]
-        }, {
-          "methods" : [ "GET" ],
-          "pathPattern" : "/codex-packages-sources"
+        }
+      ]
+    },
+    {
+      "id": "codex-packages-sources",
+      "version": "1.0",
+      "interfaceType": "multiple",
+      "handlers": [
+        {
+          "methods": ["GET"],
+          "pathPattern": "/codex-packages-sources"
         }
       ]
     }
