@@ -5,6 +5,7 @@ import static io.pactfoundation.consumer.dsl.LambdaDsl.newJsonBody;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.folio.holdingsiq.model.Configuration;
 import org.folio.holdingsiq.service.TitlesHoldingsIQService;
 import org.folio.holdingsiq.service.impl.TitlesHoldingsIQServiceImpl;
 import org.junit.After;
@@ -190,7 +191,8 @@ public class RMAPIPactTest {
     final Async listTitlesAsync = context.async();
     final Async getTitleByIdAsync = context.async();
 
-    final TitlesHoldingsIQService titlesService = new TitlesHoldingsIQServiceImpl("testcust", "123456789", mockRMAPIProvider.getUrl(), vertx);
+    final TitlesHoldingsIQService titlesService = new TitlesHoldingsIQServiceImpl(
+      Configuration.builder().customerId("testcust").apiKey("123456789").url(mockRMAPIProvider.getUrl()).build(), vertx);
 
     titlesService.retrieveTitles("searchfield=titlename&search=moby%20dick&orderby=titlename&count=10&offset=1")
       .whenComplete((titles, throwable) -> {

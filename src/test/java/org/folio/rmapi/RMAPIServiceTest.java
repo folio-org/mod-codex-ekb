@@ -2,6 +2,7 @@ package org.folio.rmapi;
 
 import static org.folio.utils.Utils.readMockFile;
 
+import org.folio.holdingsiq.model.Configuration;
 import org.folio.holdingsiq.service.TitlesHoldingsIQService;
 import org.folio.holdingsiq.service.exception.ResourceNotFoundException;
 import org.folio.holdingsiq.service.exception.ResultsProcessingException;
@@ -48,6 +49,12 @@ public class RMAPIServiceTest {
   private static int okapiPort = Integer.parseInt(System.getProperty("port", Integer.toString(Utils.getRandomPort())));
   private static int rmapiPort = Integer
       .parseInt(System.getProperty("rmapiport", Integer.toString(Utils.getRandomPort())));
+
+  private static Configuration configuration = Configuration.builder()
+    .customerId(TEST_CUST_ID)
+    .apiKey(TEST_API_KEY)
+    .url(String.format("http://%s:%s", TEST_RMAPIHOST, rmapiPort))
+    .build();
 
   private static final String MOCK_CONTENT_SUCCESS_GET_TITLE_BY_ID = "RMAPIService/SuccessGetTitleById.json";
   private static final String MOCK_CONTENT_SUCCESS_GET_TITLELIST = "RMAPIService/SuccessGetTitleList.json";
@@ -108,8 +115,7 @@ public class RMAPIServiceTest {
   public final void testSuccessGetTitleById(TestContext context) {
     final Async async = context.async();
 
-    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(TEST_CUST_ID, TEST_API_KEY,
-      String.format("http://%s:%s", TEST_RMAPIHOST, rmapiPort), vertx);
+    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(configuration, vertx);
 
     svc.retrieveTitle(SUCCESS_TITLE_ID).whenCompleteAsync((rmapiResult, throwable) -> {
       context.assertNull(throwable);
@@ -139,8 +145,7 @@ public class RMAPIServiceTest {
   public final void testSuccessGetTitleList(TestContext context) {
     final Async async = context.async();
 
-    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(TEST_CUST_ID, TEST_API_KEY,
-      String.format("http://%s:%s", TEST_RMAPIHOST, rmapiPort), vertx);
+    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(configuration, vertx);
 
     svc.retrieveTitles(SUCCESS_TITLE_LIST_QUERY).whenCompleteAsync((rmapiResult, throwable) -> {
       context.assertNull(throwable);
@@ -158,8 +163,7 @@ public class RMAPIServiceTest {
   public final void testTitleNotFound(TestContext context) {
     final Async async = context.async();
 
-    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(TEST_CUST_ID, TEST_API_KEY,
-      String.format("http://%s:%s", TEST_RMAPIHOST, rmapiPort), vertx);
+    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(configuration, vertx);
 
     svc.retrieveTitle(TITLE_NOT_FOUND_TITLE_ID).whenCompleteAsync((rmapiResult, throwable) -> {
       context.assertNotNull(throwable);
@@ -173,8 +177,7 @@ public class RMAPIServiceTest {
   public final void testResultsBadJSON(TestContext context) {
     final Async async = context.async();
 
-    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(TEST_CUST_ID, TEST_API_KEY,
-      String.format("http://%s:%s", TEST_RMAPIHOST, rmapiPort), vertx);
+    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(configuration, vertx);
 
     svc.retrieveTitle(BAD_JSON_TITLE_ID).whenCompleteAsync((rmapiResult, throwable) -> {
       context.assertNotNull(throwable);
@@ -188,8 +191,7 @@ public class RMAPIServiceTest {
   public final void testGatewayTimeout(TestContext context) {
     final Async async = context.async();
 
-    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(TEST_CUST_ID, TEST_API_KEY, String.format("http://%s:%s", TEST_RMAPIHOST, rmapiPort),
-        vertx);
+    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(configuration, vertx);
 
     svc.retrieveTitles(GATEWAY_TIMEOUT_TITLE_LIST_QUERY).whenCompleteAsync((rmapiResult, throwable) -> {
       context.assertNotNull(throwable);
@@ -205,8 +207,7 @@ public class RMAPIServiceTest {
   public final void testUnAuthorizedTitleId(TestContext context) {
     final Async async = context.async();
 
-    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(TEST_CUST_ID, TEST_API_KEY,
-      String.format("http://%s:%s", TEST_RMAPIHOST, rmapiPort), vertx);
+    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(configuration, vertx);
 
     svc.retrieveTitle(UN_AUTHORIZED_TITLE_ID).whenCompleteAsync((rmapiResult, throwable) -> {
       context.assertNotNull(throwable);
@@ -219,8 +220,7 @@ public class RMAPIServiceTest {
   public final void testForbiddenResultList(TestContext context) {
     final Async async = context.async();
 
-    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(TEST_CUST_ID, TEST_API_KEY, String.format("http://%s:%s", TEST_RMAPIHOST, rmapiPort),
-        vertx);
+    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(configuration, vertx);
 
     svc.retrieveTitles(FORBIDDEN_TITLE_LIST_QUERY).whenCompleteAsync((rmapiResult, throwable) -> {
       context.assertNotNull(throwable);
@@ -233,8 +233,7 @@ public class RMAPIServiceTest {
   public final void testNoResultsGetTitleList(TestContext context) {
     final Async async = context.async();
 
-    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(TEST_CUST_ID, TEST_API_KEY, String.format("http://%s:%s", TEST_RMAPIHOST, rmapiPort),
-        vertx);
+    TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(configuration, vertx);
 
     svc.retrieveTitles(NO_RESULTS_TITLE_LIST_QUERY).whenCompleteAsync((rmapiResult, throwable) -> {
       context.assertNull(throwable);

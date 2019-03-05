@@ -17,6 +17,7 @@ import org.springframework.core.io.ClassPathResource;
 @ComponentScan(basePackages = {
   "org.folio.converter.hld2cdx",
   "org.folio.validator",
+  "org.folio.codex",
   "org.folio.parser"})
 public class ApplicationConfig {
 

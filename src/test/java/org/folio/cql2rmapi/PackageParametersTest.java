@@ -13,12 +13,6 @@ public class PackageParametersTest {
   private static final String VALID_FILTER_QUERY = "name = bridget and type = aggregatedfulltext sortby name";
   private static final String VALID_SELECTED_QUERY = "(name = \"bridget\") and (ext.selected = true) sortby name";
 
-  @Test(expected = ValidationException.class)
-  public void packageParametersThrowsExceptionWhenSearchNameIsNotSet() throws QueryValidationException {
-    CQLParameters parameters = new CQLParameters("ext.selected = true sortby name");
-    new PackageParameters(parameters);
-  }
-
   @Test
   public void packageParametersSetsNameSearchWhenSearchFieldNotProvided() throws QueryValidationException {
     String searchValue = SEARCH_VALUE;
