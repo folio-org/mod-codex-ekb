@@ -2,19 +2,15 @@ package org.folio.codex;
 
 import static org.folio.utils.Utils.readMockFile;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.CompletionException;
 
 import org.folio.cql2rmapi.CQLParameters;
 import org.folio.cql2rmapi.QueryValidationException;
 import org.folio.cql2rmapi.TitleParameters;
-import org.folio.cql2rmapi.query.RMAPIQueries;
-import org.folio.cql2rmapi.query.TitlesQueryBuilder;
+import org.folio.cql2rmapi.query.PaginationCalculator;
+import org.folio.cql2rmapi.query.PaginationInfo;
 import org.folio.rest.RestVerticle;
 import org.folio.rest.jaxrs.model.Contributor;
 import org.folio.rest.jaxrs.model.Identifier;
@@ -84,13 +80,13 @@ public class RMAPIToCodexTest {
     HttpServer server = vertx.createHttpServer();
     server.requestHandler(req -> {
       if (req.path().equals("/rm/rmaccounts/test/titles")) {
-        if ("searchfield=titlename&search=moby%2520dick&orderby=titlename&count=5&offset=1&searchtype=advanced".equals(req.query())) {
+        if ("searchfield=titlename&selection=all&resourcetype=all&searchtype=advanced&search=moby%2520dick&offset=1&count=5&orderby=titlename".equals(req.query())) {
           req.response().setStatusCode(200).end("{\"totalResults\":524,\"titles\":[{\"titleId\":9950115,\"titleName\":\"[Resolute Dick]\",\"publisherName\":\"Unspecified\",\"identifiersList\":[{\"id\":\"4667067\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":null,\"isTitleCustom\":false,\"pubType\":\"Journal\",\"customerResourcesList\":[]},{\"titleId\":1816494,\"titleName\":\"1851 - Herman Melville's Moby Dick is Published\",\"publisherName\":\"Unspecified\",\"identifiersList\":[{\"id\":\"1816494\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":null,\"isTitleCustom\":false,\"pubType\":\"StreamingVideo\",\"customerResourcesList\":[{\"titleId\":1816494,\"packageId\":7349,\"packageName\":\"Ambrose Video 2.0\",\"packageType\":\"Variable\",\"isPackageCustom\":false,\"vendorId\":933,\"vendorName\":\"Ambrose Video Publishing, Inc.\",\"locationId\":5735819,\"isSelected\":false,\"isTokenNeeded\":true,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://dma.iriseducation.org/?license=[[license code]]&DMA2&src=XLS&segment=300496&pid=2037&sku=GAA-002-03\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}]},{\"titleId\":4634949,\"titleName\":\"60 minutes. Dick Clarke\",\"publisherName\":\"Unspecified\",\"identifiersList\":[{\"id\":\"3140739\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":null,\"isTitleCustom\":false,\"pubType\":\"Journal\",\"customerResourcesList\":[{\"titleId\":4634949,\"packageId\":1367800,\"packageName\":\"60 Minutes 1997-2014\",\"packageType\":\"Complete\",\"isPackageCustom\":false,\"vendorId\":413,\"vendorName\":\"Alexander Street Press\",\"locationId\":12526676,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"2008-01-01\",\"endCoverage\":\"2008-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://www.aspresolver.com/aspresolver.asp?CBSV;2774880\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}]},{\"titleId\":4635334,\"titleName\":\"60 minutes. The vice president [Dick Cheney]\",\"publisherName\":\"Unspecified\",\"identifiersList\":[{\"id\":\"3141124\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":null,\"isTitleCustom\":false,\"pubType\":\"Journal\",\"customerResourcesList\":[{\"titleId\":4635334,\"packageId\":1367800,\"packageName\":\"60 Minutes 1997-2014\",\"packageType\":\"Complete\",\"isPackageCustom\":false,\"vendorId\":413,\"vendorName\":\"Alexander Street Press\",\"locationId\":12527074,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"2001-01-01\",\"endCoverage\":\"2001-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://www.aspresolver.com/aspresolver.asp?CBSV;2774149\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}]},{\"titleId\":9948551,\"titleName\":\"A catalogue of books in several faculties and languages, Consisting of a choice collection in divinity, philosophy, philology, phisick, cosmography, history, mathematicks and chronology. Together with\",\"publisherName\":\"Unspecified\",\"identifiersList\":[{\"id\":\"4665550\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":null,\"isTitleCustom\":false,\"pubType\":\"Journal\",\"customerResourcesList\":[]}]}");
-        } else if ("searchfield=titlename&search=moby%2520dick&orderby=titlename&count=5&offset=2&searchtype=advanced".equals(req.query())) {
+        } else if ("searchfield=titlename&selection=all&resourcetype=all&searchtype=advanced&search=moby%2520dick&offset=2&count=5&orderby=titlename".equals(req.query())) {
           req.response().setStatusCode(200).end("{\"totalResults\":524,\"titles\":[{\"titleId\":1550515,\"titleName\":\"A Dialogue about the French government wars, cruelties, armies, fleet, &c. between Tom and Dick, two seamen.\",\"publisherName\":\"Unspecified\",\"identifiersList\":[{\"id\":\"1550515\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":null,\"isTitleCustom\":false,\"pubType\":\"Book\",\"customerResourcesList\":[{\"titleId\":1550515,\"packageId\":4207,\"packageName\":\"Early English Books Online (EEBO)\",\"packageType\":\"Complete\",\"isPackageCustom\":false,\"vendorId\":22,\"vendorName\":\"Proquest Info & Learning Co\",\"locationId\":4974961,\"isSelected\":true,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"1690-01-01\",\"endCoverage\":\"1690-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:eebo&rft_id=xri:eebo:citation:7916128\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}]},{\"titleId\":9909627,\"titleName\":\"A dialogue between Dick --- and Tom ---, Esqrs; relating to the present divisions in I-d\",\"publisherName\":\"Unspecified\",\"identifiersList\":[{\"id\":\"4575830\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":null,\"isTitleCustom\":false,\"pubType\":\"Journal\",\"customerResourcesList\":[{\"titleId\":9909627,\"packageId\":4205,\"packageName\":\"Eighteenth Century Collections Online\",\"packageType\":\"Complete\",\"isPackageCustom\":false,\"vendorId\":18,\"vendorName\":\"Gale Group\",\"locationId\":19683097,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://find.galegroup.com/menu/start.do?prodId=ECCO&userGroupName=[[galesiteid]]\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}]},{\"titleId\":1533310,\"titleName\":\"A Dialogue between Tom and Dick over a dish of coffee concerning matters of religion and government.\",\"publisherName\":\"Unspecified\",\"identifiersList\":[{\"id\":\"1533310\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":null,\"isTitleCustom\":false,\"pubType\":\"Book\",\"customerResourcesList\":[{\"titleId\":1533310,\"packageId\":4207,\"packageName\":\"Early English Books Online (EEBO)\",\"packageType\":\"Complete\",\"isPackageCustom\":false,\"vendorId\":22,\"vendorName\":\"Proquest Info & Learning Co\",\"locationId\":4957756,\"isSelected\":true,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"1680-01-01\",\"endCoverage\":\"1680-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:eebo&rft_id=xri:eebo:citation:10178611\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}]},{\"titleId\":1548192,\"titleName\":\"A dialogue between Dick and Tom, concerning the present posture of affairs in England\",\"publisherName\":\"Unspecified\",\"identifiersList\":[{\"id\":\"1548192\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":null,\"isTitleCustom\":false,\"pubType\":\"Book\",\"customerResourcesList\":[{\"titleId\":1548192,\"packageId\":4207,\"packageName\":\"Early English Books Online (EEBO)\",\"packageType\":\"Complete\",\"isPackageCustom\":false,\"vendorId\":22,\"vendorName\":\"Proquest Info & Learning Co\",\"locationId\":4972638,\"isSelected\":true,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"1689-01-01\",\"endCoverage\":\"1689-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:eebo&rft_id=xri:eebo:citation:11759671\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}]},{\"titleId\":1568257,\"titleName\":\"A dialogue between Dick Brazenface the card-maker, and Tim. Meanwell, the clothier; being the dispute between the card-maker and the clothier fairly stated, in order to set the merits of that cause in\",\"publisherName\":\"Unspecified\",\"identifiersList\":[{\"id\":\"1568257\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":null,\"isTitleCustom\":false,\"pubType\":\"Book\",\"customerResourcesList\":[{\"titleId\":1568257,\"packageId\":4207,\"packageName\":\"Early English Books Online (EEBO)\",\"packageType\":\"Complete\",\"isPackageCustom\":false,\"vendorId\":22,\"vendorName\":\"Proquest Info & Learning Co\",\"locationId\":4992703,\"isSelected\":true,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"1711-01-01\",\"endCoverage\":\"1711-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:eebo&rft_id=xri:eebo:citation:99893561\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}]}]}");
-        } else if ("searchfield=titlename&search=moby%2520dick&orderby=titlename&count=10&offset=1&searchtype=advanced".equals(req.query())) {
+        } else if ("searchfield=titlename&selection=all&resourcetype=all&searchtype=advanced&search=moby%2520dick&offset=1&count=10&orderby=titlename".equals(req.query())) {
           req.response().setStatusCode(200).end("{\"totalResults\":5,\"titles\":[{\"titleId\":1550515,\"titleName\":\"A Dialogue about the French government wars, cruelties, armies, fleet, &c. between Tom and Dick, two seamen.\",\"publisherName\":\"Unspecified\",\"identifiersList\":[{\"id\":\"1550515\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":null,\"isTitleCustom\":false,\"pubType\":\"Book\",\"customerResourcesList\":[{\"titleId\":1550515,\"packageId\":4207,\"packageName\":\"Early English Books Online (EEBO)\",\"packageType\":\"Complete\",\"isPackageCustom\":false,\"vendorId\":22,\"vendorName\":\"Proquest Info & Learning Co\",\"locationId\":4974961,\"isSelected\":true,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"1690-01-01\",\"endCoverage\":\"1690-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:eebo&rft_id=xri:eebo:citation:7916128\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}]},{\"titleId\":9909627,\"titleName\":\"A dialogue between Dick --- and Tom ---, Esqrs; relating to the present divisions in I-d\",\"publisherName\":\"Unspecified\",\"identifiersList\":[{\"id\":\"4575830\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":null,\"isTitleCustom\":false,\"pubType\":\"Journal\",\"customerResourcesList\":[{\"titleId\":9909627,\"packageId\":4205,\"packageName\":\"Eighteenth Century Collections Online\",\"packageType\":\"Complete\",\"isPackageCustom\":false,\"vendorId\":18,\"vendorName\":\"Gale Group\",\"locationId\":19683097,\"isSelected\":false,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://find.galegroup.com/menu/start.do?prodId=ECCO&userGroupName=[[galesiteid]]\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}]},{\"titleId\":1533310,\"titleName\":\"A Dialogue between Tom and Dick over a dish of coffee concerning matters of religion and government.\",\"publisherName\":\"Unspecified\",\"identifiersList\":[{\"id\":\"1533310\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":null,\"isTitleCustom\":false,\"pubType\":\"Book\",\"customerResourcesList\":[{\"titleId\":1533310,\"packageId\":4207,\"packageName\":\"Early English Books Online (EEBO)\",\"packageType\":\"Complete\",\"isPackageCustom\":false,\"vendorId\":22,\"vendorName\":\"Proquest Info & Learning Co\",\"locationId\":4957756,\"isSelected\":true,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"1680-01-01\",\"endCoverage\":\"1680-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:eebo&rft_id=xri:eebo:citation:10178611\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}]},{\"titleId\":1548192,\"titleName\":\"A dialogue between Dick and Tom, concerning the present posture of affairs in England\",\"publisherName\":\"Unspecified\",\"identifiersList\":[{\"id\":\"1548192\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":null,\"isTitleCustom\":false,\"pubType\":\"Book\",\"customerResourcesList\":[{\"titleId\":1548192,\"packageId\":4207,\"packageName\":\"Early English Books Online (EEBO)\",\"packageType\":\"Complete\",\"isPackageCustom\":false,\"vendorId\":22,\"vendorName\":\"Proquest Info & Learning Co\",\"locationId\":4972638,\"isSelected\":true,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"1689-01-01\",\"endCoverage\":\"1689-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:eebo&rft_id=xri:eebo:citation:11759671\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}]},{\"titleId\":1568257,\"titleName\":\"A dialogue between Dick Brazenface the card-maker, and Tim. Meanwell, the clothier; being the dispute between the card-maker and the clothier fairly stated, in order to set the merits of that cause in\",\"publisherName\":\"Unspecified\",\"identifiersList\":[{\"id\":\"1568257\",\"source\":\"AtoZ\",\"subtype\":0,\"type\":9}],\"subjectsList\":null,\"isTitleCustom\":false,\"pubType\":\"Book\",\"customerResourcesList\":[{\"titleId\":1568257,\"packageId\":4207,\"packageName\":\"Early English Books Online (EEBO)\",\"packageType\":\"Complete\",\"isPackageCustom\":false,\"vendorId\":22,\"vendorName\":\"Proquest Info & Learning Co\",\"locationId\":4992703,\"isSelected\":true,\"isTokenNeeded\":false,\"visibilityData\":{\"isHidden\":false,\"reason\":\"\"},\"managedCoverageList\":[{\"beginCoverage\":\"1711-01-01\",\"endCoverage\":\"1711-12-31\"}],\"customCoverageList\":[],\"coverageStatement\":null,\"managedEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"customEmbargoPeriod\":{\"embargoUnit\":null,\"embargoValue\":0},\"url\":\"http://gateway.proquest.com/openurl?ctx_ver=Z39.88-2003&res_id=xri:eebo&rft_id=xri:eebo:citation:99893561\",\"userDefinedField1\":null,\"userDefinedField2\":null,\"userDefinedField3\":null,\"userDefinedField4\":null,\"userDefinedField5\":null}]}]}");
-        } else if ("searchfield=titlename&search=moby%2520dick&orderby=titlename&count=10&offset=2&searchtype=advanced".equals(req.query())) {
+        } else if ("searchfield=titlename&selection=all&resourcetype=all&searchtype=advanced&search=moby%2520dick&offset=2&count=10&orderby=titlename".equals(req.query())) {
           req.response().setStatusCode(200).end("{\"totalResults\":5,\"titles\":[]}");
         } else {
           req.response().setStatusCode(500).end("Unexpected call: " + req.path());
@@ -372,16 +368,12 @@ public class RMAPIToCodexTest {
   }
 
   @Test
-  public void testGetInstances(TestContext context) {
+  public void testGetInstances(TestContext context) throws QueryValidationException {
     Async async = context.async();
-    final RMAPIQueries queries;
-    try {
-      queries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("title=moby%20dick")), 0, 5);
-    } catch (UnsupportedEncodingException | QueryValidationException e) {
-      throw new CompletionException(e);
-    }
+    TitleParameters parameters = new TitleParameters(new CQLParameters("title=moby%20dick"));
+    PaginationInfo pagination = new PaginationCalculator().getPagination(0, 5);
 
-    RMAPIToCodex.getInstances(queries, vertx.getOrCreateContext(), configuration)
+    RMAPIToCodex.getInstances(parameters, pagination, vertx.getOrCreateContext(), configuration)
       .whenComplete((response, throwable) -> {
         context.assertEquals(524, response.getResultInfo().getTotalRecords());
         context.assertEquals(5, response.getInstances().size());
@@ -420,24 +412,18 @@ public class RMAPIToCodexTest {
 //  }
 
   @Test
-  public void testGetInstancesPaging(TestContext context) {
+  public void testGetInstancesPaging(TestContext context) throws QueryValidationException {
     Async async = context.async();
+    TitleParameters parameters = new TitleParameters(new CQLParameters("title=moby%20dick"));
+    PaginationInfo pagination = new PaginationCalculator().getPagination(2, 5);
 
-      final RMAPIQueries queries;
-      try {
-        queries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("title=moby%20dick")), 2, 5);
-      } catch (UnsupportedEncodingException | QueryValidationException e) {
-        throw new CompletionException(e);
-      }
-
-      RMAPIToCodex.getInstances(queries, vertx.getOrCreateContext(), configuration)
-        .whenComplete((response, throwable) -> {
-      context.assertEquals(524, response.getResultInfo().getTotalRecords());
-      context.assertEquals(5, response.getInstances().size());
-      context.assertEquals("60 minutes. Dick Clarke", response.getInstances().get(0).getTitle());
-
-      async.complete();
-    }).exceptionally(throwable -> {
+    RMAPIToCodex.getInstances(parameters, pagination, vertx.getOrCreateContext(), configuration)
+      .whenComplete((response, throwable) -> {
+        context.assertEquals(524, response.getResultInfo().getTotalRecords());
+        context.assertEquals(5, response.getInstances().size());
+        context.assertEquals("60 minutes. Dick Clarke", response.getInstances().get(0).getTitle());
+        async.complete();
+      }).exceptionally(throwable -> {
       context.fail(throwable);
       async.complete();
       return null;
@@ -445,17 +431,13 @@ public class RMAPIToCodexTest {
   }
 
   @Test
-  public void testGetInstancesPagingIndexGTCount(TestContext context) {
+  public void testGetInstancesPagingIndexGTCount(TestContext context) throws QueryValidationException {
     Async async = context.async();
 
-    final RMAPIQueries queries;
-    try {
-      queries = new TitlesQueryBuilder().build(new TitleParameters(new CQLParameters("title=moby%20dick")), 7, 10);
-    } catch (UnsupportedEncodingException | QueryValidationException e) {
-      throw new CompletionException(e);
-    }
+    TitleParameters parameters = new TitleParameters(new CQLParameters("title=moby%20dick"));
+    PaginationInfo pagination = new PaginationCalculator().getPagination(7, 10);
 
-    RMAPIToCodex.getInstances(queries, vertx.getOrCreateContext(), configuration)
+    RMAPIToCodex.getInstances(parameters, pagination, vertx.getOrCreateContext(), configuration)
       .whenComplete((response, throwable) -> {
         context.assertEquals(5, response.getResultInfo().getTotalRecords());
         context.assertEquals(0, response.getInstances().size());

@@ -5,23 +5,25 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-import io.vertx.core.Context;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import org.folio.holdingsiq.model.Configuration;
-import org.folio.holdingsiq.model.Title;
-import org.folio.holdingsiq.model.Titles;
-import org.folio.holdingsiq.service.impl.TitlesHoldingsIQServiceImpl;
-import org.springframework.core.convert.converter.Converter;
-
 import org.folio.converter.hld2cdx.ContributorConverter;
 import org.folio.converter.hld2cdx.IdentifierConverter;
 import org.folio.converter.hld2cdx.SubjectConverter;
 import org.folio.converter.hld2cdx.TitleConverter;
-import org.folio.cql2rmapi.query.RMAPIQueries;
+import org.folio.cql2rmapi.TitleParameters;
+import org.folio.cql2rmapi.query.Page;
+import org.folio.cql2rmapi.query.PaginationInfo;
+import org.folio.holdingsiq.model.Configuration;
+import org.folio.holdingsiq.model.Title;
+import org.folio.holdingsiq.model.Titles;
+import org.folio.holdingsiq.service.impl.TitlesHoldingsIQServiceImpl;
 import org.folio.rest.jaxrs.model.Instance;
 import org.folio.rest.jaxrs.model.InstanceCollection;
 import org.folio.rest.jaxrs.model.ResultInfo;
+import org.springframework.core.convert.converter.Converter;
+
+import io.vertx.core.Context;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 /**
  * @author mreno
@@ -47,25 +49,22 @@ public final class RMAPIToCodex {
         .thenApply(TITLE_CONVERTER::convert);
   }
 
-  public static CompletableFuture<InstanceCollection> getInstances(RMAPIQueries cql, Context vertxContext,
+  public static CompletableFuture<InstanceCollection> getInstances(TitleParameters parameters, PaginationInfo pagination, Context vertxContext,
                                                                    Configuration rmAPIConfig) {
     log.info("Calling getInstances");
 
     final List<CompletableFuture<Titles>> titleCfs = new ArrayList<>();
 
-    // We need to create a new RMAPIService for each call so that we don't close
-    // the HTTP client connection.
-    for (String query : cql.getRMAPIQueries()) {
+    for (Page page : pagination.getPages()) {
       titleCfs.add(new TitlesHoldingsIQServiceImpl(rmAPIConfig.getCustomerId(), rmAPIConfig.getApiKey(),
-          rmAPIConfig.getUrl(), vertxContext.owner()).retrieveTitles(query));
+        rmAPIConfig.getUrl(), vertxContext.owner()).retrieveTitles(parameters.getFilterQuery(), parameters.getSortType(), page.getOffset(), page.getLimit()));
     }
-
 
     return CompletableFuture
       .allOf(titleCfs.toArray(new CompletableFuture[0]))
-      .thenCompose(aVoid ->  {
+      .thenCompose(aVoid -> {
         final List<Titles> collect = titleCfs.stream().map(CompletableFuture::join).collect(Collectors.toList());
-        return convertRMTitleListToCodex(collect, cql.getFirstObjectIndex(), cql.getLimit());
+        return convertRMTitleListToCodex(collect, pagination.getFirstObjectIndex(), pagination.getLimit());
       });
   }
 

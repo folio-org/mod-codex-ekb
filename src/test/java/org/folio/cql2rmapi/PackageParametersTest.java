@@ -2,6 +2,9 @@ package org.folio.cql2rmapi;
 
 import static org.junit.Assert.assertEquals;
 
+import javax.validation.ValidationException;
+
+import org.folio.holdingsiq.model.Sort;
 import org.junit.Test;
 
 public class PackageParametersTest {
@@ -10,7 +13,7 @@ public class PackageParametersTest {
   private static final String VALID_FILTER_QUERY = "name = bridget and type = aggregatedfulltext sortby name";
   private static final String VALID_SELECTED_QUERY = "(name = \"bridget\") and (ext.selected = true) sortby name";
 
-  @Test(expected = QueryValidationException.class)
+  @Test(expected = ValidationException.class)
   public void packageParametersThrowsExceptionWhenSearchNameIsNotSet() throws QueryValidationException {
     CQLParameters parameters = new CQLParameters("ext.selected = true sortby name");
     new PackageParameters(parameters);
@@ -29,7 +32,7 @@ public class PackageParametersTest {
     assertEquals(SEARCH_VALUE, parameters.getSearchValue());
   }
 
-  @Test(expected = QueryValidationException.class)
+  @Test(expected = ValidationException.class)
   public void packageParametersThrowsExceptionInCaseOfUnsupportedSearchField() throws QueryValidationException {
     new PackageParameters(new CQLParameters("provider=abc"));
   }
@@ -38,29 +41,29 @@ public class PackageParametersTest {
   public void packageParametersSetsExpectedValuesIfTypeFilterIsPassedTest() throws QueryValidationException {
     PackageParameters parameters = new PackageParameters(new CQLParameters(VALID_FILTER_QUERY));
     assertEquals(SEARCH_VALUE, parameters.getSearchValue());
-    assertEquals("packagename", parameters.getSortType());
-    assertEquals("aggregatedfulltext", parameters.getFilterValue());
+    assertEquals(Sort.NAME, parameters.getSortType());
+    assertEquals("aggregatedfulltext", parameters.getFilterType());
   }
 
   @Test
   public void packageParametersSetsExpectedValuesIfSelectedIsTrue() throws QueryValidationException {
     PackageParameters parameters = new PackageParameters(new CQLParameters(VALID_SELECTED_QUERY));
     assertEquals(SEARCH_VALUE, parameters.getSearchValue());
-    assertEquals("packagename", parameters.getSortType());
+    assertEquals(Sort.NAME, parameters.getSortType());
     assertEquals("selected", parameters.getSelection());
   }
 
-  @Test(expected = QueryValidationException.class)
+  @Test(expected = ValidationException.class)
   public void packageParametersThrowsExceptionIfInvalidFilterValueIsPassedTest() throws QueryValidationException {
     new PackageParameters(new CQLParameters("name = bridget and type = Unknown123 sortby name"));
   }
 
-  @Test(expected = QueryValidationException.class)
+  @Test(expected = ValidationException.class)
   public void packageParametersThrowsExceptionIfMultipleFiltersSepartedByAndAreProvidedTest() throws QueryValidationException {
     new PackageParameters(new CQLParameters("name = bridget and type = Unknown and codex.type = E-Journal sortby name"));
   }
 
-  @Test(expected = QueryValidationException.class)
+  @Test(expected = ValidationException.class)
   public void packageParametersThrowsExceptionIfMultipleFiltersSepartedByCommaAreProvidedTest() throws QueryValidationException {
     new PackageParameters(new CQLParameters("name = bridget and type = Unknown, E-Journal sortby name"));
   }
@@ -70,7 +73,7 @@ public class PackageParametersTest {
     new PackageParameters(new CQLParameters("name = bridget and type = Unknown sortby name, identifier"));
   }
 
-  @Test(expected = QueryValidationException.class)
+  @Test(expected = ValidationException.class)
   public void packageParametersThrowsExceptionIfSortOnUnsupportedFieldTest() throws QueryValidationException {
     new PackageParameters(new CQLParameters("name = bridget and type = Unknown sortby identifier"));
   }
@@ -80,12 +83,12 @@ public class PackageParametersTest {
     new PackageParameters(new CQLParameters("name = bridget OR type = Unknown sortby name"));
   }
 
-  @Test(expected = QueryValidationException.class)
+  @Test(expected = ValidationException.class)
   public void packageParametersThrowsExceptionIfSourceIsInvalid() throws QueryValidationException {
     new PackageParameters(new CQLParameters("name = bridget and source = local sortby name"));
   }
 
-  @Test(expected = QueryValidationException.class)
+  @Test(expected = ValidationException.class)
   public void packageParametersThrowsExceptionIfSelectedValueIsInvalid() throws QueryValidationException {
     new PackageParameters(new CQLParameters("name = bridget and ext.selected = yes sortby name"));
   }

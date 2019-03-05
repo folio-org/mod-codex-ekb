@@ -1,7 +1,5 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.Vertx;
-import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -15,8 +13,8 @@ import org.folio.codex.RMAPIToCodex;
 import org.folio.cql2rmapi.CQLParameters;
 import org.folio.cql2rmapi.QueryValidationException;
 import org.folio.cql2rmapi.TitleParameters;
-import org.folio.cql2rmapi.query.RMAPIQueries;
-import org.folio.cql2rmapi.query.TitlesQueryBuilder;
+import org.folio.cql2rmapi.query.PaginationCalculator;
+import org.folio.cql2rmapi.query.PaginationInfo;
 import org.folio.holdingsiq.model.Configuration;
 import org.folio.holdingsiq.model.OkapiData;
 import org.folio.holdingsiq.service.ConfigurationService;
@@ -27,16 +25,17 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.InstanceCollection;
 import org.folio.rest.jaxrs.model.ResultInfo;
 import org.folio.rest.jaxrs.resource.CodexInstances;
+import org.folio.spring.SpringContextUtil;
+import org.folio.validator.InstancesQueryValidator;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
 import io.vertx.core.Future;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import org.folio.spring.SpringContextUtil;
-import org.folio.validator.InstancesQueryValidator;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Instance related codex APIs.
@@ -123,19 +122,26 @@ public final class CodexInstancesImpl implements CodexInstances {
     try {
       CQLParameters cqlParameters = new CQLParameters(query);
       if (cqlParameters.isIdSearch()) {
-        return RMAPIToCodex.getInstance(vertxContext, rmAPIConfig, idParser.parseTitleId(cqlParameters.getIdSearchValue()))
-          .thenApply(instance ->
-            new InstanceCollection()
-              .withInstances(Collections.singletonList(instance))
-              .withResultInfo(new ResultInfo().withTotalRecords(1))
-          ).exceptionally(throwable ->
-          new InstanceCollection().withResultInfo(new ResultInfo().withTotalRecords(0))
-        );
+        return getInstanceById(vertxContext, rmAPIConfig, cqlParameters);
       }
-      RMAPIQueries queries = new TitlesQueryBuilder().build(new TitleParameters(cqlParameters), offset, limit);
-      return RMAPIToCodex.getInstances(queries, vertxContext, rmAPIConfig);
-    } catch (UnsupportedEncodingException | QueryValidationException e) {
+
+      TitleParameters parameters = new TitleParameters(cqlParameters);
+
+      PaginationInfo pagination = new PaginationCalculator().getPagination(offset, limit);
+      return RMAPIToCodex.getInstances(parameters, pagination, vertxContext, rmAPIConfig);
+    } catch (QueryValidationException e) {
       throw new CompletionException(e);
     }
+  }
+
+  private CompletionStage<InstanceCollection> getInstanceById(Context vertxContext, Configuration rmAPIConfig, CQLParameters cqlParameters) {
+    return RMAPIToCodex.getInstance(vertxContext, rmAPIConfig, idParser.parseTitleId(cqlParameters.getIdSearchValue()))
+      .thenApply(instance ->
+        new InstanceCollection()
+          .withInstances(Collections.singletonList(instance))
+          .withResultInfo(new ResultInfo().withTotalRecords(1))
+      ).exceptionally(throwable ->
+      new InstanceCollection().withResultInfo(new ResultInfo().withTotalRecords(0))
+    );
   }
 }
