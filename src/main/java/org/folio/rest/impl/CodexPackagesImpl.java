@@ -22,10 +22,10 @@ import org.folio.holdingsiq.model.OkapiData;
 import org.folio.holdingsiq.service.ConfigurationService;
 import org.folio.holdingsiq.service.exception.ConfigurationServiceException;
 import org.folio.holdingsiq.service.exception.ResourceNotFoundException;
-import org.folio.holdingsiq.service.impl.ProviderHoldingsIQServiceImpl;
 import org.folio.parser.IdParser;
 import org.folio.rest.jaxrs.model.Package;
 import org.folio.rest.jaxrs.model.PackageCollection;
+import org.folio.rest.jaxrs.model.ResultInfo;
 import org.folio.rest.jaxrs.model.Source;
 import org.folio.rest.jaxrs.model.SourceCollection;
 import org.folio.rest.jaxrs.resource.CodexPackages;
@@ -36,7 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Context;
-import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.logging.Logger;
@@ -64,9 +63,8 @@ public final class CodexPackagesImpl implements CodexPackages, CodexPackagesSour
     CompletableFuture.completedFuture(null)
       .thenCompose(o -> configurationService.retrieveConfiguration(new OkapiData(okapiHeaders)))
       .thenCompose(rmAPIConfig -> getPackages(query, offset, limit, vertxContext, rmAPIConfig))
-      .thenAccept(packages ->
-        asyncResultHandler.handle(Future.succeededFuture(CodexPackages.GetCodexPackagesResponse.respond200WithApplicationJson(packages))));
-    asyncResultHandler.handle(Future.succeededFuture(Response.status(Response.Status.NOT_IMPLEMENTED).build()));
+      .thenAccept(packages -> successfulPackages(packages, asyncResultHandler))
+      .exceptionally(e -> failedPackages(e, asyncResultHandler));
   }
 
   @Override
@@ -81,6 +79,10 @@ public final class CodexPackagesImpl implements CodexPackages, CodexPackagesSour
 
   private void successfulPkgById(Package pkg, Handler<AsyncResult<Response>> handler) {
     handler.handle(succeededFuture(GetCodexPackagesByIdResponse.respond200WithApplicationJson(pkg)));
+  }
+
+  private void successfulPackages(PackageCollection packages, Handler<AsyncResult<Response>> handler) {
+    handler.handle(succeededFuture(GetCodexPackagesResponse.respond200WithApplicationJson(packages)));
   }
 
   private Void failedPkgById(String id, Throwable throwable, Handler<AsyncResult<Response>> handler) {
@@ -102,6 +104,22 @@ public final class CodexPackagesImpl implements CodexPackages, CodexPackagesSour
     return null;
   }
 
+  private Void failedPackages(Throwable throwable, Handler<AsyncResult<Response>> handler) {
+    log.error("getCodexPackages failed!", throwable);
+
+    Response response;
+    if (throwable.getCause() instanceof ValidationException || throwable.getCause() instanceof QueryValidationException) {
+      response = CodexPackages.GetCodexPackagesResponse.respond400WithTextPlain(throwable.getCause().getMessage());
+    } else if (throwable.getCause() instanceof ConfigurationServiceException && ((ConfigurationServiceException) throwable.getCause()).getStatusCode() == 401) {
+      response = CodexPackages.GetCodexPackagesResponse.respond401WithTextPlain(throwable.getCause().getMessage());
+    } else {
+      response = CodexPackages.GetCodexPackagesResponse.respond500WithTextPlain(throwable.getCause().getMessage());
+    }
+    handler.handle(succeededFuture(response));
+
+    return null;
+  }
+
   @Override
   public void getCodexPackagesSources(String lang, Map<String, String> okapiHeaders,
                                       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
@@ -116,26 +134,27 @@ public final class CodexPackagesImpl implements CodexPackages, CodexPackagesSour
   }
 
   private CompletionStage<PackageCollection> getPackages(String query, int offset, int limit, Context vertxContext, Configuration rmAPIConfig) {
-    ProviderHoldingsIQServiceImpl providerService = new ProviderHoldingsIQServiceImpl(rmAPIConfig, vertxContext.owner());
-    return providerService.getVendorId()
-      .thenCompose(vendorId -> getPackages(query, offset, limit, vendorId, vertxContext, rmAPIConfig));
-  }
-
-  private CompletionStage<PackageCollection> getPackages(String query, int offset, int limit, long providerId, Context vertxContext, Configuration rmAPIConfig) {
     try {
       CQLParameters cqlParameters = new CQLParameters(query);
       if (cqlParameters.isIdSearch()) {
-        return getPackageById();
+        return getPackageById(vertxContext, rmAPIConfig, cqlParameters.getIdSearchValue());
       }
       PackageParameters parameters = new PackageParameters(cqlParameters);
       PaginationInfo pagination = new PaginationCalculator().getPagination(offset, limit);
-      return RMAPIToCodex.getPackages(parameters, pagination, providerId, vertxContext, rmAPIConfig);
+      return RMAPIToCodex.getPackages(parameters, pagination, vertxContext, rmAPIConfig);
     } catch (QueryValidationException e) {
       throw new CompletionException(e);
     }
   }
 
-  private CompletionStage<PackageCollection> getPackageById() {
-    throw new UnsupportedOperationException("Retrieval of package by id is not implemented");
+  private CompletionStage<PackageCollection> getPackageById(Context vertxContext, Configuration rmAPIConfig, String id) {
+    return RMAPIToCodex.getPackage(vertxContext, rmAPIConfig, idParser.parsePackageId(id))
+      .thenApply(packageObject ->
+        new PackageCollection()
+          .withPackages(Collections.singletonList(packageObject))
+          .withResultInfo(new ResultInfo().withTotalRecords(1))
+      ).exceptionally(throwable ->
+        new PackageCollection().withResultInfo(new ResultInfo().withTotalRecords(0))
+      );
   }
 }

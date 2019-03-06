@@ -22,7 +22,7 @@ import org.springframework.core.io.ClassPathResource;
 public class ApplicationConfig {
 
   @Bean
-  public PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
+  public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
     PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
     configurer.setLocation(new ClassPathResource("application.properties"));
     return configurer;

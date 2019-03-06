@@ -109,14 +109,14 @@ public final class RMAPIToCodex {
   }
 
   public static CompletableFuture<PackageCollection> getPackages(PackageParameters parameters, PaginationInfo pagination,
-                                                                  long providerId, Context vertxContext, Configuration rmAPIConfig) {
+                                                                 Context vertxContext, Configuration rmAPIConfig) {
     log.info("Calling getPackages");
 
     final List<CompletableFuture<Packages>> futures = new ArrayList<>();
 
     for (Page page : pagination.getPages()) {
       futures.add(new PackagesHoldingsIQServiceImpl(rmAPIConfig, vertxContext.owner()).retrievePackages(
-        parameters.getSelection(), parameters.getFilterType(),providerId,parameters.getSearchValue(), page.getOffset(), page.getLimit(), parameters.getSortType()));
+        parameters.getSelection(), parameters.getFilterType(), null,parameters.getSearchValue(), page.getOffset(), page.getLimit(), parameters.getSortType()));
     }
 
     return CompletableFuture
