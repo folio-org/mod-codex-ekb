@@ -41,9 +41,9 @@ import io.vertx.core.logging.LoggerFactory;
  * Instance related codex APIs.
  *
  * @author mreno
- *
  */
 public final class CodexInstancesImpl implements CodexInstances {
+
   private final Logger log = LoggerFactory.getLogger(CodexInstancesImpl.class);
 
   @Autowired
@@ -74,15 +74,15 @@ public final class CodexInstancesImpl implements CodexInstances {
       })
       .thenCompose(rmAPIConfig -> getCodexInstances(query, offset, limit, vertxContext, rmAPIConfig))
       .thenAccept(instances ->
-         asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond200WithApplicationJson(instances))))
+         asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesResponse.respond200WithApplicationJson(instances))))
       .exceptionally(throwable -> {
         log.error("getCodexInstances failed!", throwable);
         if (throwable.getCause() instanceof ValidationException || throwable.getCause() instanceof QueryValidationException) {
-          asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond400WithTextPlain(throwable.getCause().getMessage())));
-        } else if (throwable.getCause() instanceof ConfigurationServiceException && ((ConfigurationServiceException)throwable.getCause()).getStatusCode() == 401) {
-          asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond401WithTextPlain(throwable.getCause().getMessage())));
+          asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesResponse.respond400WithTextPlain(throwable.getCause().getMessage())));
+        } else if (throwable.getCause() instanceof ConfigurationServiceException && ((ConfigurationServiceException) throwable.getCause()).getStatusCode() == 401) {
+          asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesResponse.respond401WithTextPlain(throwable.getCause().getMessage())));
         } else {
-          asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
+          asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
         }
         return null;
       });
@@ -99,26 +99,26 @@ public final class CodexInstancesImpl implements CodexInstances {
       .thenCompose(rmAPIConfig ->
         RMAPIToCodex.getInstance(vertxContext, rmAPIConfig, idParser.parseTitleId(id))
       ).thenApply(instance -> {
+      asyncResultHandler.handle(
+            succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond200WithApplicationJson(instance)));
+      return instance;
+    }).exceptionally(throwable -> {
+      log.error("getCodexInstancesById failed!", throwable);
+      if (throwable.getCause() instanceof ResourceNotFoundException
+        || throwable.getCause() instanceof ValidationException) {
         asyncResultHandler.handle(
-            Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond200WithApplicationJson(instance)));
-        return instance;
-      }).exceptionally(throwable -> {
-        log.error("getCodexInstancesById failed!", throwable);
-        if (throwable.getCause() instanceof ResourceNotFoundException
-          || throwable.getCause() instanceof ValidationException) {
-          asyncResultHandler.handle(
-              Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond404WithTextPlain(id)));
-        } else if (throwable.getCause() instanceof ConfigurationServiceException && ((ConfigurationServiceException)throwable.getCause()).getStatusCode() == 401) {
-        	asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond401WithTextPlain(throwable.getCause().getMessage())));
-        } else {
-        	asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
-        }
-        return null;
-      });
+              succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond404WithTextPlain(id)));
+      } else if (throwable.getCause() instanceof ConfigurationServiceException && ((ConfigurationServiceException) throwable.getCause()).getStatusCode() == 401) {
+        	asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesResponse.respond401WithTextPlain(throwable.getCause().getMessage())));
+      } else {
+        	asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
+      }
+      return null;
+    });
   }
 
   private CompletionStage<InstanceCollection> getCodexInstances(String query, int offset, int limit,
-                                                                Context vertxContext, Configuration rmAPIConfig){
+                                                                Context vertxContext, Configuration rmAPIConfig) {
     try {
       CQLParameters cqlParameters = new CQLParameters(query);
       if (cqlParameters.isIdSearch()) {
@@ -141,7 +141,7 @@ public final class CodexInstancesImpl implements CodexInstances {
           .withInstances(Collections.singletonList(instance))
           .withResultInfo(new ResultInfo().withTotalRecords(1))
       ).exceptionally(throwable ->
-      new InstanceCollection().withResultInfo(new ResultInfo().withTotalRecords(0))
-    );
+        new InstanceCollection().withResultInfo(new ResultInfo().withTotalRecords(0))
+      );
   }
 }

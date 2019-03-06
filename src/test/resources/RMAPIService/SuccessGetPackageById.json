@@ -1,0 +1,32 @@
+{
+  "packageId": 222222,
+  "packageName": "Health & Wellness Resource Center (w/alt health module)",
+  "vendorId": 111,
+  "vendorName": "EBSCO",
+  "isCustom": true,
+  "titleCount": 1,
+  "isSelected": true,
+  "selectedCount": 1,
+  "contentType": "onlinereference",
+  "visibilityData": {
+    "isHidden": true,
+    "reason": "Hidden by Customer"
+  },
+  "customCoverage": {
+    "beginCoverage": "2003-01-01",
+    "endCoverage": "2003-12-12"
+  },
+  "isTokenNeeded": true,
+  "allowEbscoToAddTitles": true,
+  "packageType": "Complete",
+  "proxy": {
+    "id": "",
+    "inherited": true
+  },
+  "packageToken": {
+    "factName": "galesiteid",
+    "helpText": "<ul><li>Enter your Gale<sup></sup> site ID in the space provided below. The site ID may contain a combination of alpha/numeric characters, varying in length. <blockquote><p> Example: The site ID immediately follows /itweb/ in a URL. The site ID in the following URL is …………….</ul>",
+    "prompt": "/itweb/",
+    "value": "1234567"
+  }
+}

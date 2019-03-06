@@ -17,9 +17,12 @@ import org.folio.cql2rmapi.query.Page;
 import org.folio.cql2rmapi.query.PaginationInfo;
 import org.folio.holdingsiq.model.Configuration;
 import org.folio.holdingsiq.model.PackageData;
+import org.folio.holdingsiq.model.PackageId;
 import org.folio.holdingsiq.model.Packages;
 import org.folio.holdingsiq.model.Title;
 import org.folio.holdingsiq.model.Titles;
+import org.folio.holdingsiq.service.PackagesHoldingsIQService;
+import org.folio.holdingsiq.service.TitlesHoldingsIQService;
 import org.folio.holdingsiq.service.impl.PackagesHoldingsIQServiceImpl;
 import org.folio.holdingsiq.service.impl.TitlesHoldingsIQServiceImpl;
 import org.folio.rest.jaxrs.model.Instance;
@@ -42,9 +45,7 @@ public final class RMAPIToCodex {
 
   private static final Converter<Title, Instance> TITLE_CONVERTER = new TitleConverter(
     new IdentifierConverter(), new ContributorConverter(), new SubjectConverter());
-
-  private static final Converter<PackageData, Package> PACKAGE_CONVERTER = new PackageConverter(
-    new CoverageConverter());
+  private static final Converter<PackageData, Package> PACKAGE_CONVERTER = new PackageConverter(new CoverageConverter());
 
   private RMAPIToCodex() {
     super();
@@ -53,10 +54,19 @@ public final class RMAPIToCodex {
   public static CompletableFuture<Instance> getInstance(Context vertxContext, Configuration rmAPIConfig, long id) {
     log.info("Calling getInstance");
 
-    TitlesHoldingsIQServiceImpl titlesService = new TitlesHoldingsIQServiceImpl(rmAPIConfig, vertxContext.owner());
+    TitlesHoldingsIQService titlesService = new TitlesHoldingsIQServiceImpl(rmAPIConfig, vertxContext.owner());
 
     return titlesService.retrieveTitle(id)
-        .thenApply(TITLE_CONVERTER::convert);
+            .thenApply(TITLE_CONVERTER::convert);
+  }
+
+  public static CompletableFuture<Package> getPackage(Context vertxContext, Configuration rmAPIConfig, PackageId id) {
+    log.info("Calling getPackage");
+
+    PackagesHoldingsIQService service = new PackagesHoldingsIQServiceImpl(rmAPIConfig, vertxContext.owner());
+
+    return service.retrievePackage(id)
+            .thenApply(PACKAGE_CONVERTER::convert);
   }
 
   public static CompletableFuture<InstanceCollection> getInstances(TitleParameters parameters, PaginationInfo pagination, Context vertxContext,
