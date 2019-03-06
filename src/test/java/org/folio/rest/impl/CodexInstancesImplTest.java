@@ -1,20 +1,12 @@
 package org.folio.rest.impl;
 
-import static org.folio.utils.Utils.readMockFile;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 
-import java.util.concurrent.CompletableFuture;
+import static org.folio.utils.Utils.readMockFile;
 
-import org.folio.holdingsiq.model.Configuration;
-import org.folio.holdingsiq.service.ConfigurationService;
-import org.folio.holdingsiq.service.exception.ConfigurationServiceException;
-import org.folio.spring.SpringContextUtil;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.util.concurrent.CompletableFuture;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -24,9 +16,18 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import org.folio.holdingsiq.model.Configuration;
+import org.folio.holdingsiq.service.ConfigurationService;
+import org.folio.holdingsiq.service.exception.ConfigurationServiceException;
+import org.folio.spring.SpringContextUtil;
 
 @RunWith(VertxUnitRunner.class)
-public class CodexInstanceResourceImplTest extends VertxTestBase {
+public class CodexInstancesImplTest extends VertxTestBase {
 
   private static final String MOCK_RMAPI_INSTANCE_TITLE_200_RESPONSE_WHEN_FOUND = "RMAPIService/SuccessGetTitleById.json";
   private static final String MOCK_RMAPI_INSTANCE_TITLE_404_RESPONSE_WHEN_NOT_FOUND = "RMAPIConfiguration/mock_content_fail_404.json";

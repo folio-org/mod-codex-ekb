@@ -1,6 +1,7 @@
 package org.folio.rest.impl;
 
-import io.vertx.core.Vertx;
+import static io.vertx.core.Future.succeededFuture;
+
 import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Map;
@@ -10,6 +11,14 @@ import java.util.concurrent.CompletionStage;
 
 import javax.validation.ValidationException;
 import javax.ws.rs.core.Response;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import org.folio.codex.RMAPIToCodex;
 import org.folio.cql2rmapi.CQLParameters;
@@ -27,16 +36,8 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.InstanceCollection;
 import org.folio.rest.jaxrs.model.ResultInfo;
 import org.folio.rest.jaxrs.resource.CodexInstances;
-
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Future;
-import io.vertx.core.Handler;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import org.folio.spring.SpringContextUtil;
 import org.folio.validator.InstancesQueryValidator;
-import org.springframework.beans.factory.annotation.Autowired;
 
 /**
  * Instance related codex APIs.
@@ -45,6 +46,7 @@ import org.springframework.beans.factory.annotation.Autowired;
  *
  */
 public final class CodexInstancesImpl implements CodexInstances {
+
   private final Logger log = LoggerFactory.getLogger(CodexInstancesImpl.class);
 
   @Autowired
@@ -75,15 +77,15 @@ public final class CodexInstancesImpl implements CodexInstances {
       })
       .thenCompose(rmAPIConfig -> getCodexInstances(query, offset, limit, vertxContext, rmAPIConfig))
       .thenAccept(instances ->
-         asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond200WithApplicationJson(instances))))
+         asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesResponse.respond200WithApplicationJson(instances))))
       .exceptionally(throwable -> {
         log.error("getCodexInstances failed!", throwable);
         if (throwable.getCause() instanceof ValidationException || throwable.getCause() instanceof QueryValidationException) {
-          asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond400WithTextPlain(throwable.getCause().getMessage())));
+          asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesResponse.respond400WithTextPlain(throwable.getCause().getMessage())));
         } else if (throwable.getCause() instanceof ConfigurationServiceException && ((ConfigurationServiceException)throwable.getCause()).getStatusCode() == 401) {
-          asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond401WithTextPlain(throwable.getCause().getMessage())));
+          asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesResponse.respond401WithTextPlain(throwable.getCause().getMessage())));
         } else {
-          asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
+          asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
         }
         return null;
       });
@@ -101,18 +103,18 @@ public final class CodexInstancesImpl implements CodexInstances {
         RMAPIToCodex.getInstance(vertxContext, rmAPIConfig, idParser.parseTitleId(id))
       ).thenApply(instance -> {
         asyncResultHandler.handle(
-            Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond200WithApplicationJson(instance)));
+            succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond200WithApplicationJson(instance)));
         return instance;
       }).exceptionally(throwable -> {
         log.error("getCodexInstancesById failed!", throwable);
         if (throwable.getCause() instanceof ResourceNotFoundException
           || throwable.getCause() instanceof ValidationException) {
           asyncResultHandler.handle(
-              Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond404WithTextPlain(id)));
+              succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond404WithTextPlain(id)));
         } else if (throwable.getCause() instanceof ConfigurationServiceException && ((ConfigurationServiceException)throwable.getCause()).getStatusCode() == 401) {
-        	asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesResponse.respond401WithTextPlain(throwable.getCause().getMessage())));
+        	asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesResponse.respond401WithTextPlain(throwable.getCause().getMessage())));
         } else {
-        	asyncResultHandler.handle(Future.succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
+        	asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
         }
         return null;
       });
