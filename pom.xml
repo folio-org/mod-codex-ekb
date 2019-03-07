@@ -45,7 +45,8 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <ramlfiles_path>${basedir}/ramls/raml-util/ramls/codex</ramlfiles_path>
-    <rmb.version>21.0.4</rmb.version>
+    <jsonschema_paths>raml-util/schemas/**</jsonschema_paths>
+    <rmb.version>23.6.0</rmb.version>
     <dependency.locations.enabled>false</dependency.locations.enabled>
     <pact.version>3.5.11</pact.version>
   </properties>
@@ -233,6 +234,10 @@
                 <systemProperty>
                   <key>raml_files</key>
                   <value>${ramlfiles_path}</value>
+                </systemProperty>
+                <systemProperty>
+                  <key>schema_paths</key>
+                  <value>${jsonschema_paths}</value>
                 </systemProperty>
               </systemProperties>
             </configuration>
