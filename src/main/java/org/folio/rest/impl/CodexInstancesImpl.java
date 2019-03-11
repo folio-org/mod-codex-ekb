@@ -2,7 +2,6 @@ package org.folio.rest.impl;
 
 import static io.vertx.core.Future.succeededFuture;
 
-import java.io.UnsupportedEncodingException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
@@ -12,20 +11,12 @@ import java.util.concurrent.CompletionStage;
 import javax.validation.ValidationException;
 import javax.ws.rs.core.Response;
 
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-
 import org.folio.codex.RMAPIToCodex;
 import org.folio.cql2rmapi.CQLParameters;
 import org.folio.cql2rmapi.QueryValidationException;
 import org.folio.cql2rmapi.TitleParameters;
-import org.folio.cql2rmapi.query.RMAPIQueries;
-import org.folio.cql2rmapi.query.TitlesQueryBuilder;
+import org.folio.cql2rmapi.query.PaginationCalculator;
+import org.folio.cql2rmapi.query.PaginationInfo;
 import org.folio.holdingsiq.model.Configuration;
 import org.folio.holdingsiq.model.OkapiData;
 import org.folio.holdingsiq.service.ConfigurationService;
@@ -38,12 +29,19 @@ import org.folio.rest.jaxrs.model.ResultInfo;
 import org.folio.rest.jaxrs.resource.CodexInstances;
 import org.folio.spring.SpringContextUtil;
 import org.folio.validator.InstancesQueryValidator;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 /**
  * Instance related codex APIs.
  *
  * @author mreno
- *
  */
 public final class CodexInstancesImpl implements CodexInstances {
 
@@ -82,7 +80,7 @@ public final class CodexInstancesImpl implements CodexInstances {
         log.error("getCodexInstances failed!", throwable);
         if (throwable.getCause() instanceof ValidationException || throwable.getCause() instanceof QueryValidationException) {
           asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesResponse.respond400WithTextPlain(throwable.getCause().getMessage())));
-        } else if (throwable.getCause() instanceof ConfigurationServiceException && ((ConfigurationServiceException)throwable.getCause()).getStatusCode() == 401) {
+        } else if (throwable.getCause() instanceof ConfigurationServiceException && ((ConfigurationServiceException) throwable.getCause()).getStatusCode() == 401) {
           asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesResponse.respond401WithTextPlain(throwable.getCause().getMessage())));
         } else {
           asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
@@ -102,42 +100,49 @@ public final class CodexInstancesImpl implements CodexInstances {
       .thenCompose(rmAPIConfig ->
         RMAPIToCodex.getInstance(vertxContext, rmAPIConfig, idParser.parseTitleId(id))
       ).thenApply(instance -> {
-        asyncResultHandler.handle(
+      asyncResultHandler.handle(
             succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond200WithApplicationJson(instance)));
-        return instance;
-      }).exceptionally(throwable -> {
-        log.error("getCodexInstancesById failed!", throwable);
-        if (throwable.getCause() instanceof ResourceNotFoundException
-          || throwable.getCause() instanceof ValidationException) {
-          asyncResultHandler.handle(
+      return instance;
+    }).exceptionally(throwable -> {
+      log.error("getCodexInstancesById failed!", throwable);
+      if (throwable.getCause() instanceof ResourceNotFoundException
+        || throwable.getCause() instanceof ValidationException) {
+        asyncResultHandler.handle(
               succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond404WithTextPlain(id)));
-        } else if (throwable.getCause() instanceof ConfigurationServiceException && ((ConfigurationServiceException)throwable.getCause()).getStatusCode() == 401) {
+      } else if (throwable.getCause() instanceof ConfigurationServiceException && ((ConfigurationServiceException) throwable.getCause()).getStatusCode() == 401) {
         	asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesResponse.respond401WithTextPlain(throwable.getCause().getMessage())));
-        } else {
+      } else {
         	asyncResultHandler.handle(succeededFuture(CodexInstances.GetCodexInstancesByIdResponse.respond500WithTextPlain(throwable.getCause().getMessage())));
-        }
-        return null;
-      });
+      }
+      return null;
+    });
   }
 
   private CompletionStage<InstanceCollection> getCodexInstances(String query, int offset, int limit,
-                                                                Context vertxContext, Configuration rmAPIConfig){
+                                                                Context vertxContext, Configuration rmAPIConfig) {
     try {
       CQLParameters cqlParameters = new CQLParameters(query);
       if (cqlParameters.isIdSearch()) {
-        return RMAPIToCodex.getInstance(vertxContext, rmAPIConfig, idParser.parseTitleId(cqlParameters.getIdSearchValue()))
-          .thenApply(instance ->
-            new InstanceCollection()
-              .withInstances(Collections.singletonList(instance))
-              .withResultInfo(new ResultInfo().withTotalRecords(1))
-          ).exceptionally(throwable ->
-          new InstanceCollection().withResultInfo(new ResultInfo().withTotalRecords(0))
-        );
+        return getInstanceById(vertxContext, rmAPIConfig, cqlParameters);
       }
-      RMAPIQueries queries = new TitlesQueryBuilder().build(new TitleParameters(cqlParameters), offset, limit);
-      return RMAPIToCodex.getInstances(queries, vertxContext, rmAPIConfig);
-    } catch (UnsupportedEncodingException | QueryValidationException e) {
+
+      TitleParameters parameters = new TitleParameters(cqlParameters);
+
+      PaginationInfo pagination = new PaginationCalculator().getPagination(offset, limit);
+      return RMAPIToCodex.getInstances(parameters, pagination, vertxContext, rmAPIConfig);
+    } catch (QueryValidationException e) {
       throw new CompletionException(e);
     }
+  }
+
+  private CompletionStage<InstanceCollection> getInstanceById(Context vertxContext, Configuration rmAPIConfig, CQLParameters cqlParameters) {
+    return RMAPIToCodex.getInstance(vertxContext, rmAPIConfig, idParser.parseTitleId(cqlParameters.getIdSearchValue()))
+      .thenApply(instance ->
+        new InstanceCollection()
+          .withInstances(Collections.singletonList(instance))
+          .withResultInfo(new ResultInfo().withTotalRecords(1))
+      ).exceptionally(throwable ->
+        new InstanceCollection().withResultInfo(new ResultInfo().withTotalRecords(0))
+      );
   }
 }

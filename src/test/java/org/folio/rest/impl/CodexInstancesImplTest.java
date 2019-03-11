@@ -54,7 +54,7 @@ public class CodexInstancesImplTest extends VertxTestBase {
         req.response().setStatusCode(404).putHeader("content-type", "text/plain")
           .end(readMockFile(MOCK_RMAPI_INSTANCE_TITLE_404_RESPONSE_WHEN_NOT_FOUND));
       } else if (req.path().equals("/rm/rmaccounts/test/titles")) {
-        if (req.uri().contains("searchfield=titlename&search=Bridget+Jones&orderby=titlename&count=10&offset=1")) {
+        if (req.uri().contains("searchfield=titlename&selection=all&resourcetype=all&searchtype=advanced&search=Bridget+Jones&offset=1&count=10&orderby=titlename")) {
           req.response().setStatusCode(200).putHeader("content-type", "application/json")
             .end(readMockFile(MOCK_CODEX_INSTANCE_TITLE_COLLECTION_200_RESPONSE_WHEN_FOUND));
         } else {

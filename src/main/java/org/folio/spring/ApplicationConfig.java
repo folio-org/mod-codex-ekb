@@ -17,11 +17,12 @@ import org.springframework.core.io.ClassPathResource;
 @ComponentScan(basePackages = {
   "org.folio.converter.hld2cdx",
   "org.folio.validator",
+  "org.folio.codex",
   "org.folio.parser"})
 public class ApplicationConfig {
 
   @Bean
-  public PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
+  public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
     PropertySourcesPlaceholderConfigurer configurer = new PropertySourcesPlaceholderConfigurer();
     configurer.setLocation(new ClassPathResource("application.properties"));
     return configurer;

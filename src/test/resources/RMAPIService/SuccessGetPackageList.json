@@ -1,0 +1,120 @@
+{
+  "totalResults": 414,
+  "packagesList": [
+    {
+      "packageId": 3007,
+      "packageName": "American Academy of Family Physicians",
+      "isCustom": false,
+      "vendorId": 392,
+      "vendorName": "American Academy of Family Physicians",
+      "titleCount": 3,
+      "isSelected": false,
+      "visibilityData": {
+        "isHidden": false,
+        "reason": ""
+      },
+      "selectedCount": 0,
+      "isTokenNeeded": false,
+      "contentType": "EJournal",
+      "customCoverage": {
+        "beginCoverage": "2018-08-13",
+        "endCoverage": "2018-09-13"
+      },
+      "packageType": "Variable",
+      "packageToken": {
+        "factName": "galesiteid",
+        "helpText": "<ul><li>Enter your Gale<sup></sup> site ID in the space provided below. The site ID may contain a combination of alpha/numeric characters, varying in length. <blockquote><p> Example: The site ID immediately follows /itweb/ in a URL. The site ID in the following URL is …………….</ul>",
+        "prompt": "/itweb/",
+        "value": "1234567"
+      },
+      "proxy": {
+        "id": "",
+        "inherited": true
+      }
+    },
+    {
+      "packageId": 1597443,
+      "packageName": "American Academy of Orthopaedic Surgeons",
+      "isCustom": false,
+      "vendorId": 114569,
+      "vendorName": "American Academy of Orthopaedic Surgeons",
+      "titleCount": 108,
+      "isSelected": false,
+      "visibilityData": {
+        "isHidden": false,
+        "reason": ""
+      },
+      "selectedCount": 0,
+      "isTokenNeeded": false,
+      "contentType": "AggregatedFullText",
+      "customCoverage": {
+        "beginCoverage": "",
+        "endCoverage": ""
+      },
+      "packageType": "Variable"
+    },
+    {
+      "packageId": 3943,
+      "packageName": "American Academy of Pediatrics (AAP)",
+      "isCustom": false,
+      "vendorId": 554,
+      "vendorName": "American Academy of Pediatrics (AAP)",
+      "titleCount": 6,
+      "isSelected": false,
+      "visibilityData": {
+        "isHidden": false,
+        "reason": ""
+      },
+      "selectedCount": 0,
+      "isTokenNeeded": false,
+      "contentType": "EJournal",
+      "customCoverage": {
+        "beginCoverage": "",
+        "endCoverage": ""
+      },
+      "packageType": "Variable"
+    },
+    {
+      "packageId": 7566,
+      "packageName": "American Academy of Pediatrics (AAP) eBooks",
+      "isCustom": false,
+      "vendorId": 554,
+      "vendorName": "American Academy of Pediatrics (AAP)",
+      "titleCount": 207,
+      "isSelected": false,
+      "visibilityData": {
+        "isHidden": false,
+        "reason": ""
+      },
+      "selectedCount": 0,
+      "isTokenNeeded": false,
+      "contentType": "EBook",
+      "customCoverage": {
+        "beginCoverage": "",
+        "endCoverage": ""
+      },
+      "packageType": "Variable"
+    },
+    {
+      "packageId": 19236,
+      "packageName": "American Academy of Pediatrics (KMLA)",
+      "isCustom": false,
+      "vendorId": 554,
+      "vendorName": "American Academy of Pediatrics (AAP)",
+      "titleCount": 6,
+      "isSelected": false,
+      "visibilityData": {
+        "isHidden": false,
+        "reason": ""
+      },
+      "selectedCount": 0,
+      "isTokenNeeded": false,
+      "contentType": "EJournal",
+      "customCoverage": {
+        "beginCoverage": "",
+        "endCoverage": ""
+      },
+      "packageType": "Complete"
+    }
+  ]
+}
