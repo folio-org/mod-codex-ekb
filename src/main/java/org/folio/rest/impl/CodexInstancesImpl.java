@@ -28,7 +28,7 @@ import org.folio.rest.jaxrs.model.InstanceCollection;
 import org.folio.rest.jaxrs.model.ResultInfo;
 import org.folio.rest.jaxrs.resource.CodexInstances;
 import org.folio.spring.SpringContextUtil;
-import org.folio.validator.InstancesQueryValidator;
+import org.folio.validator.QueryValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.AsyncResult;
@@ -50,7 +50,7 @@ public final class CodexInstancesImpl implements CodexInstances {
   @Autowired
   private ConfigurationService configurationService;
   @Autowired
-  private InstancesQueryValidator instancesQueryValidator;
+  private QueryValidator queryValidator;
   @Autowired
   private IdParser idParser;
 
@@ -70,7 +70,7 @@ public final class CodexInstancesImpl implements CodexInstances {
 
     CompletableFuture.completedFuture(null)
       .thenCompose(o -> {
-        instancesQueryValidator.validate(query, limit);
+        queryValidator.validate(query, limit);
         return configurationService.retrieveConfiguration(new OkapiData(okapiHeaders));
       })
       .thenCompose(rmAPIConfig -> getCodexInstances(query, offset, limit, vertxContext, rmAPIConfig))
