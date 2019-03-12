@@ -273,9 +273,47 @@ public class CodexPackagesImplTest extends VertxTestBase {
     logger.info("Test done");
   }
 
+  @Test
+  public void getCodexPackagesReturns400WhenQueryIsMissing() {
+    logger.info("Test getCodexPackagesReturns400WhenQueryIsMissing");
+
+    RestAssured
+      .given()
+      .header(tenantHeader)
+      .header(contentTypeHeader)
+      .header(urlHeader)
+      .header(tokenHeader)
+      .get("/codex-packages")
+      .then()
+      .log()
+      .ifValidationFails()
+      .statusCode(400);
+
+    logger.info("Test done");
+  }
 
   @Test
-  public void getCodexPackagesIdSearchSuccessTest(TestContext context) {
+  public void getCodexPackagesReturns400WhenLimitIsNotValid() {
+    logger.info("Test getCodexPackagesReturns400WhenLimitIsNotValid");
+
+    RestAssured
+      .given()
+      .header(tenantHeader)
+      .header(contentTypeHeader)
+      .header(urlHeader)
+      .header(tokenHeader)
+      .get("/codex-packages?query=abc&limit=-1")
+      .then()
+      .log()
+      .ifValidationFails()
+      .statusCode(400);
+
+    logger.info("Test done");
+  }
+
+
+  @Test
+  public void getCodexPackagesIdSearchSuccessTest() {
     logger.info("Testing getCodexPackagesIdSearchSuccessTest");
 
     final PackageCollection response = RestAssured
