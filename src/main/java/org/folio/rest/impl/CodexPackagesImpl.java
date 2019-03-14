@@ -23,6 +23,7 @@ import org.folio.holdingsiq.service.ConfigurationService;
 import org.folio.holdingsiq.service.exception.ConfigurationServiceException;
 import org.folio.holdingsiq.service.exception.ResourceNotFoundException;
 import org.folio.parser.IdParser;
+import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.Package;
 import org.folio.rest.jaxrs.model.PackageCollection;
 import org.folio.rest.jaxrs.model.ResultInfo;
@@ -32,6 +33,7 @@ import org.folio.rest.jaxrs.resource.CodexPackages;
 import org.folio.rest.jaxrs.resource.CodexPackagesSources;
 import org.folio.rest.tools.PomReader;
 import org.folio.spring.SpringContextUtil;
+import org.folio.validator.QueryValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import io.vertx.core.AsyncResult;
@@ -52,16 +54,21 @@ public final class CodexPackagesImpl implements CodexPackages, CodexPackagesSour
   private ConfigurationService configurationService;
   @Autowired
   private IdParser idParser;
-
+  @Autowired
+  private QueryValidator queryValidator;
 
   public CodexPackagesImpl() {
     SpringContextUtil.autowireDependencies(this, Vertx.currentContext());
   }
 
   @Override
+  @Validate
   public void getCodexPackages(String query, int offset, int limit, String lang, Map<String, String> okapiHeaders, Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
     CompletableFuture.completedFuture(null)
-      .thenCompose(o -> configurationService.retrieveConfiguration(new OkapiData(okapiHeaders)))
+      .thenCompose(o -> {
+        queryValidator.validate(query, limit);
+        return configurationService.retrieveConfiguration(new OkapiData(okapiHeaders));
+      })
       .thenCompose(rmAPIConfig -> getPackages(query, offset, limit, vertxContext, rmAPIConfig))
       .thenAccept(packages -> successfulPackages(packages, asyncResultHandler))
       .exceptionally(e -> failedPackages(e, asyncResultHandler));

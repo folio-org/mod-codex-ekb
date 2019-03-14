@@ -5,7 +5,7 @@ import javax.validation.ValidationException;
 import org.springframework.stereotype.Component;
 
 @Component
-public class InstancesQueryValidator {
+public class QueryValidator {
 
   public void validate(String query, int limit) {
 
