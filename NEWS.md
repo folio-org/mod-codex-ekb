@@ -1,3 +1,13 @@
+## 1.2.0 2019-03-15
+ * [MODCXEKB-72] - Define normalized Package fields mapping
+ * [MODCXEKB-74] - Define mormaized title-package fields
+ * [MODCXEKB-79] - Implement GET Package by ID
+ * [MODCXEKB-80] - Implement Get Package Collection
+ * [MODCXEKB-81] - Implement Get Package Sources
+ * [MODCXEKB-82] - Revise CQL Parser for RMAPI to handle Package Queries
+ * [MODCXEKB-83] - Revise RMAPI To Codex to Handle Packages
+ * [MODCXEKB-85] - Extract RMAPIService to a library module
+
 ## 1.1.0 2018-12-04
  * [MODCXEKB-64] - Update mod-codex-ekb to support Boolean/Exact Phrase/Wildcard/Nested Searches
  * [MODCXEKB-67] - Upgrade mod-codex-ekb to RAML 1.0
