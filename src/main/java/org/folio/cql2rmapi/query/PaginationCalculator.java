@@ -11,7 +11,7 @@ public class PaginationCalculator {
     int rmAPILimit = Math.min(limit, RM_API_MAX_COUNT);
     int pageOffsetRMAPI = computePageOffsetForRMAPI(offset, rmAPILimit);
     pages.add(new Page(pageOffsetRMAPI, rmAPILimit));
-    while (checkIfSecondQueryIsNeeded(offset, rmAPILimit, pageOffsetRMAPI)) {
+    while (checkIfSecondQueryIsNeeded(offset, limit, rmAPILimit, pageOffsetRMAPI)) {
       pages.add(new Page(++pageOffsetRMAPI, rmAPILimit));
     }
     return new PaginationInfo(pages, offset % rmAPILimit, limit);
@@ -24,7 +24,7 @@ public class PaginationCalculator {
     return (int) pageOffset;
   }
 
-  private boolean checkIfSecondQueryIsNeeded(int offset, int limit, int pageOffsetRMAPI) {
-    return (offset + limit) > (pageOffsetRMAPI * limit);
+  private boolean checkIfSecondQueryIsNeeded(int offset, int limit, int limitRMAPI, int pageOffsetRMAPI) {
+    return (offset + limit) > (pageOffsetRMAPI * limitRMAPI);
   }
 }
