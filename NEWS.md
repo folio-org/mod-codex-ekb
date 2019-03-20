@@ -1,4 +1,7 @@
-## 1.2.0 2019-03-15
+# 1.3.0 2019-03-20
+ * [MODCXEKB-95] - Fix failing API Tests - Updated path for downloaded schemas
+
+# 1.2.0 2019-03-15
  * [MODCXEKB-72] - Define normalized Package fields mapping
  * [MODCXEKB-74] - Define mormaized title-package fields
  * [MODCXEKB-79] - Implement GET Package by ID
