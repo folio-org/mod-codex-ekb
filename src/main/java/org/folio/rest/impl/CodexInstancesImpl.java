@@ -27,6 +27,7 @@ import org.folio.rest.annotations.Validate;
 import org.folio.rest.jaxrs.model.InstanceCollection;
 import org.folio.rest.jaxrs.model.ResultInfo;
 import org.folio.rest.jaxrs.resource.CodexInstances;
+import org.folio.rest.jaxrs.resource.CodexInstancesSources;
 import org.folio.spring.SpringContextUtil;
 import org.folio.validator.QueryValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,7 @@ import io.vertx.core.logging.LoggerFactory;
  *
  * @author mreno
  */
-public final class CodexInstancesImpl implements CodexInstances {
+public final class CodexInstancesImpl implements CodexInstances, CodexInstancesSources {
 
   private final Logger log = LoggerFactory.getLogger(CodexInstancesImpl.class);
 
@@ -144,5 +145,13 @@ public final class CodexInstancesImpl implements CodexInstances {
       ).exceptionally(throwable ->
         new InstanceCollection().withResultInfo(new ResultInfo().withTotalRecords(0))
       );
+  }
+
+  @Override
+  public void getCodexInstancesSources(String lang, Map<String, String> okapiHeaders,
+                                       Handler<AsyncResult<Response>> asyncResultHandler, Context vertxContext) {
+
+    asyncResultHandler.handle(
+      succeededFuture(GetCodexInstancesSourcesResponse.status(Response.Status.NOT_IMPLEMENTED).build()));
   }
 }
