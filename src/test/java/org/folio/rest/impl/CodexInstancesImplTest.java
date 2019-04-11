@@ -35,6 +35,11 @@ public class CodexInstancesImplTest extends VertxTestBase {
 
   private static final String SEARCH_TITLE_COLLECTION_WHEN_SEARCH_FIELD_NOT_GIVEN_SUCCESS_QUERY = "Bridget Jones";
   private static final String SEARCH_TITLE_COLLECTION_FAILS_UNSUPPORTED_QUERY = "title = Bridget Jones or publisher = xyz";
+  public static final String CONTENT_TYPE_HEADER = "content-type";
+  public static final String RESULT_INFO = "resultInfo";
+  public static final String INSTANCES = "instances";
+  public static final String TEST_SUCESSFUL_MESSAGE = "Test done";
+  public static final String START_INSTANCE_COLLECTION_TEST_MESSAGE = "Testing for successful instance collection";
 
   @Autowired
   private ConfigurationService configurationService;
@@ -48,14 +53,14 @@ public class CodexInstancesImplTest extends VertxTestBase {
     final HttpServer server = vertx.createHttpServer();
     server.requestHandler(req -> {
       if (req.path().equals(String.format("/rm/rmaccounts/test/titles/%s", "99999"))) {
-        req.response().setStatusCode(200).putHeader("content-type", "application/json")
+        req.response().setStatusCode(200).putHeader(CONTENT_TYPE_HEADER, "application/json")
           .end(readMockFile(MOCK_RMAPI_INSTANCE_TITLE_200_RESPONSE_WHEN_FOUND));
       } else if (req.path().equals(String.format("/rm/rmaccounts/test/titles/%s", "1"))) {
-        req.response().setStatusCode(404).putHeader("content-type", "text/plain")
+        req.response().setStatusCode(404).putHeader(CONTENT_TYPE_HEADER, "text/plain")
           .end(readMockFile(MOCK_RMAPI_INSTANCE_TITLE_404_RESPONSE_WHEN_NOT_FOUND));
       } else if (req.path().equals("/rm/rmaccounts/test/titles")) {
         if (req.uri().contains("searchfield=titlename&selection=all&resourcetype=all&searchtype=advanced&search=Bridget+Jones&offset=1&count=10&orderby=titlename")) {
-          req.response().setStatusCode(200).putHeader("content-type", "application/json")
+          req.response().setStatusCode(200).putHeader(CONTENT_TYPE_HEADER, "application/json")
             .end(readMockFile(MOCK_CODEX_INSTANCE_TITLE_COLLECTION_200_RESPONSE_WHEN_FOUND));
         } else {
           req.response().setStatusCode(500).end("Unexpected call: " + req.path());
@@ -100,7 +105,7 @@ public class CodexInstancesImplTest extends VertxTestBase {
     context.assertTrue("99999".equals(json.getString("id")), body);
 
     // Test done
-    logger.info("Test done");
+    logger.info(TEST_SUCESSFUL_MESSAGE);
   }
 
   @Test
@@ -119,7 +124,7 @@ public class CodexInstancesImplTest extends VertxTestBase {
           .statusCode(400).body(containsString("Okapi url header does not contain valid url"));
 
     // Test done
-    logger.info("Test done");
+    logger.info(TEST_SUCESSFUL_MESSAGE);
   }
 
   @Test
@@ -139,7 +144,7 @@ public class CodexInstancesImplTest extends VertxTestBase {
         .statusCode(404);
 
     // Test done
-    logger.info("Test done");
+    logger.info(TEST_SUCESSFUL_MESSAGE);
   }
 
   @Test
@@ -162,12 +167,12 @@ public class CodexInstancesImplTest extends VertxTestBase {
         .statusCode(401);
 
     // Test done
-    logger.info("Test done");
+    logger.info(TEST_SUCESSFUL_MESSAGE);
   }
 
   @Test
   public void getCodexInstancesSuccessTest(TestContext context) {
-    logger.info("Testing for successful instance collection");
+    logger.info(START_INSTANCE_COLLECTION_TEST_MESSAGE);
 
     final Response r = RestAssured
         .given()
@@ -186,17 +191,17 @@ public class CodexInstancesImplTest extends VertxTestBase {
       final String body = r.getBody().asString();
       final JsonObject json = new JsonObject(body);
       //Ensure that total records and instances keys are present in response
-      context.assertTrue(json.containsKey("resultInfo"));
-      context.assertTrue(json.containsKey("instances"));
+      context.assertTrue(json.containsKey(RESULT_INFO));
+      context.assertTrue(json.containsKey(INSTANCES));
     }
 
     // Test done
-    logger.info("Test done");
+    logger.info(TEST_SUCESSFUL_MESSAGE);
   }
 
   @Test
   public void getCodexInstancesIdSearchSuccessTest(TestContext context) {
-    logger.info("Testing for successful instance collection");
+    logger.info(START_INSTANCE_COLLECTION_TEST_MESSAGE);
 
     final Response r = RestAssured
         .given()
@@ -215,17 +220,17 @@ public class CodexInstancesImplTest extends VertxTestBase {
       final String body = r.getBody().asString();
       final JsonObject json = new JsonObject(body);
       //Ensure that total records and instances keys are present in response
-      context.assertEquals(json.getJsonObject("resultInfo").getInteger("totalRecords"), 1);
-      context.assertTrue(json.containsKey("instances"));
+      context.assertEquals(json.getJsonObject(RESULT_INFO).getInteger("totalRecords"), 1);
+      context.assertTrue(json.containsKey(INSTANCES));
     }
 
     // Test done
-    logger.info("Test done");
+    logger.info(TEST_SUCESSFUL_MESSAGE);
   }
 
   @Test
   public void getCodexInstancesIdSearchFailTest(TestContext context) {
-    logger.info("Testing for successful instance collection");
+    logger.info(START_INSTANCE_COLLECTION_TEST_MESSAGE);
 
     final Response r = RestAssured
         .given()
@@ -244,12 +249,12 @@ public class CodexInstancesImplTest extends VertxTestBase {
       final String body = r.getBody().asString();
       final JsonObject json = new JsonObject(body);
       //Ensure that total records and instances keys are present in response
-      context.assertEquals(json.getJsonObject("resultInfo").getInteger("totalRecords"), 0);
-      context.assertTrue(json.containsKey("instances"));
+      context.assertEquals(json.getJsonObject(RESULT_INFO).getInteger("totalRecords"), 0);
+      context.assertTrue(json.containsKey(INSTANCES));
     }
 
     // Test done
-    logger.info("Test done");
+    logger.info(TEST_SUCESSFUL_MESSAGE);
   }
 
   @Test
@@ -269,7 +274,7 @@ public class CodexInstancesImplTest extends VertxTestBase {
           .statusCode(400);
 
     // Test done
-    logger.info("Test done");
+    logger.info(TEST_SUCESSFUL_MESSAGE);
   }
 
   @Test
@@ -289,6 +294,26 @@ public class CodexInstancesImplTest extends VertxTestBase {
           .statusCode(400);
 
     // Test done
-    logger.info("Test done");
+    logger.info(TEST_SUCESSFUL_MESSAGE);
+  }
+
+  @Test
+  public void shouldReturn501WhenEndpointNotImplemented(TestContext context) {
+    logger.info("Test when endpoint is not implemented");
+
+    RestAssured
+      .given()
+      .header(tenantHeader)
+      .header(contentTypeHeader)
+      .header(urlHeader)
+      .header(tokenHeader)
+      .get("/codex-instances-sources")
+      .then()
+      .log()
+      .ifValidationFails()
+      .statusCode(501);
+
+    // Test done
+    logger.info(TEST_SUCESSFUL_MESSAGE);
   }
 }

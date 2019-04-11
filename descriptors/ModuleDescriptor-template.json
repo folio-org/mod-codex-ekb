@@ -4,7 +4,7 @@
   "provides" : [
     {
       "id" : "codex",
-      "version" : "3.0",
+      "version" : "3.1",
       "interfaceType": "multiple",
       "handlers" : [
         {
@@ -17,6 +17,9 @@
           "pathPattern" : "/codex-instances/{id}",
           "permissionsRequired" : [ "codex.item.get" ],
           "modulePermissions": ["configuration.entries.collection.get"]
+        }, {
+          "methods" : [ "GET" ],
+          "pathPattern" : "/codex-instances-sources"
         }
       ]
     },
