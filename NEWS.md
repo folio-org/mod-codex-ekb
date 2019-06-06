@@ -1,3 +1,6 @@
+# 1.4.0 2019-06-06
+ * [MODCXMUX-37] - Add RAML for GET codex-instances-sources
+ 
 # 1.3.0 2019-03-20
  * [MODCXEKB-95] - Fix failing API Tests - Updated path for downloaded schemas
 
