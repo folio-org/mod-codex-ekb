@@ -10,16 +10,17 @@
         {
           "methods" : [ "GET" ],
           "pathPattern" : "/codex-instances",
-          "permissionsRequired" : [ "codex.collection.get" ],
+          "permissionsRequired" : [ "codex-ekb.instances.collection.get" ],
           "modulePermissions": ["configuration.entries.collection.get"]
         }, {
           "methods" : [ "GET" ],
           "pathPattern" : "/codex-instances/{id}",
-          "permissionsRequired" : [ "codex.item.get" ],
+          "permissionsRequired" : [ "codex-ekb.instances.item.get" ],
           "modulePermissions": ["configuration.entries.collection.get"]
         }, {
           "methods" : [ "GET" ],
-          "pathPattern" : "/codex-instances-sources"
+          "pathPattern" : "/codex-instances-sources",
+          "permissionsRequired" : [ "codex-ekb.instances-sources.collection.get" ]
         }
       ]
     },
@@ -31,16 +32,17 @@
         {
           "methods" : [ "GET" ],
           "pathPattern" : "/codex-packages",
-          "permissionsRequired" : [ "codex.packages.collection.get" ],
+          "permissionsRequired" : [ "codex-ekb.packages.collection.get" ],
           "modulePermissions": ["configuration.entries.collection.get"]
         }, {
           "methods" : [ "GET" ],
           "pathPattern" : "/codex-packages/{id}",
-          "permissionsRequired" : [ "codex.packages.item.get" ],
+          "permissionsRequired" : [ "codex-ekb.packages.item.get" ],
           "modulePermissions": ["configuration.entries.collection.get"]
         }, {
           "methods" : [ "GET" ],
-          "pathPattern" : "/codex-packages-sources"
+          "pathPattern" : "/codex-packages-sources",
+          "permissionsRequired": ["codex-ekb.packages-sources.collection.get"]
         }
       ]
     },
@@ -75,31 +77,44 @@
   ],
   "permissionSets" : [
     {
-      "permissionName" : "codex.collection.get",
+      "permissionName" : "codex-ekb.instances.collection.get",
       "displayName" : "Codex - get instances",
       "description" : "Get instance collection"
     }, {
-      "permissionName" : "codex.item.get",
+      "permissionName" : "codex-ekb.instances.item.get",
       "displayName" : "Codex - get individual instance",
       "description" : "Get individual instance"
     },
     {
-      "permissionName" : "codex.packages.collection.get",
+      "permissionName": "codex-ekb.instances-sources.collection.get",
+      "displayName": "get codex instances sources",
+      "description": "Get codex instances sources"
+    },
+    {
+      "permissionName" : "codex-ekb.packages.collection.get",
       "displayName" : "Codex - get packages",
       "description" : "Get package collection"
     }, {
-      "permissionName" : "codex.packages.item.get",
+      "permissionName" : "codex-ekb.packages.item.get",
       "displayName" : "Codex - get individual package",
       "description" : "Get individual package"
-    }, {
-      "permissionName" : "codex.all",
+    },
+    {
+      "permissionName": "codex-ekb.packages-sources.collection.get",
+      "displayName": "get codex package sources",
+      "description": "Get codex package sources"
+    },
+    {
+      "permissionName" : "codex-ekb.all",
       "displayName" : "Codex - all permissions",
       "description" : "Entire set of permissions needed to use the codex module",
       "subPermissions" : [
-        "codex.collection.get",
-        "codex.item.get",
-        "codex.packages.collection.get",
-        "codex.packages.item.get"
+        "codex-ekb.instances.collection.get",
+        "codex-ekb.instances.item.get",
+        "codex-ekb.instances-sources.collection.get",
+        "codex-ekb.packages.collection.get",
+        "codex-ekb.packages.item.get",
+        "codex-ekb.packages-sources.collection.get"
       ]
     }
   ],
