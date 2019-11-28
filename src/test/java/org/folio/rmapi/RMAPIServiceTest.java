@@ -194,9 +194,10 @@ public class RMAPIServiceTest {
     TitlesHoldingsIQService svc = new TitlesHoldingsIQServiceImpl(configuration, vertx);
 
     svc.retrieveTitles(GATEWAY_TIMEOUT_TITLE_LIST_QUERY).whenCompleteAsync((rmapiResult, throwable) -> {
-      context.assertNotNull(throwable);
-      context.assertTrue(throwable instanceof ServiceResponseException);
-      ServiceResponseException ex = (ServiceResponseException) throwable;
+      Throwable cause = throwable.getCause();
+      context.assertNotNull(cause);
+      context.assertTrue(cause instanceof ServiceResponseException);
+      ServiceResponseException ex = (ServiceResponseException) cause;
       context.assertEquals(504, ex.getCode());
       context.assertEquals("Gateway Timeout", ex.getResponseMessage());
       async.complete();
@@ -224,7 +225,7 @@ public class RMAPIServiceTest {
 
     svc.retrieveTitles(FORBIDDEN_TITLE_LIST_QUERY).whenCompleteAsync((rmapiResult, throwable) -> {
       context.assertNotNull(throwable);
-      context.assertTrue(throwable instanceof UnAuthorizedException);
+      context.assertTrue(throwable.getCause() instanceof UnAuthorizedException);
       async.complete();
     });
   }
