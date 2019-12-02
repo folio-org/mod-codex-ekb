@@ -1,3 +1,9 @@
+# 1.5.0 2019-12-02
+ * [MODCXEKB-102] - Update RMB version to 29.0.1
+ * [FOLIO-2358] - Manage container memory
+ * [MODCXEKB-98] - Add required permissions
+ * [FOLIO-2235] - Add default LaunchDescriptor settings
+ 
 # 1.4.0 2019-06-06
  * [MODCXMUX-37] - Add RAML for GET codex-instances-sources
  
