@@ -3,7 +3,6 @@ package org.folio.spring;
 import io.vertx.core.Vertx;
 import org.folio.cache.VertxCache;
 import org.folio.holdingsiq.service.ConfigurationService;
-import org.folio.holdingsiq.service.impl.ConfigurationClientProvider;
 import org.folio.holdingsiq.service.impl.ConfigurationServiceCache;
 import org.folio.holdingsiq.service.impl.ConfigurationServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +35,8 @@ public class ApplicationConfig {
   @Bean
   public ConfigurationService configurationService(Vertx vertx, @Value("${configuration.cache.expire}") long expirationTime) {
     return new ConfigurationServiceCache(
-      new ConfigurationServiceImpl(
-        new ConfigurationClientProvider()), new VertxCache<>(vertx, expirationTime, "rmApiConfigurationCache"));
+      new ConfigurationServiceImpl(vertx),
+      new VertxCache<>(vertx, expirationTime, "rmApiConfigurationCache")
+    );
   }
 }
