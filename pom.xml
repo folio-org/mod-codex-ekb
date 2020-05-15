@@ -114,6 +114,11 @@
       <artifactId>folio-di-support</artifactId>
       <version>1.0.0</version>
     </dependency>
+    <dependency>
+      <groupId>org.folio</groupId>
+      <artifactId>folio-holdingsiq-client</artifactId>
+      <version>1.7.1-SNAPSHOT</version>
+    </dependency>
     <!-- According to https://github.com/rest-assured/rest-assured/wiki/GettingStarted, rest assured should be placed before junit to ensure correct version of Hamcrest is used.-->
     <dependency>
       <groupId>io.rest-assured</groupId>
@@ -148,11 +153,6 @@
       <artifactId>mockito-core</artifactId>
       <version>2.24.5</version>
       <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.folio</groupId>
-      <artifactId>folio-holdingsiq-client</artifactId>
-      <version>1.6.0</version>
     </dependency>
   </dependencies>
 

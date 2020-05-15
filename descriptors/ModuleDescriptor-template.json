@@ -1,47 +1,47 @@
 {
-  "id" : "${artifactId}-${version}",
-  "name" : "EBSCO Knowledge Base Codex",
-  "provides" : [
+  "id": "${artifactId}-${version}",
+  "name": "EBSCO Knowledge Base Codex",
+  "provides": [
     {
-      "id" : "codex",
-      "version" : "3.1",
+      "id": "codex",
+      "version": "3.1",
       "interfaceType": "multiple",
-      "handlers" : [
+      "handlers": [
         {
-          "methods" : [ "GET" ],
-          "pathPattern" : "/codex-instances",
-          "permissionsRequired" : [ "codex-ekb.instances.collection.get" ],
-          "modulePermissions": ["configuration.entries.collection.get"]
+          "methods": [ "GET" ],
+          "pathPattern": "/codex-instances",
+          "permissionsRequired": [ "codex-ekb.instances.collection.get" ],
+          "modulePermissions": ["kb-ebsco.user-kb-credential.get"]
         }, {
-          "methods" : [ "GET" ],
-          "pathPattern" : "/codex-instances/{id}",
-          "permissionsRequired" : [ "codex-ekb.instances.item.get" ],
-          "modulePermissions": ["configuration.entries.collection.get"]
+          "methods": [ "GET" ],
+          "pathPattern": "/codex-instances/{id}",
+          "permissionsRequired": [ "codex-ekb.instances.item.get" ],
+          "modulePermissions": ["kb-ebsco.user-kb-credential.get"]
         }, {
-          "methods" : [ "GET" ],
-          "pathPattern" : "/codex-instances-sources",
-          "permissionsRequired" : [ "codex-ekb.instances-sources.collection.get" ]
+          "methods": [ "GET" ],
+          "pathPattern": "/codex-instances-sources",
+          "permissionsRequired": [ "codex-ekb.instances-sources.collection.get" ]
         }
       ]
     },
     {
-      "id" : "codex-packages",
-      "version" : "1.0",
+      "id": "codex-packages",
+      "version": "1.0",
       "interfaceType": "multiple",
-      "handlers" : [
+      "handlers": [
         {
-          "methods" : [ "GET" ],
-          "pathPattern" : "/codex-packages",
-          "permissionsRequired" : [ "codex-ekb.packages.collection.get" ],
-          "modulePermissions": ["configuration.entries.collection.get"]
+          "methods": [ "GET" ],
+          "pathPattern": "/codex-packages",
+          "permissionsRequired": [ "codex-ekb.packages.collection.get" ],
+          "modulePermissions": ["kb-ebsco.user-kb-credential.get"]
         }, {
-          "methods" : [ "GET" ],
-          "pathPattern" : "/codex-packages/{id}",
-          "permissionsRequired" : [ "codex-ekb.packages.item.get" ],
-          "modulePermissions": ["configuration.entries.collection.get"]
+          "methods": [ "GET" ],
+          "pathPattern": "/codex-packages/{id}",
+          "permissionsRequired": [ "codex-ekb.packages.item.get" ],
+          "modulePermissions": ["kb-ebsco.user-kb-credential.get"]
         }, {
-          "methods" : [ "GET" ],
-          "pathPattern" : "/codex-packages-sources",
+          "methods": [ "GET" ],
+          "pathPattern": "/codex-packages-sources",
           "permissionsRequired": ["codex-ekb.packages-sources.collection.get"]
         }
       ]
@@ -49,22 +49,22 @@
     {
       "id": "_jsonSchemas",
       "version": "1.0",
-      "interfaceType" : "multiple",
-      "handlers" : [
+      "interfaceType": "multiple",
+      "handlers": [
         {
-          "methods" : [ "GET" ],
-          "pathPattern" : "/_/jsonSchemas"
+          "methods": [ "GET" ],
+          "pathPattern": "/_/jsonSchemas"
         }
       ]
     },
     {
       "id": "_ramls",
       "version": "1.0",
-      "interfaceType" : "multiple",
-      "handlers" : [
+      "interfaceType": "multiple",
+      "handlers": [
         {
-          "methods" : [ "GET" ],
-          "pathPattern" : "/_/ramls"
+          "methods": [ "GET" ],
+          "pathPattern": "/_/ramls"
         }
       ]
     }
@@ -75,15 +75,15 @@
       "version": "2.0"
     }
   ],
-  "permissionSets" : [
+  "permissionSets": [
     {
-      "permissionName" : "codex-ekb.instances.collection.get",
-      "displayName" : "Codex - get instances",
-      "description" : "Get instance collection"
+      "permissionName": "codex-ekb.instances.collection.get",
+      "displayName": "Codex - get instances",
+      "description": "Get instance collection"
     }, {
-      "permissionName" : "codex-ekb.instances.item.get",
-      "displayName" : "Codex - get individual instance",
-      "description" : "Get individual instance"
+      "permissionName": "codex-ekb.instances.item.get",
+      "displayName": "Codex - get individual instance",
+      "description": "Get individual instance"
     },
     {
       "permissionName": "codex-ekb.instances-sources.collection.get",
@@ -91,13 +91,13 @@
       "description": "Get codex instances sources"
     },
     {
-      "permissionName" : "codex-ekb.packages.collection.get",
-      "displayName" : "Codex - get packages",
-      "description" : "Get package collection"
+      "permissionName": "codex-ekb.packages.collection.get",
+      "displayName": "Codex - get packages",
+      "description": "Get package collection"
     }, {
-      "permissionName" : "codex-ekb.packages.item.get",
-      "displayName" : "Codex - get individual package",
-      "description" : "Get individual package"
+      "permissionName": "codex-ekb.packages.item.get",
+      "displayName": "Codex - get individual package",
+      "description": "Get individual package"
     },
     {
       "permissionName": "codex-ekb.packages-sources.collection.get",
@@ -105,10 +105,10 @@
       "description": "Get codex package sources"
     },
     {
-      "permissionName" : "codex-ekb.all",
-      "displayName" : "Codex - all permissions",
-      "description" : "Entire set of permissions needed to use the codex module",
-      "subPermissions" : [
+      "permissionName": "codex-ekb.all",
+      "displayName": "Codex - all permissions",
+      "description": "Entire set of permissions needed to use the codex module",
+      "subPermissions": [
         "codex-ekb.instances.collection.get",
         "codex-ekb.instances.item.get",
         "codex-ekb.instances-sources.collection.get",
