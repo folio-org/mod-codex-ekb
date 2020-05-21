@@ -1,23 +1,21 @@
-/**
- *
- */
 package org.folio.utils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.ServerSocket;
+import java.nio.charset.StandardCharsets;
 import java.util.Random;
-
-import org.apache.commons.io.IOUtils;
 
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
+import org.apache.commons.io.IOUtils;
 
 /**
  * @author mreno
  *
  */
 public final class Utils {
+
   private static final Logger logger = LoggerFactory.getLogger("okapi");
 
   private Utils() {
@@ -31,7 +29,7 @@ public final class Utils {
    * @return a random port number.
    */
   public static int getRandomPort() {
-    int port = -1;
+    int port;
     do {
       // Use a random ephemeral port
       port = new Random().nextInt(16_384) + 49_152;
@@ -52,7 +50,7 @@ public final class Utils {
       final InputStream is = Utils.class.getClassLoader().getResourceAsStream(path);
 
       if (is != null) {
-        return IOUtils.toString(is, "UTF-8");
+        return IOUtils.toString(is, StandardCharsets.UTF_8);
       } else {
         return "";
       }

@@ -1,8 +1,5 @@
 package org.folio.rest.impl;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.folio.rest.RestVerticle;
 import org.folio.rest.tools.PomReader;
 import org.folio.utils.Utils;
@@ -51,9 +48,6 @@ public class VertxTestBase {
     RestAssured.port = okapiPort;
     logger.info("Codex Instances Resource Test Setup Done using port " + okapiPort);
 
-    final Map<String, String> okapiHeaders = new HashMap<>();
-    okapiHeaders.put("X-Okapi-Tenant", "codexinstancesresourceimpltest");
-    okapiHeaders.put("X-Okapi-Url", "https://localhost:" + Integer.toString(okapiPort));
     async.awaitSuccess();
   }
 
