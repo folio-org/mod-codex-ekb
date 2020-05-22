@@ -1,6 +1,3 @@
-/**
- *
- */
 package org.folio.codex;
 
 import java.util.EnumMap;
@@ -60,7 +57,7 @@ public enum PubType {
   private final Instance.Type codex;
   private final String rmAPI;
 
-  private PubType(Instance.Type codex, String rmAPI) {
+  PubType(Instance.Type codex, String rmAPI) {
     this.codex = codex;
     this.rmAPI = rmAPI;
   }
