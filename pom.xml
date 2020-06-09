@@ -48,10 +48,10 @@
     <ramlfiles_path>${basedir}/ramls/raml-util/ramls/codex</ramlfiles_path>
     <jsonschema_paths>raml-util/schemas,raml-util/schemas/codex</jsonschema_paths>
 
-    <rmb.version>30.0.0</rmb.version>
-    <folio-di-support.version>1.1.0-SNAPSHOT</folio-di-support.version>
-    <folio-holdingsiq-client.version>1.8.1-SNAPSHOT</folio-holdingsiq-client.version>
-    <vertx.version>3.9.0</vertx.version>
+    <rmb.version>30.0.2</rmb.version>
+    <folio-di-support.version>1.1.0</folio-di-support.version>
+    <folio-holdingsiq-client.version>1.9.0</folio-holdingsiq-client.version>
+    <vertx.version>3.9.1</vertx.version>
     <jackson.version>2.10.4</jackson.version>
     <pact.version>3.5.11</pact.version>
     <rest-assured.version>3.0.6</rest-assured.version>

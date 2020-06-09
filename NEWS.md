@@ -1,31 +1,35 @@
+# 1.6.0 2020-06-09
+ * MODCXEKB-103 Support multiply KB credentials
+ * MODCXEKB-106 Update to RMB v30.0.2
+ * MODCXEKB-104 Securing APIs by default
+
 # 1.5.0 2019-12-02
- * [MODCXEKB-102] - Update RMB version to 29.0.1
- * [FOLIO-2358] - Manage container memory
- * [MODCXEKB-98] - Add required permissions
- * [FOLIO-2235] - Add default LaunchDescriptor settings
+ * MODCXEKB-102 Update RMB version to 29.0.1
+ * FOLIO-2358 Manage container memory
+ * MODCXEKB-98 Add required permissions
+ * FOLIO-2235 Add default LaunchDescriptor settings
  
 # 1.4.0 2019-06-06
- * [MODCXMUX-37] - Add RAML for GET codex-instances-sources
+ * MODCXMUX-37 Add RAML for GET codex-instances-sources
  
 # 1.3.0 2019-03-20
- * [MODCXEKB-95] - Fix failing API Tests - Updated path for downloaded schemas
+ * MODCXEKB-95 Fix failing API Tests - Updated path for downloaded schemas
 
 # 1.2.0 2019-03-15
- * [MODCXEKB-72] - Define normalized Package fields mapping
- * [MODCXEKB-74] - Define mormaized title-package fields
- * [MODCXEKB-79] - Implement GET Package by ID
- * [MODCXEKB-80] - Implement Get Package Collection
- * [MODCXEKB-81] - Implement Get Package Sources
- * [MODCXEKB-82] - Revise CQL Parser for RMAPI to handle Package Queries
- * [MODCXEKB-83] - Revise RMAPI To Codex to Handle Packages
- * [MODCXEKB-85] - Extract RMAPIService to a library module
+ * MODCXEKB-72 Define normalized Package fields mapping
+ * MODCXEKB-74 Define mormaized title-package fields
+ * MODCXEKB-79 Implement GET Package by ID
+ * MODCXEKB-80 Implement Get Package Collection
+ * MODCXEKB-81 Implement Get Package Sources
+ * MODCXEKB-82 Revise CQL Parser for RMAPI to handle Package Queries
+ * MODCXEKB-83 Revise RMAPI To Codex to Handle Packages
+ * MODCXEKB-85 Extract RMAPIService to a library module
 
 ## 1.1.0 2018-12-04
- * [MODCXEKB-64] - Update mod-codex-ekb to support Boolean/Exact Phrase/Wildcard/Nested Searches
- * [MODCXEKB-67] - Upgrade mod-codex-ekb to RAML 1.0
- * [MODCXEKB-68] - Return Subjects in mod-codex-ekb response
- * [MODCXEKB-69] - Support search by subject
-
+ * MODCXEKB-64 Update mod-codex-ekb to support Boolean/Exact Phrase/Wildcard/Nested Searches
+ * MODCXEKB-67 Upgrade mod-codex-ekb to RAML 1.0
+ * MODCXEKB-68 Return Subjects in mod-codex-ekb response
+ * MODCXEKB-69 Support search by subject
 
 ## 1.0.0 2018-05-17
  * MODCXEKB-63: Higher API limits required changes to RM API paging.
