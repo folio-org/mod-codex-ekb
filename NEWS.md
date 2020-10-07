@@ -1,3 +1,6 @@
+# 1.7.0 2020-10-07
+ * MODCXEKB-107 Migrate to JDK 11 and RMB 31.x
+
 # 1.6.0 2020-06-09
  * MODCXEKB-103 Support multiply KB credentials
  * MODCXEKB-106 Update to RMB v30.0.2
