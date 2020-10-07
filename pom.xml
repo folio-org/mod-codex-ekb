@@ -42,15 +42,13 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <maven.compiler.target>1.8</maven.compiler.target>
     <dependency.locations.enabled>false</dependency.locations.enabled>
     <ramlfiles_path>${basedir}/ramls/raml-util/ramls/codex</ramlfiles_path>
     <jsonschema_paths>raml-util/schemas,raml-util/schemas/codex</jsonschema_paths>
 
     <rmb.version>31.1.0</rmb.version>
-    <folio-di-support.version>1.1.0</folio-di-support.version>
-    <folio-holdingsiq-client.version>1.9.0</folio-holdingsiq-client.version>
+    <folio-di-support.version>1.2.0</folio-di-support.version>
+    <folio-holdingsiq-client.version>1.10.0</folio-holdingsiq-client.version>
     <vertx.version>3.9.2</vertx.version>
     <jackson.version>2.11.2</jackson.version>
     <pact.version>3.6.15</pact.version>
