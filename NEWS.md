@@ -1,3 +1,7 @@
+# 1.7.1 2020-10-23
+ * Fix logging issue
+ * Update RMB to v31.1.2 and Vertx to 3.9.3
+
 # 1.7.0 2020-10-07
  * MODCXEKB-107 Migrate to JDK 11 and RMB 31.x
 
@@ -11,10 +15,10 @@
  * FOLIO-2358 Manage container memory
  * MODCXEKB-98 Add required permissions
  * FOLIO-2235 Add default LaunchDescriptor settings
- 
+
 # 1.4.0 2019-06-06
  * MODCXMUX-37 Add RAML for GET codex-instances-sources
- 
+
 # 1.3.0 2019-03-20
  * MODCXEKB-95 Fix failing API Tests - Updated path for downloaded schemas
 
