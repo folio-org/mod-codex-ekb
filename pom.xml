@@ -48,7 +48,7 @@
 
     <rmb.version>31.1.2</rmb.version>
     <folio-di-support.version>1.2.0</folio-di-support.version>
-    <folio-holdingsiq-client.version>1.10.0</folio-holdingsiq-client.version>
+    <folio-holdingsiq-client.version>1.10.1</folio-holdingsiq-client.version>
     <vertx.version>3.9.3</vertx.version>
     <jackson.version>2.11.2</jackson.version>
     <pact.version>3.6.15</pact.version>
