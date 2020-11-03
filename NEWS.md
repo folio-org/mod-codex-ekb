@@ -1,3 +1,7 @@
+# 1.7.2 2020-11-03
+ * MODKBEKBJ-505 Log responses from HoldingsIQ/MODKBEKBJ
+ * Update RMB to v31.1.5 and Vertx to 3.9.4
+
 # 1.7.1 2020-10-23
  * Fix logging issue
  * Update RMB to v31.1.2 and Vertx to 3.9.3
