@@ -11,6 +11,14 @@ import java.util.concurrent.CompletionStage;
 import javax.validation.ValidationException;
 import javax.ws.rs.core.Response;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import org.folio.codex.RMAPIToCodex;
 import org.folio.cql2rmapi.CQLParameters;
 import org.folio.cql2rmapi.QueryValidationException;
@@ -30,14 +38,6 @@ import org.folio.rest.jaxrs.resource.CodexInstances;
 import org.folio.rest.jaxrs.resource.CodexInstancesSources;
 import org.folio.spring.SpringContextUtil;
 import org.folio.validator.QueryValidator;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 
 /**
  * Instance related codex APIs.
@@ -46,7 +46,7 @@ import io.vertx.core.logging.LoggerFactory;
  */
 public final class CodexInstancesImpl implements CodexInstances, CodexInstancesSources {
 
-  private final Logger log = LoggerFactory.getLogger(CodexInstancesImpl.class);
+  private final Logger log = LogManager.getLogger(CodexInstancesImpl.class);
 
   @Autowired
   private ConfigurationService configurationService;

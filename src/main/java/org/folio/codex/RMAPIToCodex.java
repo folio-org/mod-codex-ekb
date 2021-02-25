@@ -5,6 +5,11 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
+import io.vertx.core.Context;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.core.convert.converter.Converter;
+
 import org.folio.converter.hld2cdx.ContributorConverter;
 import org.folio.converter.hld2cdx.CoverageConverter;
 import org.folio.converter.hld2cdx.IdentifierConverter;
@@ -30,18 +35,13 @@ import org.folio.rest.jaxrs.model.InstanceCollection;
 import org.folio.rest.jaxrs.model.Package;
 import org.folio.rest.jaxrs.model.PackageCollection;
 import org.folio.rest.jaxrs.model.ResultInfo;
-import org.springframework.core.convert.converter.Converter;
-
-import io.vertx.core.Context;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 
 /**
  * @author mreno
  *
  */
 public final class RMAPIToCodex {
-  private static final Logger log = LoggerFactory.getLogger(RMAPIToCodex.class);
+  private static final Logger log = LogManager.getLogger(RMAPIToCodex.class);
 
   private static final Converter<Title, Instance> TITLE_CONVERTER = new TitleConverter(
     new IdentifierConverter(), new ContributorConverter(), new SubjectConverter());

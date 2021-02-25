@@ -11,6 +11,14 @@ import java.util.concurrent.CompletionStage;
 import javax.validation.ValidationException;
 import javax.ws.rs.core.Response;
 
+import io.vertx.core.AsyncResult;
+import io.vertx.core.Context;
+import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
+
 import org.folio.codex.RMAPIToCodex;
 import org.folio.cql2rmapi.CQLParameters;
 import org.folio.cql2rmapi.PackageParameters;
@@ -34,14 +42,6 @@ import org.folio.rest.jaxrs.resource.CodexPackagesSources;
 import org.folio.rest.tools.PomReader;
 import org.folio.spring.SpringContextUtil;
 import org.folio.validator.QueryValidator;
-import org.springframework.beans.factory.annotation.Autowired;
-
-import io.vertx.core.AsyncResult;
-import io.vertx.core.Context;
-import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 
 /**
  * Package related codex APIs.
@@ -49,7 +49,7 @@ import io.vertx.core.logging.LoggerFactory;
 public final class CodexPackagesImpl implements CodexPackages, CodexPackagesSources {
 
   private static final String MODULE_SOURCE = "kb";
-  private final Logger log = LoggerFactory.getLogger(CodexPackagesImpl.class);
+  private final Logger log = LogManager.getLogger(CodexPackagesImpl.class);
   @Autowired
   private ConfigurationService configurationService;
   @Autowired

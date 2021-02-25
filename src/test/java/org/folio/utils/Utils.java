@@ -6,9 +6,9 @@ import java.net.ServerSocket;
 import java.nio.charset.StandardCharsets;
 import java.util.Random;
 
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author mreno
@@ -16,7 +16,7 @@ import org.apache.commons.io.IOUtils;
  */
 public final class Utils {
 
-  private static final Logger logger = LoggerFactory.getLogger("okapi");
+  private static final Logger logger = LogManager.getLogger("okapi");
 
   private Utils() {
     super();
