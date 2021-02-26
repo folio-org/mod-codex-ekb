@@ -1,23 +1,23 @@
 package org.folio.rest.impl;
 
-import org.folio.rest.RestVerticle;
-import org.folio.rest.tools.PomReader;
-import org.folio.utils.Utils;
-import org.junit.After;
-import org.junit.Before;
-
 import io.restassured.RestAssured;
 import io.restassured.http.Header;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
 import io.vertx.ext.unit.Async;
 import io.vertx.ext.unit.TestContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.junit.After;
+import org.junit.Before;
+
+import org.folio.rest.RestVerticle;
+import org.folio.rest.tools.PomReader;
+import org.folio.utils.Utils;
 
 public class VertxTestBase {
-  protected final Logger logger = LoggerFactory.getLogger("CodexInstancesResourceImplTest");
+  protected final Logger logger = LogManager.getLogger("CodexInstancesResourceImplTest");
   protected final int okapiPort = Utils.getRandomPort();
   protected final Header tenantHeader = new Header("x-okapi-tenant", "codexinstancesresourceimpltest");
   protected final Header tokenHeader = new Header("x-okapi-token", "codexinstancesresourceimpltest");
