@@ -1,3 +1,6 @@
+# 1.8.0 2021-03-04
+ * MODCXEKB-116 Upgrade to RMB v32.1.0 and Vert.X v4.0.2
+
 # 1.7.2 2020-11-03
  * MODKBEKBJ-505 Log responses from HoldingsIQ/MODKBEKBJ
  * Update RMB to v31.1.5 and Vertx to 3.9.4
