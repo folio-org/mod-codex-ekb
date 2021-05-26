@@ -98,7 +98,7 @@ public class ModConfigurationPactTest {
   }
 
   @Test
-  @Ignore
+  @Ignore("Incompatible with new version of RMB. Should be rewrite in task MODCXEKB-123")
   @PactVerification("mod-kb-ebsco")
   public void test(TestContext context) {
     final Async async = context.async();

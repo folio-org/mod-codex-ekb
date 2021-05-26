@@ -159,7 +159,7 @@ public class RMAPIPactTest {
   }
 
   @Test
-  @Ignore
+  @Ignore("Incompatible with new version of RMB. Should be rewrite in task MODCXEKB-123")
   @PactVerification("rm-api")
   public void pactTest(TestContext context) {
     final Async listTitlesAsync = context.async();
