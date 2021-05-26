@@ -17,6 +17,7 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -158,6 +159,7 @@ public class RMAPIPactTest {
   }
 
   @Test
+  @Ignore
   @PactVerification("rm-api")
   public void pactTest(TestContext context) {
     final Async listTitlesAsync = context.async();

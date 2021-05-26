@@ -20,6 +20,7 @@ import io.vertx.ext.unit.TestContext;
 import io.vertx.ext.unit.junit.VertxUnitRunner;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -97,6 +98,7 @@ public class ModConfigurationPactTest {
   }
 
   @Test
+  @Ignore
   @PactVerification("mod-kb-ebsco")
   public void test(TestContext context) {
     final Async async = context.async();
