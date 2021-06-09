@@ -1,9 +1,8 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.folio</groupId>
   <artifactId>mod-codex-ekb</artifactId>
-  <version>1.8.1-SNAPSHOT</version>
+  <version>1.9.0</version>
 
   <name>EBSCO Knowledge Base Codex Module</name>
   <url>https://github.com/folio-org/mod-codex-ekb</url>
@@ -24,7 +23,7 @@
     <connection>scm:git:git://github.com/folio-org/mod-codex-ekb.git</connection>
     <developerConnection>scm:git:git@github.com:folio-org/mod-codex-ekb.git</developerConnection>
     <url>https://github.com/folio-org/mod-codex-ekb.git</url>
-    <tag>HEAD</tag>
+    <tag>v1.9.0</tag>
   </scm>
 
   <ciManagement>
@@ -361,13 +360,11 @@
             <phase>prepare-package</phase>
             <configuration>
               <target>
-                <replace token="baseUri: https://github.com/folio-org/mod-codex-ekb"
-                         value="baseUri: http://localhost:{http.port}" dir="${basedir}/target/classes/apidocs/raml">
-                  <include name="**/*.raml"/>
+                <replace token="baseUri: https://github.com/folio-org/mod-codex-ekb" value="baseUri: http://localhost:{http.port}" dir="${basedir}/target/classes/apidocs/raml">
+                  <include name="**/*.raml" />
                 </replace>
-                <replace token="protocols: [ HTTPS ]" value="protocols: [ HTTP ]"
-                         dir="${basedir}/target/classes/apidocs/raml">
-                  <include name="**/*.raml"/>
+                <replace token="protocols: [ HTTPS ]" value="protocols: [ HTTP ]" dir="${basedir}/target/classes/apidocs/raml">
+                  <include name="**/*.raml" />
                 </replace>
               </target>
             </configuration>
@@ -398,7 +395,7 @@
                   </manifestEntries>
                 </transformer>
               </transformers>
-              <artifactSet/>
+              <artifactSet />
               <outputFile>${project.build.directory}/${project.artifactId}-fat.jar</outputFile>
               <filters>
                 <!-- this required to fix module logging -->
