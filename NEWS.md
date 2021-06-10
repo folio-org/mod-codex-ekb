@@ -1,3 +1,6 @@
+# 1.8.0 2021-06-09
+* MODCXEKB-121 Upgrade to RMB v33.0.0 and Vert.X v4.1.0.CR1
+
 # 1.8.0 2021-03-04
  * MODCXEKB-116 Upgrade to RMB v32.1.0 and Vert.X v4.0.2
 
