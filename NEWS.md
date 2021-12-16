@@ -1,4 +1,7 @@
-# 1.8.0 2021-06-09
+# 1.9.1 2021-12-16
+* MODCXEKB-125 Log4j vulnerability verification and correction
+
+# 1.9.0 2021-06-09
 * MODCXEKB-121 Upgrade to RMB v33.0.0 and Vert.X v4.1.0.CR1
 
 # 1.8.0 2021-03-04
