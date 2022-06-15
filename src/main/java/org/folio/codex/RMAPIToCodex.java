@@ -43,6 +43,8 @@ import org.folio.rest.jaxrs.model.ResultInfo;
 public final class RMAPIToCodex {
   private static final Logger log = LogManager.getLogger(RMAPIToCodex.class);
 
+  private static final String TITLE_SEARCH_TYPE = "contains";
+  private static final String PACKAGE_SEARCH_TYPE = "advanced";
   private static final Converter<Title, Instance> TITLE_CONVERTER = new TitleConverter(
     new IdentifierConverter(), new ContributorConverter(), new SubjectConverter());
   private static final Converter<PackageData, Package> PACKAGE_CONVERTER = new PackageConverter(new CoverageConverter());
@@ -76,7 +78,8 @@ public final class RMAPIToCodex {
     final List<CompletableFuture<Titles>> titleCfs = new ArrayList<>();
 
     for (Page page : pagination.getPages()) {
-      titleCfs.add(new TitlesHoldingsIQServiceImpl(rmAPIConfig, vertxContext.owner()).retrieveTitles(parameters.getFilterQuery(), parameters.getSortType(), page.getOffset(), page.getLimit()));
+      titleCfs.add(new TitlesHoldingsIQServiceImpl(rmAPIConfig, vertxContext.owner())
+        .retrieveTitles(parameters.getFilterQuery(), TITLE_SEARCH_TYPE, parameters.getSortType(), page.getOffset(), page.getLimit()));
     }
 
     return CompletableFuture
@@ -115,8 +118,9 @@ public final class RMAPIToCodex {
     final List<CompletableFuture<Packages>> futures = new ArrayList<>();
 
     for (Page page : pagination.getPages()) {
-      futures.add(new PackagesHoldingsIQServiceImpl(rmAPIConfig, vertxContext.owner()).retrievePackages(
-        parameters.getSelection(), parameters.getFilterType(), null,parameters.getSearchValue(), page.getOffset(), page.getLimit(), parameters.getSortType()));
+      futures.add(new PackagesHoldingsIQServiceImpl(rmAPIConfig, vertxContext.owner())
+        .retrievePackages(parameters.getSelection(), parameters.getFilterType(), PACKAGE_SEARCH_TYPE, null,
+          parameters.getSearchValue(), page.getOffset(), page.getLimit(), parameters.getSortType()));
     }
 
     return CompletableFuture

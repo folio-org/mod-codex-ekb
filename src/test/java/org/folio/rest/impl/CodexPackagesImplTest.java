@@ -46,7 +46,7 @@ public class CodexPackagesImplTest extends VertxTestBase {
   private static final String SEARCH_PACKAGES_QUERY = "name = Academy";
   private static final String NOT_MOCKED_QUERY = "name = abc";
   private static final String INVALID_SEARCH_PACKAGES_QUERY = "name = Academy or id = 22";
-  private static final String GET_PACKAGES_SUCCESSFUL_RM_API_URL = "/rm/rmaccounts/test/packages?selection=all&contenttype=all&search=Academy&offset=1&count=10&orderby=packagename";
+  private static final String GET_PACKAGES_SUCCESSFUL_RM_API_URL = "/rm/rmaccounts/test/packages?selection=all&contenttype=all&searchtype=advanced&search=Academy&offset=1&count=10&orderby=packagename";
 
   @Autowired
   private ConfigurationService configurationService;
