@@ -46,34 +46,35 @@
     <ramlfiles_path>${basedir}/ramls/raml-util/ramls/codex</ramlfiles_path>
     <jsonschema_paths>raml-util/schemas,raml-util/schemas/codex</jsonschema_paths>
 
-    <rmb.version>34.0.0</rmb.version>
-    <folio-di-support.version>1.6.0</folio-di-support.version>
-    <folio-holdingsiq-client.version>2.1.0</folio-holdingsiq-client.version>
-    <vertx.version>4.3.1</vertx.version>
+    <rmb.version>35.0.0</rmb.version>
+    <folio-di-support.version>1.7.0-SNAPSHOT</folio-di-support.version>
+    <folio-holdingsiq-client.version>2.2.0-SNAPSHOT</folio-holdingsiq-client.version>
+    <vertx.version>4.3.3</vertx.version>
+    <spring.version>5.3.23</spring.version>
     <jackson.version>2.13.3</jackson.version>
     <aspectj.version>1.9.9.1</aspectj.version>
-    <log4j.version>2.17.2</log4j.version>
+    <log4j.version>2.19.0</log4j.version>
     <validation-api.version>2.0.1.Final</validation-api.version>
 
     <!-- Test dependencies versions -->
     <pact.version>3.6.15</pact.version>
-    <rest-assured.version>5.1.1</rest-assured.version>
-    <mockito.version>4.6.1</mockito.version>
+    <rest-assured.version>5.2.0</rest-assured.version>
+    <mockito.version>4.8.0</mockito.version>
     <junit.version>4.13.2</junit.version>
-    <vertx-unit.version>4.3.1</vertx-unit.version>
+    <vertx-unit.version>4.3.3</vertx-unit.version>
 
     <!-- Plugin versions -->
-    <versions-maven-plugin.version>2.11.0</versions-maven-plugin.version>
+    <versions-maven-plugin.version>2.12.0</versions-maven-plugin.version>
     <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
     <build-helper-maven-plugin.version>3.3.0</build-helper-maven-plugin.version>
-    <exec-maven-plugin.version>3.0.0</exec-maven-plugin.version>
+    <exec-maven-plugin.version>3.1.0</exec-maven-plugin.version>
     <aspectj-maven-plugin.version>1.12.6</aspectj-maven-plugin.version>
     <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
     <maven-antrun-plugin.version>3.1.0</maven-antrun-plugin.version>
     <maven-shade-plugin.version>3.2.4</maven-shade-plugin.version>
     <copy-rename-maven-plugin.version>1.0.1</copy-rename-maven-plugin.version>
-    <maven-surefire-plugin.version>3.0.0-M5</maven-surefire-plugin.version>
-    <maven-release-plugin.version>3.0.0-M5</maven-release-plugin.version>
+    <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
+    <maven-release-plugin.version>3.0.0-M6</maven-release-plugin.version>
   </properties>
 
   <repositories>
@@ -213,6 +214,16 @@
       <artifactId>mockito-core</artifactId>
       <version>${mockito.version}</version>
       <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>${spring.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-context</artifactId>
+      <version>${spring.version}</version>
     </dependency>
   </dependencies>
 

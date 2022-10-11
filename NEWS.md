@@ -1,3 +1,6 @@
+# 1.11.0 IN_PROGRESS
+* MODCXEKB-135 Upgrade to RMB v35.0.0 and Vert.X v4.3.3
+
 # 1.10.0 2022-06-28
 * MODCXEKB-133 Upgrade to RMB v34.0.0 and Vert.X v4.3.1
 
